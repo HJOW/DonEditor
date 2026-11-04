@@ -78,7 +78,7 @@ pub fn authorize_access_to_unreleased_wasm_api_version(release_channel: ReleaseC
 
     anyhow::ensure!(
         allow_unreleased_version,
-        "unreleased versions of the extension API can only be used on development builds of Gram"
+        "unreleased versions of the extension API can only be used on development builds of Don Editor"
     );
 
     Ok(())

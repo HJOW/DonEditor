@@ -3048,12 +3048,17 @@ fn parse_upstream_track(upstream_track: &str) -> Result<UpstreamTracking> {
     Ok(UpstreamTracking::Tracked(UpstreamTrackingStatus { ahead, behind }))
 }
 
+// [DonEditor] 체크포인트 커밋의 작성자. 원본은 Gram 제작자의 개인 이메일을 썼으나, 사용자 저장소에 남는 커밋이므로
+// Don Editor 의 이름과 전달되지 않는 주소(.invalid)로 바꾼다. 체크포인트는 트리 내용으로만 비교하므로 동작은 같다.
 fn checkpoint_author_envs() -> HashMap<String, String> {
     HashMap::from_iter([
-        ("GIT_AUTHOR_NAME".to_string(), "Gram".to_string()),
-        ("GIT_AUTHOR_EMAIL".to_string(), "k@ziran.se".to_string()),
-        ("GIT_COMMITTER_NAME".to_string(), "Gram".to_string()),
-        ("GIT_COMMITTER_EMAIL".to_string(), "k@ziran.se".to_string()),
+        ("GIT_AUTHOR_NAME".to_string(), "Don Editor".to_string()),
+        ("GIT_AUTHOR_EMAIL".to_string(), "noreply@doneditor.invalid".to_string()),
+        ("GIT_COMMITTER_NAME".to_string(), "Don Editor".to_string()),
+        (
+            "GIT_COMMITTER_EMAIL".to_string(),
+            "noreply@doneditor.invalid".to_string(),
+        ),
     ])
 }
 

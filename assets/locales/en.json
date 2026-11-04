@@ -1220,7 +1220,7 @@
   "ui.text.copy_action": "Copy Action",
   "ui.text.toggle_exact_match_mode": "Toggle Exact Match Mode",
   "ui.text.view_default": "View Default...",
-  "ui.text.gram_key_bindings": "Gram Key Bindings",
+  "ui.text.gram_key_bindings": "Don Editor Key Bindings",
   "ui.text.vim_bindings": "Vim Bindings",
   "ui.text.create_keybinding": "Create Keybinding",
   "ui.text.edit_keystroke": "Edit Keystroke",

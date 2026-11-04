@@ -19,8 +19,30 @@
 - 사용자 결정 대기: Don Editor 자체 기여 안내·행동 강령 필요 여부, 배포 시 Don Editor 소스의 공개 위치(현재는 배포본에 수정 소스를 동봉), `README.md` 보호 단락 내용 갱신이 필요하면 사용자 요청 후에만.
 - 사용자 지시로 제외: Linux/macOS 직접 실행·tar.gz 실물 검증, 실제 OpenAI/Claude API 호출 검증(유료·키 필요), Claude Desktop/Code 실제 연결(외부 클라이언트의 API 호출이 따름).
 - 이 환경에서 불가: 깨끗한 Windows/ARM64 설치 검증, 실제 프린터 출력과 PDF 뷰어 `print` 동작 확인(기본 프린터가 가상 프린터), 탐색기 UI에서 `.md`를 연결 프로그램으로 직접 지정하는 수동 확인.
-- 계속 진행형: 기능 인벤토리의 미확인 영역(실행 확인 22개/미확인 28개), 'Gram' 문자열 잔여 백로그.
+- 계속 진행형: 기능 인벤토리의 미확인 영역(실행 확인 22개/미확인 28개), 'Gram' 문자열 잔여 백로그(남은 것은 의도적으로 둔 것). **사용자 요청으로 중단한 시점의 남은 점검 작업과 미검증 변경은 바로 아래 "작업 중단 시점 기록" 절을 먼저 읽는다.**
 - 알려진 경미한 문제: ① 이번 세션의 릴리스 ZIP은 커밋 `2e9ff1c` 기준(이후 변경은 동작 불변 정리), ② 상태 표시줄 `Failed to load environment variables`(콘솔 로그상 `H:` 드라이브에서 PowerShell 환경 로드 실패 — 이 PC의 환경 문제로 보이며 이전부터 있던 메시지), ③ MCP 승인 창의 일부 요소가 화면 가운데 위쪽에 뭉쳐 보이는 레이아웃(기능은 동작), ④ `don_protocol_tests`의 브릿지 취소 테스트가 부하에서 가끔 실패하는 타이밍 경쟁(8회 연속 통과로 확인).
+
+## 2026-11-05 작업 중단 시점 기록과 남은 점검 작업 (사용자 요청으로 중단)
+
+사용자가 "지금 작업도 멈추고 문서 반영 후 커밋"을 요청해 여기서 멈췄다. 아래는 다음 작업 때 이어서 할 일이다.
+
+**이 구간에서 커밋한 것:** 기존 기능 스모크 2차(`1075e69`), CLI 도움말 정정(`4b3b18f`·`9401d01`), F10 메뉴 키맵 수정과 사용자 노출 템플릿 정리(`0c1aea6`), clippy 정리(`9b6a8ce`), 테스트 결과 기록(`edf0b35`·`5bdcb24`), 그리고 이 문서와 함께 커밋하는 **'Gram' 문자열 추가 정리**.
+
+**⚠ 이번 커밋에 포함된 미검증 변경 (컴파일·테스트를 돌리다 중단함 — rustfmt 검사만 통과):**
+- `crates/git/src/repository.rs` `checkpoint_author_envs`: 체크포인트 커밋 작성자를 원본 제작자의 개인 이메일(`k@ziran.se`)·`Gram`에서 `Don Editor <noreply@doneditor.invalid>`로 변경. 체크포인트는 트리 내용으로만 비교하고 테스트도 이름을 검사하지 않는다는 것을 코드로 확인했지만 실행은 하지 않았다.
+- `crates/extension_host/src/wasm_host/wit.rs`·`crates/dap/src/transport.rs`·`crates/util/src/util.rs`: 오류 문구의 `Gram` → `Don Editor`(문자열만 변경).
+- `assets/locales/en.json`: `ui.text.gram_key_bindings` 영어 값을 `Don Editor Key Bindings`로 변경(키 이름은 그대로).
+- **검증 방법(Visual Studio 개발자 셸 amd64, `RUSTUP_TOOLCHAIN=stable`):** `cargo check -p extension_host -p dap -p util --offline` → `cargo test -p git --lib --offline --no-fail-fast` → `cargo test -p i18n --no-default-features --lib --offline`. 실패하면 이 변경만 되돌려도 다른 기능에 영향이 없다.
+
+**남은 점검 작업 (우선순위 순):**
+1. **위 미검증 변경 검증** (명령은 바로 위).
+2. **PC 화면 잠금을 푼 뒤 GUI 회귀 배치.** 이 시점에 `LogonUI`가 떠 있어 화면 캡처가 `The handle is invalid`로 실패하고 앱 창이 만들어지지 않았다. 확인할 것: ① **F10이 실제로 메뉴를 여는지**(키맵 수정 `0c1aea6`), ② 개요 패널 빈 상태 안내가 한국어로 나오는지(`outline.empty`·`outline.no_matches`·`outline.toggle_hint`), ③ Vim 모드(설정 `vim_mode: true`)·Helix 모드, ④ 작업 실행(`.gram/tasks.json`), ⑤ 단어 기반 자동 완성, ⑥ 스니펫·Which-key·디버그 패널 열기. 시험 폴더 `target/gui-test-regress3/`(프로젝트 `proj`와 격리 데이터 `data`, `target/`은 git 무시 대상)를 준비해 두었고, 설정 파일은 실행 중 저장하면 바로 반영되므로 앱을 다시 띄우지 않고 `vim_mode`를 켜고 끌 수 있다. 앱 조작은 포그라운드 확인 뒤에만 입력을 보내는 방식으로 했다.
+3. **상태 표시줄 `Failed to load environment variables` 원인 진단.** 앱이 쓰는 환경 수집 명령(PowerShell에서 `doneditor.exe --printenv`)을 H: 경로·`\?\H:` 경로·C: 경로로 직접 실행하면 모두 정상이라 PowerShell 호출 자체가 원인은 아니다. 앱을 `RUST_LOG=info,project::environment=debug,util=debug`로 실행하고 stderr를 파일로 받아 `capturing shell environment` 오류 사슬을 확인해야 한다(화면이 풀린 상태에서 창이 만들어져야 로그가 나온다).
+4. **기능 인벤토리 미확인 28개 영역**([FEATURE-INVENTORY.md](FEATURE-INVENTORY.md) ⬜ 항목) 중 앱 안에서 확인 가능한 것부터. `vim` 167·`project_panel` 69·`file_finder` 53·`search` 22 등의 단위 테스트는 통과했으나 실행 확인으로 치지 않는다.
+5. 그 밖의 GUI crate(`project` 등) 테스트 전체 실행, 원본 `prettier` clippy 1건(호출 crate까지 바꿔야 해서 보류).
+6. **'Gram' 문자열 백로그의 남은 것은 의도적으로 둔 것이다:** 테마·아이콘 테마 이름 `Gram (Default)`, `gram://` 스킴과 명령 팔레트 이름(`gram: open ...`), 사용자 에이전트, 키맵 컨텍스트 `Gram Keybind Context`, DAP 클라이언트 이름, `.git/info/exclude`의 `Auto-added by Gram` 표지(원본이 남긴 잔여 블록 정리와 호환), 원저작·maintainer 고지, Linux 전용 리소스(flatpak·desktop 파일), 개발용 예제·로그 문구.
+
+**개발 환경 메모:** 이 PC에서 `Enter-VsDevShell`이 느릴 때는 4분 가까이 걸리며(그 동안 로그 파일이 생기지 않아도 멈춘 것이 아니다), cargo 실행은 `cargo-dev.ps1`처럼 개발자 셸을 먼저 불러온 뒤 해야 한다. 같은 `target/`을 쓰는 cargo는 동시에 한 개만 돌린다. 테스트 앱은 항상 격리 데이터 폴더(`--user-data-dir`)로 실행하고 끝나면 종료한다.
 
 ## 2026-11-05 회귀 테스트·clippy 정리 (사용자 목표 진행)
 
@@ -733,7 +755,7 @@ DonEditor/
 - [x] **기본 글꼴 D2Coding 적용** (2026-10-27, 3.8 참고) — 코드 적용·빌드·실행 완료. `.ttc` 로드 경로 수정, 기본 설정 변경, 라이선스 고지 추가. **화면에서 실제로 D2Coding 으로 보이는지는 사용자 시각 확인 대기**
 - [x] **라이선스 고지 정리** (2026-10-27, 3.9 참고) — `assets/licenses.md`: Don Editor 가 Gram(→Zed)의 수정본임을 밝히되 **원본 "Copyright (C) 2026 The Gram Project" 표기와 GPL 본문은 그대로 유지**, "Bundled fonts" 절 추가, `assets/fonts/D2Coding-LICENSE` 추가. README 는 앞서 반영 완료
   - **남은 TODO:** `licenses.md` 의 "full source code … from codeberg.org/GramEditor/gram" 문구는 원본 Gram 을 가리킨다. 이를 "Don Editor 의 소스는 배포자에게서 받을 수 있다"로 바꿔 두었으나, **배포 시 Don Editor 소스를 어디에 공개할지(저장소 주소 또는 소스 동봉)** 를 정해 구체적으로 적어야 한다(GPL 의무). 수정본 저작권자 표기도 필요하면 사용자가 결정
-- [ ] **'Gram' 문자열 잔여 백로그 (진행형 백로그, 의도적으로 남긴 항목 포함):** Phase 5 에서 화면에 보이는 것 중 설정 화면 설명문 8건·에디터 안내문·시작 화면·시스템 정보 등을 "Don Editor"로 바꿨다. 남은 것은 식별자·호환성 때문에 의도적으로 두었거나(테마 이름 `Gram (Default)`, `gram://` 스킴, 사용자 에이전트, 키맵 컨텍스트 `Gram Keybind Context`, DAP 클라이언트 이름) Linux 전용(`install_cli` 안내), 내부 오류 메시지·개발용 문구다. 재조사 명령: `grep -rIn '"[^"]*\bGram\b[^"]*"' crates --include=*.rs`
+- [ ] **'Gram' 문자열 잔여 백로그 (진행형 백로그, 의도적으로 남긴 항목 포함):** Phase 5 에서 화면에 보이는 것 중 설정 화면 설명문 8건·에디터 안내문·시작 화면·시스템 정보 등을 "Don Editor"로 바꿨다. 남은 것은 식별자·호환성 때문에 의도적으로 두었거나(테마 이름 `Gram (Default)`, `gram://` 스킴, 사용자 에이전트, 키맵 컨텍스트 `Gram Keybind Context`, DAP 클라이언트 이름) Linux 전용(`install_cli` 안내), 내부 오류 메시지·개발용 문구다. 재조사 명령: `grep -rIn '"[^"]*\bGram\b[^"]*"' crates --include=*.rs`. 2026-11-05 추가로 CLI 도움말·키맵 F10 인자·사용자 설정/키맵 템플릿·`default.jsonc` 주석·개요 패널 안내·체크포인트 커밋 작성자·사용자에게 보이는 오류 문구를 정리했고, 남은 것은 "작업 중단 시점 기록" 절 6번에 적은 의도적 항목이다(일부 변경은 컴파일·테스트 미검증이라 그 절의 검증 방법을 먼저 실행한다)
 - **완료 기준 점검:** ① 원본 Gram 과 동시 실행해도 설정이 섞이지 않음 — **충족(검증함)** ② 기본 글꼴이 D2Coding 으로 표시됨 — **사용자 시각 확인 필요**. 나머지 협의 항목(앱 내 도움말 처리, 자체 기여 안내 필요 여부)은 Phase 2 를 막지 않는 별도 결정 사항
 
 ### Phase 3. Windows 배포 zip 스크립트 (R5, 조기 작성 → 이후 Phase마다 패키징 검증) ✅

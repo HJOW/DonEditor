@@ -338,7 +338,7 @@ pub fn get_shell_safe_binary_path(shell_kind: shell::ShellKind) -> anyhow::Resul
 
     binary_path
         .try_shell_safe(shell_kind)
-        .context("Failed to shell-escape Gram executable path.")
+        .context("Failed to shell-escape Don Editor executable path.")
 }
 
 /// Returns a path for the gram cli executable, this function
