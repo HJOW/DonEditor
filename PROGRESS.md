@@ -480,7 +480,7 @@ DonEditor/
 - [ ] **깨끗한 환경(도구 미설치 VM 또는 사용자 계정)에서 검사·설치 흐름 확인 — 미수행.** 아래 "검증 범위" 참고
 - 완료 기준: 스크립트 1회 실행으로 `dist/` 에 실행 가능한 zip 생성, 압축 해제 후 실행 확인 — **충족 (릴리스 빌드 기준)**
 
-**zip 구성** (최상위 폴더 `DonEditor-<버전>-windows-<아키텍처>\` 안에 파일 11개): `doneditor.exe`(GUI, 151MB), `bin\doneditor.exe`(CLI, 2.6MB), `LICENSE`, `licenses.md`, `licenses\`(APACHE·MIT·OFL·CC-A-SA-4.0·D2Coding-LICENSE), `README.md`, `SOURCE.txt`. Phase 2 메모의 "zip 루트에 doneditor.exe" 는 이 최상위 폴더 안을 뜻하도록 정리했다 (압축을 풀 때 파일이 흩어지지 않게). `SOURCE.txt` 는 제품·버전·커밋·미커밋 변경 여부·소스 저장소 주소(`git remote origin`, 없으면 "배포자에게 요청")·GPL 안내를 담는다. 옵션 `-IncludeSource` 는 `git archive` 로 소스 zip 도 만든다(커밋된 내용만 — 미커밋 변경이 있으면 경고)
+**zip 구성** (최상위 폴더 `DonEditor-<버전>-windows-<아키텍처>\` 안): `doneditor.exe`(GUI), `bin\doneditor.exe`(CLI), `bin\don-mcp.exe`(MCP stdio 브릿지, `f1ba957`에서 추가), `LICENSE`, `licenses.md`, `licenses\`(APACHE·MIT·OFL·CC-A-SA-4.0·D2Coding-LICENSE), `README.md`, `SOURCE.txt`, `source\DonEditor-<버전>-source.zip`(작업 트리 스냅샷, 항상 동봉). Phase 2 메모의 "zip 루트에 doneditor.exe" 는 이 최상위 폴더 안을 뜻하도록 정리했다 (압축을 풀 때 파일이 흩어지지 않게). `SOURCE.txt` 는 제품·버전·커밋·미커밋 변경 여부·소스 저장소 주소(`git remote origin`, 없으면 "배포자에게 요청")·GPL 안내를 담는다. 옵션 `-IncludeSource` 는 기본 동봉 소스 zip을 결과물 폴더에도 별도로 복사한다(커밋된 내용만이 아니라 미커밋 수정·새 파일도 포함, gitignore·`target`·`dist` 제외)
 
 **검증 결과 (2026-10-27)**
 - **릴리스:** 한 번의 실행으로 **9분 10초**(이전 릴리스 빌드의 캐시 일부 재사용), zip **53.4MB**, 종료 코드 0. 압축 해제 후 `bin\doneditor.exe --version` 이 같은 폴더의 GUI 를 찾아 출력, GUI 를 격리 데이터 폴더(`--user-data-dir`)로 실행 → 응답 정상·`sample-open.txt` 열림·메모리 약 144MB, 해시 파일 일치, 항목 이름 전부 `/`, exe 아이콘 파랑(stable), 확인 후 제가 띄운 PID 만 종료
@@ -501,13 +501,20 @@ DonEditor/
 - `.ps1` 은 **UTF-8 BOM + CRLF** 로 저장해야 Windows PowerShell 5.1 이 한글을 올바르게 읽는다(BOM 없으면 깨짐). 이 파일을 편집한 뒤에는 BOM 이 유지되는지 확인할 것
 - PROGRESS 3.7 계획과 달라진 점: VS Build Tools 패키지 ID 를 `Microsoft.VisualStudio.BuildTools`(VS 2026, winget 조회로 확인)로 했다(계획은 `2022.BuildTools`). 이 PC 의 호스트 아키텍처와 같으면 `--target` 을 주지 않아 기존 `target\release` 캐시를 재사용한다(원본 스크립트는 항상 `--target` → 전체 재빌드)
 
-### Phase 3 후속. Linux/macOS 배포 tar.gz 스크립트 (R9, 미구현)
+### Phase 3 후속. Linux/macOS 배포 tar.gz 스크립트 (R9, 스크립트 구현·모의 검증 완료 — 실제 OS 빌드·실행 미검증)
 
-- [ ] 별도 sh 배포 스크립트(`package-tar.sh` 예정) 작성, Linux/macOS 감지·OS별 빌드 도구 검사
-- [ ] 미설치 도구의 설치 여부 질의, 선택한 도구 설치 후 재검사, 거절·EOF·설치 실패 시 빌드 전 중단
-- [ ] OS별 릴리스 빌드·스테이징·tar.gz/SHA256 생성, GPL-3.0·원저작·제3자·글꼴 고지 및 소스 입수 방법 포함
-- [ ] Linux와 macOS 각각에서 도구 준비/누락 및 설치 동의/거절 흐름 검증, 압축 해제 후 실행 확인
-- 완료 기준: 각 OS에서 스크립트 호출 시 도구 검사·설치 질의를 거쳐 tar.gz를 만들고, 압축을 푼 배포본이 실행됨. **`install-build-tools.sh` 구현 완료와 별개로 전체 미완료다.**
+- [x] 별도 sh 배포 스크립트(`package-tar.sh`) 작성, Linux/macOS 감지·OS별 빌드 도구 검사 — 구현됨(`f1ba957`). Linux(`apt/dnf/pacman/zypper`)·macOS(`brew`)·x64/ARM64 호스트 감지, 교차 빌드 없음(네이티브 타깃만)
+- [x] 미설치 도구의 설치 여부 질의, 선택한 도구 설치 후 재검사, 거절·EOF·설치 실패 시 빌드 전 중단 — 구현됨. `install-build-tools.sh` 번호 선택 메뉴(`1 3`/`A`/`N`/`I`/`0`/EOF) 재사용, 설치 후 `--check-only` 재검사, 미준비 시 종료 코드 1(macOS 외부 설치 미완료는 2)
+- [x] OS별 릴리스 빌드·스테이징·tar.gz/SHA256 생성, GPL-3.0·원저작·제3자·글꼴 고지 및 소스 입수 방법 포함 — 구현됨. `gram`·`cli`·`mcp_server`·`remote_server` 함께 빌드, Linux(`bin/doneditor`·`libexec/`·`.desktop`)·macOS(`Don Editor.app`·`Info.plist`) 배치, `LICENSE`·`licenses.md`·`licenses/`·`D2Coding-LICENSE`·작업 트리 소스 스냅샷·`SOURCE.txt` 동봉
+- [ ] Linux와 macOS 각각에서 도구 준비/누락 및 설치 동의/거절 흐름 검증, 압축 해제 후 실행 확인 — **모의 검증만 완료, 실제 OS 검증 미수행.** `tests/test_package_tar.py` 14개(가짜 cargo·패키지 관리자, 실제 tar/git/SHA256) 통과. 실제 Linux/macOS 네이티브 릴리스 빌드·압축 해제·GUI 실행, 깨끗한 환경 설치, ARM64, macOS 서명/공증은 미검증
+- 완료 기준: 각 OS에서 스크립트 호출 시 도구 검사·설치 질의를 거쳐 tar.gz를 만들고, 압축을 푼 배포본이 실행됨. **스크립트·모의 검증은 충족, 실제 OS 실행 확인은 남음.** `install-build-tools.sh` 테스트 19개 통과는 배포 압축 검증을 대신하지 않는다.
+
+**Linux 검증 결과 (2026-11-04, Debian x86_64, `target/` 없음, 메모리 3.8GiB)**
+- `tests/test_package_tar.py` **14개 통과**, `tests/test_install_build_tools.py` **19개 통과**(가짜 cargo·패키지 관리자, 실제 tar/git/SHA256)
+- `bash -n` 구문 검사 통과(`package-tar.sh`·`install-build-tools.sh`), `shellcheck`는 미설치로 생략. `package-zip.bat` ASCII·CRLF, `script/package-zip.ps1` UTF-8 BOM·CRLF 유지 확인(Linux에서 실행 검증은 불가)
+- `bash package-tar.sh --check-only` → 미준비 항목(C/C++·Clang·GUI 개발 라이브러리) 감지, 종료 코드 1. Rust 1.99.1은 `rustc --version` 조회 시 툴체인 동기화 후 준비됨으로 바뀜(재검사 동작 확인)
+- `printf '' | bash package-tar.sh`(EOF)·`printf '0\n' | ...` → 설치 메뉴에서 취소 처리, `필수 도구가 준비되지 않아 빌드 전에 중단합니다`, 종료 코드 1, `dist/` 미생성. R9의 "미설치 시 설치를 묻고 거절하면 빌드 전 중단" 요구 충족
+- **실제 릴리스 빌드·tar.gz 생성·압축 해제·실행은 수행하지 않았다.** C/C++·GUI 개발 라이브러리 미설치 상태이며, 시스템 패키지 설치(`sudo apt-get`)와 전체 컴파일(캐시 없음·저메모리)은 이번 작업에서 하지 않았다. macOS·ARM64·깨끗한 환경 설치·서명/공증도 미검증
 
 ### Phase 4. 문법 강조 (26개 언어: 원본 내장 15개 확인 + 신규 11개 추가) ✅ (2026-10-27)
 - [x] **원본 내장 15개 언어 동작 확인 및 확장자 보강** — 샘플 18개(`mjs`·`cjs`·`yaml`·`xhtml` 포함)를 실제 쿼리·테마 키 규칙으로 강조해 대표 토큰을 검증. 요구 확장자 중 빠진 것은 Python `pyw` 뿐이라 추가, XML 은 `xsd xsl xslt wsdl` 을 보강. mjs·cjs(JavaScript)·yml/yaml·xhtml(HTML) 은 원래 포함되어 있었다
@@ -687,6 +694,7 @@ DonEditor/
 | 2026-10-28 | Phase 5 검증: i18n 11개·gram 메뉴 테스트 통과, 변경 crate 기존 테스트 회귀 없음, fmt·clippy 통과. 발견·수정: `t_with` 재치환 결함, 소스 스캔 오탐, 설정 필드 누락(`vscode_import`), 병렬 테스트의 전역 언어 경쟁(→ `with_language` 스레드 격리). 한계 기록: 설정 화면 본문·키맵 편집기·Git 패널 등 미적용 |
 | 2026-10-28 | Phase 5 실제 화면 확인: 디버그 빌드(5분 53초)를 격리 폴더로 실행해 ko/en/auto 를 창 캡처로 확인 — 한국어 메뉴 막대·앱 메뉴·파일 메뉴·에디터/탭 우클릭 메뉴 정상, 영어는 원본과 동일, D2Coding 한글 렌더링 정상. (실수: 첫 시도에서 설정 JSON 의 따옴표가 자식 PowerShell 인자 전달 중 사라져 ko/en 이 모두 auto 로 동작 — 알림 문구로 알아채고 스크립트가 설정 파일을 직접 만들게 고쳐 재확인. 또 `LP` 라는 함수 이름이 PowerShell 별칭 `Out-Printer` 와 충돌해 클릭이 실패했으나 인쇄는 일어나지 않았고 이름을 바꿔 재실행) |
 | 2026-11-04 | **AGENTS.md 변경 문서 반영:** 변경 커밋 `ab97a9a`를 확인해 R4(Agent 패널 숨김·별도 아이콘으로 다시 표시), R5(Windows zip), 신규 R9(Linux/macOS sh 기반 tar.gz·빌드 도구 검사·미설치 시 설치 질의)를 요구사항·설계·목표 구조·Phase 3 후속/7/8·다음 작업에 반영. FEATURE-INVENTORY.md에 R1~R9 상태표 및 신규 요구사항 확인 목록 추가. HJOW-Athlon의 원본 H: 경로와 현재 Phase 5 커밋 상태도 정정. 두 Markdown 문서의 diff·요구사항 정합성을 검토했으며, 앱 소스 변경·빌드·설치는 수행하지 않음 |
+| 2026-11-04 | **Phase 3(R5·R9 배포 스크립트) Linux 재검증:** `package-tar.sh`·`install-build-tools.sh` 구문 검사, `test_package_tar.py` 14개·`test_install_build_tools.py` 19개 통과, `--check-only`(종료 코드 1)·EOF/`0` 취소(빌드 전 중단·종료 코드 1·`dist/` 미생성) 확인, `package-zip.bat` ASCII·`package-zip.ps1` BOM·CRLF 확인. Phase 3 후속 절을 "미구현"에서 "스크립트 구현·모의 검증 완료, 실제 OS 빌드·실행 미검증"으로 정정. 실제 릴리스 빌드·tar.gz 생성·실행, 시스템 패키지 설치, macOS·ARM64 검증은 수행하지 않음(Phase 3 후속 "Linux 검증 결과" 참고). 앱 소스 변경 없음 |
 
 ---
 
@@ -696,9 +704,9 @@ DonEditor/
 2. ~~`cargo build` 재실행~~ ~~격리 폴더로 실행 확인~~ — 완료(창 생성·응답·파일 열기, 그리고 사용자가 GUI 편집·저장·한글 입력(IME)·화면 렌더링까지 직접 확인). 실행 방법: `target\debug\gram.exe --user-data-dir <임의 폴더> <파일>` (원본 Gram 과 식별자가 같으므로 원본 Gram 을 먼저 종료할 것)
 3. ~~릴리스 빌드 확인~~ — 완료. 기능 인벤토리·기준선 태그도 완료 (**Phase 1 완료**). 이후 인벤토리의 ⬜ 항목은 앱을 쓰면서 확인되는 대로 갱신
 4. ~~Phase 2 (리브랜딩 + D2Coding 기본 글꼴)~~ — 구현·검증 완료 (2026-10-27). **남은 것: 상단 "사용자 결정·확인 요청" 5건**
-5. ~~Phase 3 (Windows 배포 zip 스크립트, R5)~~ — 구현·검증 완료 (2026-10-27). **남은 것:** 깨끗한 환경에서의 실제 설치 흐름 확인(Phase 3 "검증하지 못한 것" 참고). **Linux/macOS tar.gz(R9)는 Phase 3 후속으로 별도 구현·검증해야 한다.**
+5. ~~Phase 3 (Windows 배포 zip 스크립트, R5)~~ — 구현·검증 완료 (2026-10-27). **남은 것:** 깨끗한 환경에서의 실제 설치 흐름 확인(Phase 3 "검증하지 못한 것" 참고). **Linux/macOS tar.gz(R9)는 스크립트 구현·모의 검증 완료(`f1ba957`, Phase 3 후속 "Linux 검증 결과" 참고). 남은 것은 실제 OS 릴리스 빌드·tar.gz 생성·압축 해제·실행, 깨끗한 환경 설치, ARM64, macOS 서명/공증이다.**
 6. ~~README.md 에 AGENTS.md 변경(26개 언어, R8) 반영~~ — 완료 (2026-10-27)
 7. ~~Phase 4 (문법 강조 26개)~~ — 구현·검증 완료 (2026-10-27). **남은 것:** 실제 창에서 색상 눈으로 확인(`tests/samples/` 의 파일을 열어 보면 됨), XHTML 처리 결정(Phase 4 "알려진 한계"). (변경분은 커밋 `78320a1` 에 포함됨) 빌드 크기 기준값(이후 비교용): 릴리스 `doneditor.exe` 170,434,048 바이트, zip 55.1MB
 8. ~~Phase 5 1차 (한국어 UI)~~ — 완료 (2026-10-28, 현재 저장소의 `f061f14`에 소스 포함). **남은 것:** 대화상자·툴팁·검색 바·명령 팔레트 이중 이름·언어 전환의 실제 화면 확인(메뉴·우클릭 메뉴는 확인함), Phase 5 2차·3차(설정 화면 본문 구조 변경, 키맵 편집기, Git 패널, 디버거 등 — Phase 5 "남은 것"). **다음 후보는 Phase 5 2차, Phase 6 (공용 도구 + 로컬 MCP 서버), Phase 3 후속(R9)**이다. 병행 가능한 사용자 결정: 상단 "사용자 결정·확인 요청 (Phase 2)" 5건. 특히 5번(소스 공개 위치)은 `SOURCE.txt` 의 "소스 저장소" 항목과 `assets/licenses.md` 에 들어갈 내용이므로 배포 전에 필요
 9. **Phase 7 (Agent 패널, R4)** — 기본 우측 배치·OpenAI/Claude API Key 연동과 함께, 패널 숨김 및 화면 내 별도 아이콘 클릭으로 다시 표시하는 흐름을 구현·검증한다.
-10. ~~AGENTS.md 최신 요구사항을 PROGRESS.md·FEATURE-INVENTORY.md에 반영~~ — 완료 (2026-11-04). 새 요구사항의 구현 완료를 뜻하지 않으며, R4·R9는 후속 작업으로 남아 있다.
+10. ~~AGENTS.md 최신 요구사항을 PROGRESS.md·FEATURE-INVENTORY.md에 반영~~ — 완료 (2026-11-04). 새 요구사항의 구현 완료를 뜻하지 않으며, R4는 후속 작업으로 남아 있다. R9는 스크립트 구현·모의 검증까지 완료이며 실제 OS 빌드·실행 검증이 남는다.
