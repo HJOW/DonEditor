@@ -2329,6 +2329,7 @@ name = "don_protocol_tests"
 version = "3.4.0"
 dependencies = [
  "anyhow",
+ "keyring",
  "serde",
  "serde_json",
  "uuid",
