@@ -32,6 +32,7 @@ GramEditor 은 가벼움을 모토로 개발된 텍스트 편집기 프로젝트
 | 기본 글꼴 | [D2Coding](./assets/fonts) 을 기본 글꼴로 사용 (편집기·UI 모두) | 적용됨 (화면 확인 대기) |
 | 문법 강조 | 파일 확장자로 언어를 감지하여 기본 문법 강조. 대상 **26개**: Java, C, C++, SQL, C#, Rust, JavaScript(mjs·cjs 포함), TypeScript, Python, Ruby, JSON, JSON5, YAML(yml), Properties(`java.util.Properties` 호환), XML, HTML, XHTML, Markdown(md), Swift, Scala, R, Bat(Windows Batch), PowerShell, Sh(Unix Shell), Go, Dart. 이 중 15개는 원본에 내장되어 있고, **Java, C#, Ruby, JSON5, Properties, Swift, Scala, R, Bat, PowerShell, Dart 11개는 새로 추가** 샘플 파일은 [tests/samples/](./tests/samples) 에 있습니다. | 구현됨 (26개 감지·강조를 자동 테스트로 확인, 실제 창의 색상은 눈으로 미확인). 한계: `.xhtml` 의 `<?xml ?>` 선언 줄은 강조되지 않음 |
 | 배포 zip 스크립트 | 빌드에 필요한 프로그램의 설치 여부를 검사하고, 없으면 설치 여부를 물은 뒤 배포용 zip 생성 ([사용법](#배포용-zip-만들기)) | 구현됨 (릴리스 zip 생성·실행 확인, 깨끗한 환경의 설치 흐름은 미확인) |
+| 빌드 도구 선택 설치 | Windows bat 및 Linux/macOS sh로 필요한 도구를 나열하고, 번호로 선택한 항목만 설치 ([사용법](#빌드-도구-선택-설치-windows--linux--macos)) | 구현됨 (모의 설치 테스트 통과, 실제 설치는 미검증) |
 | 기존 기능 보존 | GramEditor 가 제공하는 기존 기능(Git, 디버거, 원격 개발, Vim/Helix 모드 등)을 삭제하지 않고 최대한 포함 | 원본 이관 상태 유지 (점검 예정) |
 
 AI 관련 기능은 위 두 가지에서 시작하며, 이후 더 늘려 갈 예정입니다.
@@ -64,6 +65,46 @@ Don Editor 는 다음 프로젝트의 파생물입니다.
 그 밖에 한국어 UI, D2Coding 기본 글꼴, 문법 강조 언어 11개(Java·C#·Ruby·JSON5·Properties·Swift·Scala·R·Bat·PowerShell·Dart), 배포 스크립트가 추가·변경됩니다.
 원본의 나머지 기능은 삭제하지 않고 유지합니다.
 수정이 이루어진 위치에는 가능한 한 `[DonEditor]` 표시 주석을 남깁니다.
+
+## 빌드 도구 선택 설치 (Windows / Linux / macOS)
+
+필요한 프로그램의 설치 상태와 번호 목록을 먼저 표시한 뒤, **선택한 항목만 설치**하는 스크립트입니다. 처음에는 모든 항목이 미선택이며, 실행만 해서는 다운로드·설치를 시작하지 않습니다.
+
+```powershell
+# Windows: 저장소 루트에서 실행 (Windows PowerShell 5.1 이상)
+.\install-build-tools.bat
+
+# 상태 조회만 / 번호 선택 후 설치 명령만 미리 보기
+.\install-build-tools.bat -CheckOnly
+.\install-build-tools.bat -DryRun
+```
+
+```sh
+# Linux / macOS: Bash로 실행 (macOS 기본 Bash 3.2 지원)
+bash ./install-build-tools.sh
+
+# 상태 조회만 / 번호 선택 후 설치 명령만 미리 보기
+bash ./install-build-tools.sh --check-only
+bash ./install-build-tools.sh --dry-run
+```
+
+| 입력 | 동작 |
+|------|------|
+| `1 3` 또는 `1,3` | 해당 번호의 설치 선택/해제를 전환. 이미 준비된 항목은 건너뜀 |
+| `A` | 준비되지 않은 모든 항목 선택 |
+| `N` | 전체 선택 해제 |
+| `I` | 선택 확정 및 설치 시작 (`-DryRun` / `--dry-run`에서는 명령만 출력) |
+| `0`, 빈 입력, 입력 종료(EOF) | 설치 없이 종료 |
+
+예를 들어 `1,3`을 입력하면 1번과 3번만 선택되며, 이어서 `I`를 입력해야 설치합니다. 번호를 다시 입력하면 선택이 해제됩니다. 선행 도구가 빠졌으면 필요한 항목을 함께 선택하도록 안내하며, 미선택 항목을 자동 추가하지 않습니다. 선택한 프로그램 자체의 필수 하위 의존성은 패키지 관리자가 함께 설치할 수 있습니다.
+
+- **Windows:** Git, CMake, MSVC C++/Spectre 라이브러리, Windows SDK, rustup, 프로젝트 Rust 툴체인을 각각 선택합니다. Git/CMake/새 Build Tools 설치에는 `winget`(앱 설치 관리자)이 필요합니다. 없으면 [설치 주소](https://aka.ms/getwinget)를 안내합니다. 기존 Visual Studio에는 선택한 구성 요소만 추가합니다. UAC 창이 나타날 수 있습니다. [배치 파일](./install-build-tools.bat)은 한국어 메뉴를 제공하는 [PowerShell 본체](./script/install-build-tools.ps1)를 호출합니다.
+- **Linux:** `apt-get`(Debian/Ubuntu 계열), `dnf`(Fedora/RHEL 계열), `pacman`(Arch 계열), `zypper`(openSUSE 계열)를 지원합니다. curl/인증서, Git, CMake, C/C++/Clang 도구 묶음, GUI/시스템 라이브러리 묶음, rustup, 프로젝트 Rust 툴체인을 선택하며, 묶음의 패키지 이름도 표시합니다. 배포판 버전·활성 저장소에 따라 일부 패키지는 수동 준비가 필요할 수 있습니다. 시스템 패키지 설치 시에만 `sudo`를 사용하므로 스크립트 전체를 `sudo`로 실행하지 마세요.
+- **macOS:** Xcode/SDK/Metal, Homebrew, Git, CMake, rustup, 프로젝트 Rust 툴체인을 선택합니다. **Xcode 자체는 Apple 계정 인증과 초기 설정이 필요하므로 자동 설치를 완료할 수 없습니다.** 선택 시 App Store를 열어 안내하고, 설치 완료 후 스크립트를 다시 실행해야 합니다. 설치된 Xcode는 개발자 도구 경로 설정과 초기 구성, 필요한 Metal 도구 다운로드를 진행합니다. Homebrew는 [공식 설치 스크립트](https://docs.brew.sh/Installation)를 사용하며 Xcode/명령줄 도구가 먼저 필요합니다. Metal 도구 다운로드 방식은 [Apple 안내](https://developer.apple.com/documentation/xcode/downloading-and-installing-additional-xcode-components)를 따릅니다.
+
+Rust 버전·프로필·구성 요소(`rustfmt`, `clippy`, `rust-analyzer`)·추가 타깃(`wasm32-wasip2`)은 [rust-toolchain.toml](./rust-toolchain.toml)에서 읽습니다. [rustup의 툴체인 없는 설치 방식](https://rust-lang.github.io/rustup/installation/other)을 사용해 관리자와 프로젝트 툴체인을 따로 선택할 수 있으며, 전역 기본 Rust 버전은 바꾸지 않습니다. 네이티브 x64/ARM64 환경을 지원하며 교차 빌드 환경은 별도로 준비해야 합니다.
+
+설치 스크립트는 빌드나 배포 zip 생성을 실행하지 않습니다. `-CheckOnly` / `--check-only`는 미준비 항목이 있으면 종료 코드 `1`, 일반 설치는 선택한 항목이 준비되면 `0`, 실패하면 `1`, macOS 외부 설치가 남았으면 `2`로 종료합니다. 취소는 `0`입니다. Linux/macOS 실제 설치와 깨끗한 Windows 환경의 설치는 아직 확인하지 않았으며, 번호 선택·설치 명령·실패 경로는 외부 설치 명령을 대체한 테스트로 검증합니다.
 
 ## 개발 환경 (Windows)
 

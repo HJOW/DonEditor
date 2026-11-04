@@ -1,11 +1,26 @@
 # Don Editor 진행 상황
 
-- 최종 갱신: 2026-11-03
+- 최종 갱신: 2026-11-04
 - 현재 단계: **Phase 5(한국어 UI) 1차 구현 완료 — 기반(`crates/i18n`·`ui_language` 설정)과 주요 UI(메뉴·패널·탭·컨텍스트 메뉴·검색·상태바·대화상자·명령 팔레트·설정 화면의 언어 선택)를 한글화, 자동 테스트 통과. 설정 화면 본문·키맵 편집기·Git 패널·디버거 등은 아직 영어(Phase 5 "남은 것" 참고). 디버그 빌드를 실제로 실행해 창을 캡처해 한국어 메뉴·우클릭 메뉴가 정상 표시됨을 확인했다(확인 범위는 Phase 5 "실제 화면 확인" 참고)** (Phase 5 변경분은 미커밋). Phase 4·3·2 의 사용자 확인·결정 요청도 그대로 남아 있음 → 다음은 Phase 5 2차(남은 화면) 또는 Phase 6 (MCP)
 - Phase 1 완료 ✅ (디버그·릴리스 빌드와 실행, GUI 확인, 기능 인벤토리, 기준선 태그 `gram-baseline-3.4.0`)
 - Phase 2 구현·검증 완료 ✅, 사용자 시각 확인 대기 (식별자·경로·실행 파일명·표시 이름·글꼴·라이선스 고지 적용, 원본 빌드와 동시 실행 검증)
 - Phase 3·4 구현·검증 완료 ✅ (2026-10-27), Phase 5 1차 구현 완료 (2026-10-28). Phase 3·4 의 변경분은 사용자가 커밋 `78320a1` 에 포함했다. **Phase 5 의 변경분(신규 `crates/i18n/`·`assets/locales/`, 한글화로 수정한 crate 다수 — 변경 파일 약 86개, `Cargo.toml`/`Cargo.lock`, `assets/settings/default.jsonc`, README·PROGRESS)은 아직 커밋하지 않았다**
 - 2026-11-03 소스·빌드 환경 점검: Cargo workspace 에 선언된 139개 구성 요소의 디렉터리와 매니페스트가 모두 존재하고 핵심 소스·자산도 확인했다. 단, `AGENTS.md` 의 원본 경로 `D:\Workspace\git\GramEditor` 는 이 PC 에 없어 원본과의 전체 대조는 하지 못했다. 배포 스크립트 `-CheckOnly` 결과 Git·CMake·Windows SDK 10.0.26100 은 준비됨, `rustup`/Rust 1.99.1 및 MSVC Spectre 완화 라이브러리는 없음으로 빌드 환경 미완비.
+- 2026-11-04 **빌드 도구 번호 선택 설치 구현 완료:** Windows `install-build-tools.bat` + `script/install-build-tools.ps1`, Linux/macOS `install-build-tools.sh` 추가. 처음에는 전부 미선택이고, 번호로 항목을 고른 후 `I`를 입력해야 설치한다. 조회·모의 실행·취소 지원. 셸 테스트 19개와 Windows 메뉴 15개 시나리오·Rust 구성 요소 검사 통과. 실제 패키지 설치는 수행하지 않았다. 자세한 내용은 아래 절 참고.
+
+### 빌드 도구 선택 설치 (2026-11-04)
+
+- **사용자 요청:** 빌드 프로그램을 자동 설치하는 Windows bat 및 Linux/macOS sh를 별도로 준비하되, 실행 즉시 설치하지 않고 프로그램 목록과 설치 여부를 번호로 선택하게 한다.
+- **추가 파일:** 루트 `install-build-tools.bat`(Windows PowerShell 5.1 본체 호출), `script/install-build-tools.ps1`(한국어 메뉴·설치), 루트 `install-build-tools.sh`(Bash 3.2 호환), `tests/test_install_build_tools.ps1`, `tests/test_install_build_tools.py`. README에 실행법·선택 방법·지원 환경·한계 설명 추가. GPL-3.0 계열 라이선스와 기존 원저작 고지 유지.
+- **공통 조작:** `1 3`/`1,3`으로 선택 전환, 같은 번호 재입력으로 해제, `A`로 미준비 항목 전체 선택, `N`으로 전체 해제, `I`로 설치 시작, `0`/빈 입력/EOF로 취소. 준비된 도구는 건너뛴다. 잘못된 번호가 섞이면 선택 상태를 바꾸지 않는다. 선행 도구가 미선택이면 함께 선택하도록 안내한다. 패키지 관리자가 설치하는 각 도구의 필수 하위 의존성은 목록 항목과 함께 설치될 수 있다.
+- **Windows:** Git·CMake·MSVC/Spectre·Windows SDK·rustup·프로젝트 툴체인 6항목. WinGet 및 기존 Visual Studio Installer를 사용하며, MSVC/SDK는 개별 선택하되 동시에 선택하면 한 번에 설치한다. VS 설치 경로의 공백 인용, ARM64용 MSVC 구성 요소, SDK 헤더/라이브러리/rc/fxc 파일 점검, 표준 Rust/Git/CMake 및 VS 내장 CMake 경로 탐색 포함. WinGet 미설치 시 설치 주소 안내. rustup은 공식 exe와 SHA256을 받아 검증하고 MSVC 자동 설치 제안을 막는다. bat는 ASCII/CRLF, ps1은 UTF-8 BOM/CRLF로 저장.
+- **Linux:** apt-get, dnf, pacman, zypper 지원. curl/인증서·Git·CMake·C/C++/Clang/libclang/pkg-config 묶음·GUI/시스템 라이브러리 묶음·rustup·프로젝트 툴체인 7항목. 묶음의 패키지 이름을 모두 표시하며 설치 상태는 로컬 패키지 DB로 확인한다. sudo는 시스템 패키지 설치 시에만 호출하고, apt 목록 갱신도 설치 확정 뒤 한 번만 수행한다. 배포판별 추가 저장소를 자동 활성화하지 않으므로 일부 버전에서는 수동 준비가 필요할 수 있다.
+- **macOS:** Xcode/SDK/Metal·Homebrew·Git·CMake·rustup·프로젝트 툴체인 6항목. 선택 전 Git/Clang 스텁을 실행해 개발 도구 설치 창이 뜨는 것을 방지한다. **Xcode 본체 설치는 Apple 인증·초기 실행을 사용자가 완료해야 한다.** 선택 시 App Store를 열고 미완료 종료 코드 2를 반환한다. 설치된 Xcode는 개발 도구 경로·초기 구성을 설정하고 필요한 Metal 도구를 다운로드한다. Homebrew 설치 전에 Xcode/명령줄 도구가 있는지도 다시 검사한다.
+- **Rust:** `rust-toolchain.toml`의 버전·프로필·모든 구성 요소(rustfmt/clippy/rust-analyzer)·추가 타깃(wasm32-wasip2)을 읽어 설치 및 재검사한다. 조회 중 cargo/rustc를 호출하지 않으며, rustup 조회도 설치된 툴체인에만 수행해 암묵적 다운로드를 피한다. rustup 자체는 `--default-toolchain none`으로 별도 설치하고 프로젝트 설치 시 전역 기본 Rust 버전을 바꾸지 않는다.
+- **검증:** `powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\test_install_build_tools.ps1` 통과(Rust 설치 인자·누락 구성 요소·누락 타깃·안전한 rustup 상태 조회·메뉴 15개 시나리오). WSL에서 `python3 -m unittest discover -s tests -p test_install_build_tools.py -v` **19개 통과**. 선택/해제/중복/잘못된 입력/EOF, 선택 항목만 설치, 준비된 도구 제외, 의존성 미선택 차단, 조회/모의 실행, 설치 실패, 배포판 4종의 패키지 명령, macOS 설치 전 대화상자 방지·외부 설치 미완료·Metal·CMake 경로를 가짜 명령으로 검증했다. Bash 구문 검사 및 PowerShell 파서 검사 통과.
+- **구현 중 보완:** [rustup 소스](https://github.com/rust-lang/rustup/blob/main/src/cli/rustup_mode.rs)의 버전 표시가 활성 툴체인 확인 함수를 호출함을 확인했다. 일부 버전의 암묵 설치 가능성을 피하려고 상태 조회는 `rustup --version` 대신 `rustup --help`를 사용하며, 이 경로의 회귀 테스트도 추가했다.
+- **실제 환경 조회:** Windows에서 bat의 `-Help`, `-CheckOnly`, Rust 관리자/툴체인 `-DryRun` 실행 확인. 이 시점에는 Git·CMake·MSVC/Spectre·SDK가 준비됐고 rustup/프로젝트 툴체인은 없음. WSL에서도 `--check-only`로 Linux 목록이 정상 표시됨을 확인했다. **실제 설치·다운로드·관리자 권한 상승은 하지 않았으며, 깨끗한 Windows/macOS/Linux 및 ARM64에서의 설치/빌드는 미검증이다.** 에디터 소스 변경이 없어 Cargo 빌드/테스트는 실행하지 않았다.
+- 기존 `package-zip.bat`의 배포 흐름은 그대로다. 이 스크립트는 도구 준비만 담당한다. AGENTS.md에 추가된 Linux/macOS tar.gz 배포 및 Agent 패널 숨김/아이콘 요구사항은 별도 후속 구현 대상이다.
 
 ### 사용자 결정·확인 요청 (Phase 2)
 
