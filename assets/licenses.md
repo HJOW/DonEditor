@@ -87,6 +87,37 @@ Windows/macOS use the platform credential APIs; Linux uses the system D-Bus and
 Secret Service. The system libraries are not copied into Don Editor's tar archives.
 Existing shared dependencies retain their original notices and licenses.
 
+## Typst and md2typ (Apache License 2.0), added by Don Editor
+
+Don Editor's Typst support (page preview, PDF export, printing, Markdown to Typst
+conversion) uses the following Apache License 2.0 works. The Apache License 2.0
+allows use together with GPL-3.0-or-later code. Their license texts and notices are
+preserved in `assets/licenses/` (the distribution's `licenses/` directory), and the
+credits below are required by the Apache License 2.0.
+
+- **Typst** — Copyright The Typst Project Developers. <https://typst.app>,
+  <https://github.com/typst/typst>. Don Editor links the Rust crates `typst`,
+  `typst-layout`, `typst-pdf` and `typst-svg` (version 0.15.1) and their sub-crates
+  as a library. The code is not modified. License: `typst-LICENSE-APACHE`; the
+  project's NOTICE (third-party components) is `typst-NOTICE`.
+- **typst-assets** — Copyright The Typst Project Developers.
+  <https://github.com/typst/typst-assets>. Typst's bundled fonts (Libertinus Serif,
+  New Computer Modern, DejaVu Sans Mono) and data files are embedded in the Don Editor
+  binary through this crate (version 0.15.1). The crate is Apache License 2.0
+  (`typst-assets-LICENSE-APACHE`); the fonts have their own licenses (SIL Open Font
+  License 1.1 and others), whose notices are in `typst-assets-NOTICE`. These notices
+  must accompany every distribution that contains the fonts.
+- **md2typ** — Copyright 2025 Nervosys, LLC. <https://github.com/nervosys/md2typ>.
+  Don Editor's Markdown to Typst converter (`crates/don_typst/src/markdown.rs`)
+  follows md2typ's mapping rules (headings, emphasis, lists, links, quotes, rules,
+  footnotes). **No md2typ source code was copied;** the converter is a new
+  implementation that also fixes table syntax and escaping. License:
+  `md2typ-LICENSE-APACHE`.
+
+The crates that Typst itself depends on are listed with their license expressions in
+`typst-dependencies.md`. They are all permissive or weak-copyleft licenses that the
+Rust ecosystem commonly combines with GPL-3.0-or-later programs (see that file).
+
 ## GNU GENERAL PUBLIC LICENSE
 
 GNU GENERAL PUBLIC LICENSE

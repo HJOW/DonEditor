@@ -555,6 +555,8 @@ pub fn main() {
         git_ui::init(cx);
         git_graph::init(cx);
         markdown_preview::init(cx);
+        // [DonEditor] Typst 미리보기·변환·PDF·인쇄
+        typst_preview::init(cx);
         svg_preview::init(cx);
         onboarding::init(cx);
         settings_ui::init(cx);

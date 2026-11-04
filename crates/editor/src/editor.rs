@@ -20778,9 +20778,15 @@ impl Editor {
         cx.notify();
     }
 
-    /// 작업 공간 탭으로 처음 추가될 때의 화면 모드 자동 결정을 아직 하지 않았다면 `true` 를 돌려주고 완료로 표시한다.
-    pub fn take_alternate_view_initialization(&mut self) -> bool {
-        !std::mem::replace(&mut self.alternate_view_initialized, true)
+    /// 작업 공간 탭으로 처음 추가될 때의 화면 모드 자동 결정을 이미 마쳤는지 돌려준다.
+    /// Markdown·Typst 처럼 미리보기를 지원하는 언어마다 따로 판단하므로, 자기 언어가 아닌 편집기는 이 값을 바꾸지 않아야 한다.
+    pub fn alternate_view_initialized(&self) -> bool {
+        self.alternate_view_initialized
+    }
+
+    /// 화면 모드 자동 결정을 마쳤다고 표시한다. 이후 탭을 옮기거나 다시 추가해도 사용자가 고른 모드를 덮어쓰지 않는다.
+    pub fn mark_alternate_view_initialized(&mut self) {
+        self.alternate_view_initialized = true;
     }
 }
 

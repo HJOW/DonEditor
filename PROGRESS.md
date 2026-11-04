@@ -9,7 +9,7 @@
 - README.md의 나머지 부분(`## 목표 기능` 이후)은 기존처럼 수정할 수 있다. 다만 다른 부분을 고칠 때도 위 두 단락이 바뀌지 않았는지 diff로 확인한다.
 - 위 두 단락의 내용이 실제 기능과 맞지 않게 되면 직접 고치지 말고 사용자에게 알리고 수정 여부를 묻는다.
 
-## 예정 작업: Typst 지원, Markdown→Typst 변환, 인쇄·PDF 변환 (사용자 요청 2026-11-04 접수, 미착수)
+## Typst 지원, Markdown→Typst 변환, 인쇄·PDF 변환 (사용자 요청 2026-11-04 접수, 2026-11-05 구현 — 결과는 이 절 맨 아래 "구현 결과" 참고)
 
 - **선행 작업:** Markdown 미리보기/편집 모드 작업(같은 탭의 대체 화면 `Editor::set_alternate_view`, 툴바 `미리보기 | 편집` 토글, 열 때 미리보기로 시작)은 2026-11-04에 구현·Windows GUI 검증을 마쳤다(아래 "Markdown 미리보기/편집 모드" 절). 아래 작업은 이 구조를 재사용한다.
 - **참고 저장소:** Typst <https://github.com/typst/typst> (오픈소스 조판 소프트웨어이자 자체 마크업 언어), md2typ <https://github.com/nervosys/md2typ> (Markdown→Typst 변환 참고 라이브러리).
@@ -21,7 +21,7 @@
 3. **Markdown→Typst 변환:** Markdown 파일을 연 상태에서 Typst로 변환하는 기능을 **메뉴를 통해** 제공한다. 변환 규칙은 md2typ를 참고한다. **(2026-11-04 사용자 결정) 메뉴를 선택하면 곧바로 파일 저장 창을 띄워 변환 결과를 `.typ` 파일로 즉시 저장한다.** 저장 창에서 취소하면 아무 파일도 만들지 않는다.
 4. **인쇄와 PDF 변환:** Markdown과 Typst 문서를 인쇄하거나 PDF로 변환(저장)할 수 있어야 한다. **Markdown 파일에 이 기능을 쓰면 자동으로 Typst로 변환한 뒤 인쇄/PDF 변환을 수행한다.** **(2026-11-04 사용자 결정) 이때 중간 변환 결과(Typst)는 파일로 저장하지 않는다.** 메모리에서만 변환해 쓰고, 구현상 임시 파일이 꼭 필요하면 작업 후 지운다. PDF 변환은 결과 PDF만 저장한다.
 
-### 착수 시 확인·결정할 사항 (아직 조사하지 않음)
+### 착수 시 확인·결정할 사항 (아래 항목은 계획 당시 기록이며, 조사·결정 결과는 "구현 결과" 절에 있다)
 
 - **라이선스 (2026-11-04 사용자 확인):** Typst와 md2typ는 모두 **Apache License 2.0**이며, GPL-3.0 프로그램인 Don Editor에서 **라이선스상 이용 가능**하다. 다만 다음을 반드시 지킨다.
   - 프로그램 안에 **두 프로젝트의 Apache-2.0 라이선스 파일을 첨부**하고 **Credit(원저작자·저작권 고지)을 표시**한다. 앱 내 라이선스 고지(`assets/licenses.md`)와 배포 zip/tar.gz의 `licenses/`에 모두 넣고, 라이선스 검사기 대상에도 추가한다.
@@ -34,7 +34,28 @@
 - **인쇄:** GPUI에는 인쇄 API가 없으므로 PDF 생성 후 OS 인쇄 대화상자로 넘기는 방식 등 Windows/Linux/macOS별 인쇄 경로를 조사한다. PDF 저장은 저장 위치 선택 대화상자를 사용한다.
 - **공통:** 모든 신규 기능은 한국어 UI 문자열(i18n 영·한), MCP 액션 제어(R3), 상수·함수·반복문 한국어 주석, 자동 테스트와 실제 GUI 검증, 자체 도움말 갱신을 포함한다. README.md의 보호된 앞 두 단락은 수정하지 않는다.
 
-## 상태 표시줄 캐릭터셋 표시·선택·다시 불러오기·저장 (사용자 요청 2026-11-04 접수, 2026-11-05 구현 중 — 구현 결과는 이 절 맨 아래 "구현 결과" 참고)
+### 구현 결과 (2026-11-05)
+
+- **조사 결과:** Typst 문법 강조는 **원본에 이미 내장**되어 있다(`languages`의 tree-sitter 문법 `codebook-tree-sitter-typst` 0.12.1 MIT, 확장자 `typ`·`typst`, 개요·들여쓰기 쿼리 포함). 별도 추가 없이 `.typ` 편집 화면의 문법 강조를 확인했다. Typst 컴파일러는 crates.io의 `typst` 0.15.1 계열(Apache-2.0, MSRV 1.92 ≤ 툴체인 1.99.1)을 라이브러리로 쓴다. md2typ는 crates.io에 없고 단일 변환 함수(`lib.rs` 약 400줄, pulldown-cmark 0.10)라서 **코드를 가져오지 않고 변환 규칙만 참고해 새로 구현**했다(제목 `=`, `#emph`/`#strong`/`#strike`, `#link`, `#quote`, `#line`, `#footnote` 등 같은 대응). md2typ의 표 변환(`columns: (left, …)`)이 Typst 문법에 맞지 않고 이스케이프가 부족해(`* _ $ < > @ ~ ` 등) 고쳐서 구현했다.
+- **신규 crate `don_typst`(GUI 무관):** `markdown.rs`(Markdown→Typst 변환: 제목·문단·강조·취소선·링크·이미지(원격은 링크로)·목록(번호 유지·중첩·체크박스 글자)·표(열 정렬)·인용·각주·코드(백틱 울타리 자동 확장)·수평선·HTML 주석 제거·`<br>`, 한글이 있으면 `lang: "ko"` 서문), `world.rs`(Typst `World`: 편집 중인 글자를 원본으로, 문서 폴더 기준 파일 읽기(폴더 밖·패키지·저장 안 한 문서 거절), 글꼴 = Typst 내장 + D2Coding + 시스템 한글 글꼴(맑은 고딕 등, 있을 때만)), `don_typst.rs`(컴파일, 줄·열이 있는 진단, 쪽별 SVG, PDF). **단위 테스트 17개 통과** — 특히 변환 결과가 실제로 Typst로 컴파일되고 PDF가 만들어지는지, 오류의 줄 번호, 폴더 밖 파일 거절을 확인한다.
+- **신규 crate `typst_preview`(화면):**
+  - **미리보기/편집 모드:** Markdown과 같은 방식(편집기 탭의 대체 화면 슬롯)으로 Typst 파일을 열면 **쪽 미리보기로 먼저** 보여 주고 툴바 `미리보기 | 편집` 토글(명령 팔레트 `typst: toggle preview mode`)로 전환한다. 쪽은 백그라운드에서 컴파일해 SVG를 그림으로 바꿔 세로로 늘어놓고(스크롤바 포함), 편집하면 450ms 뒤 자동 재컴파일, 오류는 줄·열 번호와 함께 화면 위에 보여 주며 성공한 쪽이 있으면 그대로 둔다. 빈 파일·분할 복제본·세션 복원 규칙은 Markdown과 같다. Markdown과 Typst가 "열 때 모드 결정" 표시를 서로 가로채지 않도록 `Editor`의 API를 `alternate_view_initialized`/`mark_alternate_view_initialized`로 나눴다.
+  - **키보드 스크롤:** PageUp/Down·위/아래·Ctrl+Home/End 키 바인딩을 Markdown 미리보기와 공유한다(키맵 컨텍스트 `MarkdownPreview || TypstPreview`).
+  - **메뉴(파일 메뉴 → 저장 아래):** `Markdown을 Typst로 변환…`, `PDF로 내보내기…`, `인쇄…`. 액션 `typst::ConvertMarkdownToTypst {path}`·`typst::ExportPdf {path}`·`typst::Print`·`typst::TogglePreviewMode`(MCP `dispatch_action`으로 실행 가능, `path`를 주면 저장 창 없이 그 경로에 씀).
+  - **사용자 결정(2026-11-04)대로:** 변환 메뉴는 **곧바로 저장 창을 띄워 `.typ`로 즉시 저장**(원본과 같은 폴더·같은 이름 제안, 확장자가 없으면 `.typ` 추가, 취소하면 아무것도 만들지 않음). PDF 내보내기·인쇄는 **Markdown을 메모리에서 Typst로 바꿔 컴파일하며 중간 Typst 파일을 저장하지 않는다**(PDF 내보내기는 결과 PDF만 저장).
+  - **인쇄:** GPUI에 인쇄 API가 없어 임시 PDF(`%TEMP%\doneditor-print`, 하루 뒤 정리)를 만든 뒤 Windows는 연결 프로그램의 `Print` 동작으로, Linux/macOS는 `lp`로 보내고, 실패하면 PDF 뷰어로 열어 준다(뷰어에서 인쇄). 컴파일·저장은 백그라운드에서 한다.
+- **글꼴:** 기본 글꼴 D2Coding을 앱 에셋에서 읽어 Typst에 넘기고, Typst 내장 글꼴(Libertinus Serif·New Computer Modern·DejaVu Sans Mono), Windows 맑은 고딕 등 시스템 한글 글꼴이 있으면 함께 쓴다. 변환 결과의 서문은 `("Libertinus Serif", "D2Coding")` 순서라 한글은 D2Coding(고정폭)으로 나온다 — 보기에 어색하면 서문의 글꼴 목록에 시스템 한글 글꼴을 앞세우는 개선이 가능하다.
+- **라이선스 고지(사용자 확인 2026-11-04 반영):** `assets/licenses.md`에 "Typst and md2typ (Apache License 2.0)" 절(저작권 Credit·사용 범위·md2typ 코드 미사용 명시), `assets/licenses/`에 `typst-LICENSE-APACHE`·`typst-NOTICE`·`typst-assets-LICENSE-APACHE`·`typst-assets-NOTICE`(내장 글꼴 OFL 등)·`md2typ-LICENSE-APACHE`, 새로 들어온 **외부 crate 117개**의 라이선스 파일(170개, `typst-deps/`)과 목록(`typst-dependencies.md`)을 추가했다. 새 crate의 라이선스 표현식은 MIT/Apache-2.0/Unicode-3.0/BSD-2·3/Unlicense/0BSD·CC0뿐이며 GPL-3.0과 함께 쓸 수 있다. 소스 아카이브에 라이선스 파일이 없는 22개(주로 Typst 자체 하위 crate)는 목록 파일에 별도 안내했다. 내부 crate 146개 SPDX 검사 통과.
+- **문서·문자열:** 자체 도움말 `docs/index.md`에 Typst·변환·PDF·인쇄 절을 추가했다. i18n 신규 키 20개(메뉴 3·미리보기/오류/인쇄 안내)를 영·한에 넣어 카탈로그는 **1,824키**다(테스트 11개 통과).
+- **실제 GUI 확인 (Windows, 디버그 빌드, 격리 데이터 폴더 `target/gui-test-typst-4baf5ae8/`):**
+  - `.typ`를 열면 미리보기로 시작해 한글·수식·목록·표·본문이 A4 쪽으로 조판되고(2쪽 문서, 마우스 휠·PageDown으로 이동), 상태 표시줄에 `Typst  UTF-8`이 보인다. `편집`을 누르면 Typst 문법 강조 편집 화면이 되고, 입력한 줄(`*굵은 글씨*` 포함)이 다시 `미리보기`에 반영된다.
+  - 오류 문서는 "Typst 컴파일에 실패했습니다." + "3번째 줄 2열: unknown variable: unknown_function"을 표시한다.
+  - 파일 메뉴에 변환·PDF·인쇄 항목이 보인다. **Markdown에서 `Markdown을 Typst로 변환…`을 누르면 곧바로 "다른 이름으로 저장" 창**(같은 폴더, 제안 이름 `변환 테스트`)이 뜨고 Enter로 `.typ`가 저장된다. 저장된 `.typ`를 열면 제목·목록·번호 목록·체크박스·인용·표(정렬)·각주·코드·수평선이 올바르게 조판된다.
+  - **새 Markdown에서 `PDF로 내보내기…` → 저장 창 → Enter:** `pdf-test.pdf`(45,846바이트, PDF 1.7, 1쪽, Libertinus Serif·D2Coding 포함)만 만들어지고 **중간 `.typ` 파일은 폴더에 생기지 않았다.**
+  - `인쇄…`: 임시 PDF가 만들어지고 운영체제에 넘겨졌다. 이 PC는 기본 프린터가 가상 프린터(Microsoft Print to PDF), PDF 기본 앱(Edge)에 `print` 동작이 없어 대체 경로(열기)로 갔고 Windows의 "앱 선택" 창이 떠서 닫았다(종이 출력 없음). 실제 프린터 출력과 PDF 뷰어가 `print` 동작을 지원하는 환경은 확인하지 못했다.
+- **알려진 한계·남은 것:** 미리보기와 편집 위치는 서로 맞추지 않는다(Markdown은 맞춤). `@preview` 패키지는 지원하지 않는다. 변환 결과 파일을 저장 뒤 자동으로 열지는 않는다. Linux/macOS의 인쇄(`lp`)·시스템 한글 글꼴·실제 프린터 출력, 릴리스 크기 증가(Typst 도입 후 실행 파일 크기)는 확인하지 못했다. 디버그 빌드 기준으로 상태 표시줄의 `Failed to load environment variables`는 이전부터 있던 메시지다(콘솔 로그상 한글 경로에서 PowerShell 환경 로드가 실패하는 것으로 보이며 이번 변경과 무관해 조사하지 않음).
+
+## 상태 표시줄 캐릭터셋 표시·선택·다시 불러오기·저장 (사용자 요청 2026-11-04 접수, 2026-11-05 구현·검증 완료 — 구현 결과는 이 절 맨 아래 "구현 결과" 참고)
 
 ### 요구사항
 

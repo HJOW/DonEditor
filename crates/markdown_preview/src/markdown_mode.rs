@@ -54,9 +54,15 @@ fn start_in_preview_if_markdown_file(
         return;
     };
     // 이미 모드를 정한 편집기(다른 분할로 옮긴 탭)나 분할 복제본은 사용자가 고른 모드를 유지한다.
-    if !editor.update(cx, |editor, _| editor.take_alternate_view_initialization()) {
+    if editor.read(cx).alternate_view_initialized() {
         return;
     }
+    // Markdown 이 아니면 건드리지 않는다 (다른 미리보기 종류, 예: Typst 가 같은 표시를 쓰므로 가로채면 안 된다)
+    if !is_markdown_editor(editor.read(cx), cx) {
+        return;
+    }
+    // Markdown 은 여기서 모드 결정을 마친다. 내용이 없으면 편집 모드로 둔다.
+    editor.update(cx, |editor, _| editor.mark_alternate_view_initialized());
     if !is_markdown_file_with_content(editor.read(cx), cx) {
         return;
     }

@@ -932,7 +932,7 @@
     },
   },
   {
-    "context": "MarkdownPreview",
+    "context": "MarkdownPreview || TypstPreview",
     "use_key_equivalents": true,
     "bindings": {
       "pageup": "markdown::ScrollPageUp",

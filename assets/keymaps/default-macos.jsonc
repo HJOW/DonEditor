@@ -1033,7 +1033,7 @@
     },
   },
   {
-    "context": "MarkdownPreview",
+    "context": "MarkdownPreview || TypstPreview",
     "bindings": {
       "pageup": "markdown::ScrollPageUp",
       "pagedown": "markdown::ScrollPageDown",

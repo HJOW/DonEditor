@@ -993,6 +993,9 @@ fn initialize_pane(workspace: &Workspace, pane: &Entity<Pane>, window: &mut Wind
             // [DonEditor] Markdown 탭의 "미리보기 | 편집" 토글. 오른쪽 항목은 먼저 추가할수록 오른쪽 끝에 놓인다.
             let markdown_mode_toggle = cx.new(|_| markdown_preview::markdown_mode::MarkdownModeToggle::new(workspace));
             toolbar.add_item(markdown_mode_toggle, window, cx);
+            // [DonEditor] Typst 탭의 "미리보기 | 편집" 토글 (Markdown 토글과 같은 자리, 각자 자기 언어에서만 보인다)
+            let typst_mode_toggle = cx.new(|_| typst_preview::TypstModeToggle::new());
+            toolbar.add_item(typst_mode_toggle, window, cx);
             let buffer_search_bar = cx.new(|cx| {
                 search::BufferSearchBar::new(Some(workspace.project().read(cx).languages().clone()), window, cx)
             });
@@ -4357,6 +4360,8 @@ mod tests {
                 "theme_selector",
                 "toast",
                 "toolchain",
+                // [DonEditor] Typst 미리보기·변환·PDF·인쇄 액션
+                "typst",
                 "variable_list",
                 "vim",
                 "window",

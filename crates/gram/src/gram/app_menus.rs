@@ -163,6 +163,14 @@ pub fn app_menus(cx: &mut App) -> Vec<Menu> {
                 MenuItem::action(i18n::t!("menu.file.save_as"), workspace::SaveAs),
                 MenuItem::action(i18n::t!("menu.file.save_all"), workspace::SaveAll { save_intent: None }),
                 MenuItem::separator(),
+                // [DonEditor] Markdown→Typst 변환, PDF 내보내기, 인쇄 (Markdown·Typst 문서용)
+                MenuItem::action(
+                    i18n::t!("menu.file.convert_to_typst"),
+                    typst_preview::ConvertMarkdownToTypst::default(),
+                ),
+                MenuItem::action(i18n::t!("menu.file.export_pdf"), typst_preview::ExportPdf::default()),
+                MenuItem::action(i18n::t!("menu.file.print"), typst_preview::Print),
+                MenuItem::separator(),
                 MenuItem::action(
                     i18n::t!("menu.file.close_editor"),
                     workspace::CloseActiveItem {
