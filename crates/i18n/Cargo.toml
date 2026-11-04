@@ -10,10 +10,15 @@ publish.workspace = true
 doctest = false
 path = "src/i18n.rs"
 
+[features]
+# 기본 앱에서는 GPUI 설정 연결을 유지하고 순수 카탈로그 검증에서는 GUI 빌드를 생략합니다.
+default = ["gpui-settings"]
+gpui-settings = ["dep:gpui", "dep:settings"]
+
 [dependencies]
-gpui.workspace = true
+gpui = { workspace = true, optional = true }
 serde_json.workspace = true
-settings.workspace = true
+settings = { workspace = true, optional = true }
 sys-locale.workspace = true
 
 [lints]

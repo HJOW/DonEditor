@@ -193,7 +193,7 @@ impl PickerDelegate for ScopeSelectorDelegate {
     type ListItem = ListItem;
 
     fn placeholder_text(&self, _window: &mut Window, _: &mut App) -> Arc<str> {
-        "Select snippet scope...".into()
+        i18n::t!("ui.text.select_snippet_scope").into()
     }
 
     fn match_count(&self) -> usize {

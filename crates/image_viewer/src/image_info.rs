@@ -55,10 +55,10 @@ impl Render for ImageInfo {
         components.push(format_image_size(metadata.file_size, settings.unit));
 
         if let Some(colors) = metadata.colors {
-            components.push(format!(
-                "{} channels, {} bits per pixel",
-                colors.channels,
-                colors.bits_per_pixel()
+            components.push(i18n::t!(
+                "ui.text.channels_bits_per_pixel",
+                value0 = colors.channels,
+                value1 = colors.bits_per_pixel()
             ));
         }
 

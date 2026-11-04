@@ -238,9 +238,8 @@ pub(crate) fn suggest(buffer: Entity<Buffer>, window: &mut Window, cx: &mut Cont
 
         struct ExtensionSuggestionNotification;
 
-        let notification_id = NotificationId::composite::<ExtensionSuggestionNotification>(
-            SharedString::from(extension_id.clone()),
-        );
+        let notification_id =
+            NotificationId::composite::<ExtensionSuggestionNotification>(SharedString::from(extension_id.clone()));
 
         let Some(url) = EXTENSION_URL.iter().find(|eu| *eu.0 == *extension_id) else {
             log::info!("No URL found for {}", extension_id);
@@ -253,37 +252,31 @@ pub(crate) fn suggest(buffer: Entity<Buffer>, window: &mut Window, cx: &mut Cont
             cx.new(move |cx| {
                 MessageNotification::new(
                     if extension_id == file_name_or_extension {
-                        format!(
-                            "Install an extension for '{}' files?\nInstallation from source URL requires rustup to be installed.",
-                            extension_id,
+                        i18n::t!(
+                            "ui.text.install_an_extension_for_files_installation_from_source__b4215b6e",
+                            value0 = extension_id
                         )
                     } else {
-                        format!(
-                            "Install an extension for '{}' ('{}') files?\nInstallation from source URL requires rustup to be installed.",
-                            extension_id, file_name_or_extension,
+                        i18n::t!(
+                            "ui.text.install_an_extension_for_files_installation_from_source__ba0b4478",
+                            value0 = extension_id,
+                            value1 = file_name_or_extension
                         )
                     },
                     cx,
                 )
-                .primary_message("Install")
+                .primary_message(i18n::t!("ui.text.install"))
                 .primary_icon(IconName::Check)
                 .primary_icon_color(Color::Success)
-                .primary_on_click(
-                    move |window, cx| {
-                        window.dispatch_action(
-                            Box::new(InstallExtensionFromGit { url: url.into() }),
-                            cx,
-                        );
-                    }
-                )
-                .secondary_message("No")
+                .primary_on_click(move |window, cx| {
+                    window.dispatch_action(Box::new(InstallExtensionFromGit { url: url.into() }), cx);
+                })
+                .secondary_message(i18n::t!("ui.text.no"))
                 .secondary_icon(IconName::Close)
                 .secondary_icon_color(Color::Error)
                 .secondary_on_click(move |_window, cx| {
                     let key = language_extension_key(&extension_id);
-                    db::write_and_log(cx, move || {
-                        KEY_VALUE_STORE.write_kvp(key, "dismissed".to_string())
-                    });
+                    db::write_and_log(cx, move || KEY_VALUE_STORE.write_kvp(key, "dismissed".to_string()));
                 })
                 .more_info_message(pretty_url(url))
                 .more_info_url(url)

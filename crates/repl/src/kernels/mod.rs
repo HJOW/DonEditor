@@ -41,8 +41,8 @@ impl KernelSpecification {
     pub fn type_name(&self) -> SharedString {
         match self {
             Self::Jupyter(_) => "Jupyter".into(),
-            Self::PythonEnv(_) => "Python Environment".into(),
-            Self::Remote(_) => "Remote".into(),
+            Self::PythonEnv(_) => i18n::t!("ui.text.python_environment").into(),
+            Self::Remote(_) => i18n::t!("ui.text.remote").into(),
         }
     }
 
@@ -186,13 +186,13 @@ impl KernelStatus {
 impl std::fmt::Display for KernelStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(match self {
-            KernelStatus::Idle => "Idle",
-            KernelStatus::Busy => "Busy",
-            KernelStatus::Starting => "Starting",
-            KernelStatus::Error => "Error",
-            KernelStatus::ShuttingDown => "Shutting Down",
-            KernelStatus::Shutdown => "Shutdown",
-            KernelStatus::Restarting => "Restarting",
+            KernelStatus::Idle => i18n::t!("ui.text.idle"),
+            KernelStatus::Busy => i18n::t!("ui.text.busy"),
+            KernelStatus::Starting => i18n::t!("ui.text.starting"),
+            KernelStatus::Error => i18n::t!("ui.text.error"),
+            KernelStatus::ShuttingDown => i18n::t!("ui.text.shutting_down"),
+            KernelStatus::Shutdown => i18n::t!("ui.text.shutdown"),
+            KernelStatus::Restarting => i18n::t!("ui.text.restarting"),
         })
     }
 }

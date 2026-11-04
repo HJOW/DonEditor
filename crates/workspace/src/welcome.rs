@@ -368,13 +368,11 @@ impl Render for WelcomePage {
                                         .gap_1()
                                         .child(Headline::new("Don Editor").size(HeadlineSize::Large))
                                         .child(
-                                            Label::new(
-                                                "“What cannot be mended must be transcended.”\n- Ursula K. Le Guin",
-                                            )
-                                            .line_height_style(LineHeightStyle::UiLabel)
-                                            .size(LabelSize::Small)
-                                            .color(Color::Muted)
-                                            .italic(),
+                                            Label::new(i18n::t!("onboarding.quote"))
+                                                .line_height_style(LineHeightStyle::UiLabel)
+                                                .size(LabelSize::Small)
+                                                .color(Color::Muted)
+                                                .italic(),
                                         ),
                                 ),
                         )

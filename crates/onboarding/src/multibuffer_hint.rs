@@ -148,7 +148,9 @@ impl Render for MultibufferHint {
                         h_flex()
                             .gap_2()
                             .child(Icon::new(IconName::Info).size(IconSize::XSmall).color(Color::Muted))
-                            .child(Label::new("Edit and save files directly in the results multibuffer!")),
+                            .child(Label::new(i18n::t!(
+                                "ui.text.edit_and_save_files_directly_in_the_results_multibuffer"
+                            ))),
                     )
                     .child(
                         Button::new("open_docs", i18n::t!("common.learn_more"))

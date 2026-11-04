@@ -312,11 +312,11 @@ impl Item for StackTraceView {
     }
 
     fn tab_tooltip_text(&self, _: &App) -> Option<SharedString> {
-        Some("Stack Frame Viewer".into())
+        Some(i18n::t!("ui.text.stack_frame_viewer").into())
     }
 
     fn tab_content_text(&self, _detail: usize, _: &App) -> SharedString {
-        "Stack Frames".into()
+        i18n::t!("ui.text.stack_frames").into()
     }
 
     fn for_each_project_item(&self, cx: &App, f: &mut dyn FnMut(gpui::EntityId, &dyn project::ProjectItem)) {

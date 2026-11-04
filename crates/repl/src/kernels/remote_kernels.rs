@@ -51,7 +51,7 @@ pub async fn launch_remote_kernel(
     if !response.status().is_success() {
         let mut body = String::new();
         response.into_body().read_to_string(&mut body).await?;
-        anyhow::bail!("Failed to launch kernel: {body}");
+        anyhow::bail!(i18n::t!("ui.text.failed_to_launch_kernel_body", body = body));
     }
 
     let mut body = String::new();
@@ -99,7 +99,10 @@ pub async fn list_remote_kernelspecs(
         })
         .collect::<Vec<RemoteKernelSpecification>>();
 
-    anyhow::ensure!(!remote_kernelspecs.is_empty(), "No kernel specs found");
+    anyhow::ensure!(
+        !remote_kernelspecs.is_empty(),
+        i18n::t!("ui.text.no_kernel_specs_found")
+    );
     Ok(remote_kernelspecs)
 }
 

@@ -12,6 +12,7 @@ path = "src/install_cli.rs"
 test = false
 
 [dependencies]
+i18n.workspace = true
 anyhow.workspace = true
 gpui.workspace = true
 release_channel.workspace = true

@@ -515,7 +515,11 @@ pub(crate) fn new_debugger_pane(
                                 .tooltip({
                                     let focus_handle = focus_handle.clone();
                                     move |_window, cx| {
-                                        let zoomed_text = if zoomed { "Minimize" } else { "Expand" };
+                                        let zoomed_text = if zoomed {
+                                            i18n::t!("menu.window.minimize")
+                                        } else {
+                                            i18n::t!("ui.text.expand")
+                                        };
                                         Tooltip::for_action_in(zoomed_text, &ToggleExpandItem, &focus_handle, cx)
                                     }
                                 }),
@@ -894,26 +898,33 @@ impl RunningState {
             Self::relativize_paths(None, &mut config, &task_context);
             Self::substitute_variables_in_config(&mut config, &task_context);
 
-            if Self::contains_substring(&config, PROCESS_ID_PLACEHOLDER.as_str()) || label.as_ref().contains(PROCESS_ID_PLACEHOLDER.as_str()) {
+            if Self::contains_substring(&config, PROCESS_ID_PLACEHOLDER.as_str())
+                || label.as_ref().contains(PROCESS_ID_PLACEHOLDER.as_str())
+            {
                 let (tx, rx) = futures::channel::oneshot::channel::<Option<i32>>();
 
                 let weak_workspace_clone = weak_workspace.clone();
-                weak_workspace.update_in(cx, |workspace, window, cx| {
-                    let project = workspace.project().clone();
-                    workspace.toggle_modal(window, cx, |window, cx| {
-                        AttachModal::new(
-                            ModalIntent::ResolveProcessId(Some(tx)),
-                            weak_workspace_clone,
-                            project,
-                            true,
-                            window,
-                            cx,
-                        )
-                    });
-                }).ok();
+                weak_workspace
+                    .update_in(cx, |workspace, window, cx| {
+                        let project = workspace.project().clone();
+                        workspace.toggle_modal(window, cx, |window, cx| {
+                            AttachModal::new(
+                                ModalIntent::ResolveProcessId(Some(tx)),
+                                weak_workspace_clone,
+                                project,
+                                true,
+                                window,
+                                cx,
+                            )
+                        });
+                    })
+                    .ok();
 
                 let Some(process_id) = rx.await.ok().flatten() else {
-                    bail!("No process selected with config that contains {}", PROCESS_ID_PLACEHOLDER.as_str())
+                    bail!(
+                        "No process selected with config that contains {}",
+                        PROCESS_ID_PLACEHOLDER.as_str()
+                    )
                 };
 
                 Self::substitute_process_id_in_config(&mut config, process_id);
@@ -921,11 +932,11 @@ impl RunningState {
 
             let request_type = match dap_registry
                 .adapter(&adapter)
-                .with_context(|| format!("{}: is not a valid adapter name", adapter)) {
-                    Ok(adapter) => adapter.request_kind(&config).await,
-                    Err(e) => Err(e)
-                };
-
+                .with_context(|| format!("{}: is not a valid adapter name", adapter))
+            {
+                Ok(adapter) => adapter.request_kind(&config).await,
+                Err(e) => Err(e),
+            };
 
             let config_is_valid = request_type.is_ok();
             let mut extra_config = Value::Null;
@@ -938,18 +949,16 @@ impl RunningState {
                     BuildTaskDefinition::ByName(ref label) => {
                         let task = task_store.update(cx, |this, cx| {
                             this.task_inventory().map(|inventory| {
-                                inventory.read(cx).task_template_by_label(
-                                    buffer,
-                                    worktree_id,
-                                    label,
-                                    cx,
-                                )
+                                inventory
+                                    .read(cx)
+                                    .task_template_by_label(buffer, worktree_id, label, cx)
                             })
                         })?;
                         let task = match task {
                             Some(task) => task.await,
                             None => None,
-                        }.with_context(|| format!("Couldn't find task template for {build:?}"))?;
+                        }
+                        .with_context(|| format!("Couldn't find task template for {build:?}"))?;
                         (task, None)
                     }
                 };
@@ -962,42 +971,39 @@ impl RunningState {
                     debug_assert!(!config_is_valid);
                     Some(locator_name)
                 } else if !config_is_valid {
-                    let task = dap_store
-                        .update(cx, |this, cx| {
-                            this.debug_scenario_for_build_task(
-                                task.original_task().clone(),
-                                adapter.clone().into(),
-                                task.display_label().to_owned().into(),
-                                cx,
-                            )
-
-                        });
+                    let task = dap_store.update(cx, |this, cx| {
+                        this.debug_scenario_for_build_task(
+                            task.original_task().clone(),
+                            adapter.clone().into(),
+                            task.display_label().to_owned().into(),
+                            cx,
+                        )
+                    });
                     if let Ok(t) = task {
                         t.await.and_then(|scenario| {
                             extra_config = scenario.config;
                             match scenario.build {
-                                Some(BuildTaskDefinition::Template {
-                                    locator_name, ..
-                                }) => locator_name,
+                                Some(BuildTaskDefinition::Template { locator_name, .. }) => locator_name,
                                 _ => None,
                             }
                         })
                     } else {
                         None
                     }
-
                 } else {
                     None
                 };
 
-                if let Some(remote_shell) = remote_shell && task.resolved.shell == Shell::System {
+                if let Some(remote_shell) = remote_shell
+                    && task.resolved.shell == Shell::System
+                {
                     task.resolved.shell = Shell::Program(remote_shell);
                 }
 
                 let builder = ShellBuilder::new(&task.resolved.shell, is_windows);
-                let command_label = builder.command_label(task.resolved.command.as_deref().unwrap_or(""), &task.resolved.args);
-                let (command, args) =
-                    builder.build(task.resolved.command.clone(), &task.resolved.args);
+                let command_label =
+                    builder.command_label(task.resolved.command.as_deref().unwrap_or(""), &task.resolved.args);
+                let (command, args) = builder.build(task.resolved.command.clone(), &task.resolved.args);
 
                 let task_with_shell = SpawnInTerminal {
                     command_label,
@@ -1010,21 +1016,12 @@ impl RunningState {
 
                 let terminal = project
                     .update(cx, |project, cx| {
-                        project.create_terminal_task(
-                            task_with_shell.clone(),
-                            cx,
-                        )
-                    })?.await?;
+                        project.create_terminal_task(task_with_shell.clone(), cx)
+                    })?
+                    .await?;
 
                 let terminal_view = cx.new_window_entity(|window, cx| {
-                    TerminalView::new(
-                        terminal.clone(),
-                        weak_workspace,
-                        None,
-                        weak_project,
-                        window,
-                        cx,
-                    )
+                    TerminalView::new(terminal.clone(), weak_workspace, None, weak_project, window, cx)
                 })?;
 
                 this.update_in(cx, |this, window, cx| {
@@ -1041,7 +1038,7 @@ impl RunningState {
                     .context("Failed to wait for completed task")?;
 
                 if !exit_status.success() {
-                    anyhow::bail!("Build failed");
+                    anyhow::bail!(i18n::t!("ui.text.build_failed"));
                 }
                 Some((task.resolved.clone(), locator_name, extra_config))
             } else {
@@ -1050,16 +1047,14 @@ impl RunningState {
 
             if config_is_valid {
             } else if let Some((task, locator_name, extra_config)) = build_output {
-                let locator_name =
-                    locator_name.with_context(|| {
-                        format!("Could not find a valid locator for a build task and configure is invalid with error: {}", request_type.err()
-                            .map(|err| err.to_string())
-                            .unwrap_or_default())
-                    })?;
+                let locator_name = locator_name.with_context(|| {
+                    format!(
+                        "Could not find a valid locator for a build task and configure is invalid with error: {}",
+                        request_type.err().map(|err| err.to_string()).unwrap_or_default()
+                    )
+                })?;
                 let request = dap_store
-                    .update(cx, |this, cx| {
-                        this.run_debug_locator(&locator_name, task, cx)
-                    })?
+                    .update(cx, |this, cx| this.run_debug_locator(&locator_name, task, cx))?
                     .await?;
 
                 let zed_config = GramDebugConfig {
@@ -1071,7 +1066,8 @@ impl RunningState {
 
                 let scenario = dap_registry
                     .adapter(&adapter)
-                    .with_context(|| anyhow!("{}: is not a valid adapter name", adapter))?.config_from_gram_format(zed_config)
+                    .with_context(|| anyhow!("{}: is not a valid adapter name", adapter))?
+                    .config_from_gram_format(zed_config)
                     .await?;
                 config = scenario.config;
                 util::merge_non_null_json_value_into(extra_config, &mut config);
@@ -1081,7 +1077,7 @@ impl RunningState {
                 let Err(e) = request_type else {
                     unreachable!();
                 };
-                anyhow::bail!("Gram cannot determine how to run this debug scenario. `build` field was not provided and Debug Adapter won't accept provided configuration because: {e}");
+                anyhow::bail!(i18n::t!("debugger.cannot_determine_scenario", error = e));
             };
 
             Ok(DebugTaskDefinition {
@@ -1153,7 +1149,7 @@ impl RunningState {
             .clone()
             .filter(|title| !title.is_empty())
             .or_else(|| command.clone())
-            .unwrap_or_else(|| "Debug terminal".to_string());
+            .unwrap_or_else(|| i18n::t!("ui.text.debug_terminal").to_string());
         let kind = task::SpawnInTerminal {
             id: task::TaskId("debug".to_string()),
             full_label: title.clone(),

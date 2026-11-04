@@ -12,6 +12,7 @@ path = "src/snippets_ui.rs"
 test = false
 
 [dependencies]
+i18n.workspace = true
 file_finder.workspace = true
 file_icons.workspace = true
 fuzzy.workspace = true

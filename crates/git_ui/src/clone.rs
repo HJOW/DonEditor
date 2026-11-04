@@ -16,7 +16,7 @@ pub fn clone_and_open(
         files: false,
         directories: true,
         multiple: false,
-        prompt: Some("Select as Repository Destination".into()),
+        prompt: Some(i18n::t!("ui.text.select_as_repository_destination").into()),
     });
 
     window
@@ -63,9 +63,12 @@ pub fn clone_and_open(
                 cx.update(|window, cx| {
                     window.prompt(
                         gpui::PromptLevel::Info,
-                        &format!("Git Clone: {}", repo_name),
+                        &i18n::t!("ui.text.git_clone", value0 = repo_name),
                         None,
-                        &["Add repo to project", "Open repo in new project"],
+                        &[
+                            i18n::t!("ui.text.add_repo_to_project"),
+                            i18n::t!("ui.text.open_repo_in_new_project"),
+                        ],
                         cx,
                     )
                 })

@@ -369,7 +369,7 @@ impl Render for QuickActionBar {
                                             }
                                         });
                                     if !diagnostics_enabled {
-                                        inline_diagnostics_item = inline_diagnostics_item.disabled(true).documentation_aside(DocumentationSide::Left, |_|  Label::new("Inline diagnostics are not available until regular diagnostics are enabled.").into_any_element());
+                                        inline_diagnostics_item = inline_diagnostics_item.disabled(true).documentation_aside(DocumentationSide::Left, |_|  Label::new(i18n::t!("ui.text.inline_diagnostics_are_not_available_until_regular_diagnostics_are_enabled")).into_any_element());
                                     }
                                     menu = menu.item(inline_diagnostics_item);
                                 }

@@ -375,14 +375,14 @@ impl MemoryView {
         if !self.is_writing_memory {
             self.query_editor.update(cx, |this, cx| {
                 this.clear(window, cx);
-                this.set_placeholder_text("Write to Selected Memory Range", window, cx);
+                this.set_placeholder_text(i18n::t!("ui.text.write_to_selected_memory_range"), window, cx);
             });
             self.is_writing_memory = true;
             self.query_editor.focus_handle(cx).focus(window, cx);
         } else {
             self.query_editor.update(cx, |this, cx| {
                 this.clear(window, cx);
-                this.set_placeholder_text("Go to Memory Address / Expression", window, cx);
+                this.set_placeholder_text(i18n::t!("ui.text.go_to_memory_address_expression"), window, cx);
             });
             self.is_writing_memory = false;
         }
@@ -436,7 +436,10 @@ impl MemoryView {
                         _ = self.workspace.update(cx, |this, cx| {
                             this.toggle_status_toast(
                                 StatusToast::new(
-                                    format!("Debug Adapter `{adapter_name}` does not support writing to memory"),
+                                    i18n::t!(
+                                        "ui.text.debug_adapter_adapter_name_does_not_support_writing_to_memory",
+                                        adapter_name = adapter_name
+                                    ),
                                     cx,
                                     |this, cx| {
                                         cx.spawn(async move |this, cx| {
@@ -586,14 +589,14 @@ impl MemoryView {
 
             let mut menu = menu.action_disabled_when(
                 range_too_large || *memory_unreadable,
-                "Go To Selected Address",
+                i18n::t!("ui.text.go_to_selected_address"),
                 GoToSelectedAddress.boxed_clone(),
             );
 
             if supports_data_breakpoints {
                 menu = menu.action_disabled_when(
                     *memory_unreadable,
-                    "Set Data Breakpoint",
+                    i18n::t!("ui.text.set_data_breakpoint"),
                     ToggleDataBreakpoint { access_type: None }.boxed_clone(),
                 );
             }
@@ -786,9 +789,12 @@ fn render_single_memory_view_line(
 impl Render for MemoryView {
     fn render(&mut self, window: &mut ui::Window, cx: &mut ui::Context<Self>) -> impl ui::IntoElement {
         let (icon, tooltip_text) = if self.is_writing_memory {
-            (IconName::Pencil, "Edit memory at a selected address")
+            (IconName::Pencil, i18n::t!("ui.text.edit_memory_at_a_selected_address"))
         } else {
-            (IconName::LocationEdit, "Change address of currently viewed memory")
+            (
+                IconName::LocationEdit,
+                i18n::t!("ui.text.change_address_of_currently_viewed_memory"),
+            )
         };
         v_flex()
             .id("Memory-view")

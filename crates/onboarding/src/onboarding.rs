@@ -233,14 +233,12 @@ impl Render for Onboarding {
                                                 // [DonEditor] 시작 화면 제목의 제품 이름
                                                 .child(Headline::new("Don Editor").size(HeadlineSize::Large))
                                                 .child(
-                                                Label::new(
-                                                    "“What cannot be mended must be transcended.”\n- Ursula K. Le Guin",
-                                                )
-                                                .size(LabelSize::Small)
-                                                .line_height_style(LineHeightStyle::UiLabel)
-                                                .color(Color::Muted)
-                                                .italic(),
-                                            ),
+                                                    Label::new(i18n::t!("onboarding.quote"))
+                                                        .size(LabelSize::Small)
+                                                        .line_height_style(LineHeightStyle::UiLabel)
+                                                        .color(Color::Muted)
+                                                        .italic(),
+                                                ),
                                         ),
                                     )
                                     .child({
@@ -357,9 +355,9 @@ pub async fn handle_import_vscode_settings(
             zlog::error!("{err:?}");
             let _ = cx.prompt(
                 gpui::PromptLevel::Info,
-                &format!("Could not find or load a {source} settings file"),
+                &i18n::t!("ui.text.could_not_find_or_load_a_source_settings_file", source = source),
                 None,
-                &["Ok"],
+                &[i18n::t!("common.ok")],
             );
             return;
         }
@@ -375,7 +373,7 @@ pub async fn handle_import_vscode_settings(
                 truncate_and_remove_front(&vscode_settings.path.to_string_lossy(), 128),
             ),
             None,
-            &["Ok", "Cancel"],
+            &[i18n::t!("common.ok"), i18n::t!("common.cancel")],
         );
         let result = cx.spawn(async move |_| prompt.await.ok()).await;
         if result != Some(0) {
@@ -398,7 +396,7 @@ pub async fn handle_import_vscode_settings(
         .update_in(cx, |workspace, _, cx| match result {
             Ok(_) => {
                 let confirmation_toast = StatusToast::new(
-                    format!("Your {} settings were successfully imported.", source),
+                    i18n::t!("ui.text.your_settings_were_successfully_imported", value0 = source),
                     cx,
                     |this, _| {
                         this.icon(ToastIcon::new(IconName::Check).color(Color::Success))
@@ -416,13 +414,17 @@ pub async fn handle_import_vscode_settings(
                 workspace.toggle_status_toast(confirmation_toast, cx);
             }
             Err(_) => {
-                let error_toast = StatusToast::new("Failed to import settings. See log for details", cx, |this, _| {
-                    this.icon(ToastIcon::new(IconName::Close).color(Color::Error))
-                        .action(i18n::t!("onboarding.open_log"), |window, cx| {
-                            window.dispatch_action(workspace::OpenLog.boxed_clone(), cx)
-                        })
-                        .dismiss_button(true)
-                });
+                let error_toast = StatusToast::new(
+                    i18n::t!("ui.text.failed_to_import_settings_see_log_for_details"),
+                    cx,
+                    |this, _| {
+                        this.icon(ToastIcon::new(IconName::Close).color(Color::Error))
+                            .action(i18n::t!("onboarding.open_log"), |window, cx| {
+                                window.dispatch_action(workspace::OpenLog.boxed_clone(), cx)
+                            })
+                            .dismiss_button(true)
+                    },
+                );
                 workspace.toggle_status_toast(error_toast, cx);
             }
         })

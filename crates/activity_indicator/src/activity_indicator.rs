@@ -186,7 +186,14 @@ impl ActivityIndicator {
                     let buffer = create_buffer.await?;
                     buffer.update(cx, |buffer, cx| {
                         buffer.edit(
-                            [(0..0, format!("Language server {server_name}:\n\n{status}"))],
+                            [(
+                                0..0,
+                                i18n::t!(
+                                    "ui.text.language_server_server_name_status",
+                                    server_name = server_name,
+                                    status = status
+                                ),
+                            )],
                             None,
                             cx,
                         );
@@ -466,9 +473,9 @@ impl ActivityIndicator {
                         .size(icon_size.icon_size())
                         .into_any_element(),
                 ),
-                message: format!(
-                    "Checking for updates to {}...",
-                    checking_for_update
+                message: i18n::t!(
+                    "ui.text.checking_for_updates_to",
+                    value0 = checking_for_update
                         .iter()
                         .map(|name| name.as_ref())
                         .fold(String::new(), |mut acc, s| {
@@ -477,7 +484,7 @@ impl ActivityIndicator {
                             }
                             acc.push_str(s);
                             acc
-                        }),
+                        })
                 ),
                 on_click: Some(Arc::new(move |this, _window, _cx| {
                     this.statuses
@@ -494,9 +501,9 @@ impl ActivityIndicator {
                         .size(icon_size.icon_size())
                         .into_any_element(),
                 ),
-                message: format!(
-                    "Failed to run {}. Click to show error.",
-                    failed
+                message: i18n::t!(
+                    "ui.text.failed_to_run_click_to_show_error",
+                    value0 = failed
                         .iter()
                         .map(|name| name.as_ref())
                         .fold(String::new(), |mut acc, s| {
@@ -505,7 +512,7 @@ impl ActivityIndicator {
                             }
                             acc.push_str(s);
                             acc
-                        }),
+                        })
                 ),
                 on_click: Some(Arc::new(|this, window, cx| {
                     this.show_error_message(&ShowErrorMessage, window, cx)
@@ -522,7 +529,7 @@ impl ActivityIndicator {
                         .size(icon_size.icon_size())
                         .into_any_element(),
                 ),
-                message: format!("Formatting failed: {failure}. Click to see logs."),
+                message: i18n::t!("ui.text.formatting_failed_failure_click_to_see_logs", failure = failure),
                 on_click: Some(Arc::new(|indicator, window, cx| {
                     indicator.project.update(cx, |project, cx| {
                         project.reset_last_formatting_failure(cx);
@@ -584,17 +591,17 @@ impl ActivityIndicator {
         {
             let (message, icon, rotate) = match operation {
                 ExtensionOperation::Install => (
-                    format!("Installing extension: {extension_id}…"),
+                    i18n::t!("ui.text.installing_extension_extension_id", extension_id = extension_id),
                     IconName::LoadCircle,
                     true,
                 ),
                 ExtensionOperation::Upgrade => (
-                    format!("Updating extension: {extension_id}…"),
+                    i18n::t!("ui.text.updating_extension_extension_id", extension_id = extension_id),
                     IconName::Download,
                     false,
                 ),
                 ExtensionOperation::Remove => (
-                    format!("Removing extension: {extension_id}…"),
+                    i18n::t!("ui.text.removing_extension_extension_id", extension_id = extension_id),
                     IconName::LoadCircle,
                     true,
                 ),

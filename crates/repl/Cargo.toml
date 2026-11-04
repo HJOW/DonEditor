@@ -11,6 +11,7 @@ doctest = false
 path = "src/repl.rs"
 
 [dependencies]
+i18n.workspace = true
 alacritty_terminal.workspace = true
 anyhow.workspace = true
 async-dispatcher.workspace = true

@@ -169,11 +169,13 @@ impl ProjectDiff {
         cx: &mut App,
     ) -> Task<Result<Entity<Self>>> {
         let Some(repo) = project.read(cx).git_store().read(cx).active_repository() else {
-            return Task::ready(Err(anyhow!("No active repository")));
+            return Task::ready(Err(anyhow!(i18n::t!("ui.text.no_active_repository"))));
         };
         let main_branch = repo.update(cx, |repo, _| repo.default_branch(true));
         window.spawn(cx, async move |cx| {
-            let main_branch = main_branch.await??.context("Could not determine default branch")?;
+            let main_branch = main_branch
+                .await??
+                .context(i18n::t!("ui.text.could_not_determine_default_branch"))?;
 
             let branch_diff = cx.new_window_entity(|window, cx| {
                 branch_diff::BranchDiff::new(DiffBase::Merge { base_ref: main_branch }, project.clone(), window, cx)
@@ -647,7 +649,7 @@ impl Item for ProjectDiff {
     }
 
     fn tab_tooltip_text(&self, _: &App) -> Option<SharedString> {
-        Some("Project Diff".into())
+        Some(i18n::t!("ui.text.project_diff").into())
     }
 
     fn tab_content(&self, params: TabContentParams, _window: &Window, cx: &App) -> AnyElement {
@@ -658,8 +660,8 @@ impl Item for ProjectDiff {
 
     fn tab_content_text(&self, _detail: usize, cx: &App) -> SharedString {
         match self.branch_diff.read(cx).diff_base() {
-            DiffBase::Head => "Uncommitted Changes".into(),
-            DiffBase::Merge { base_ref } => format!("Changes since {}", base_ref).into(),
+            DiffBase::Head => i18n::t!("ui.text.uncommitted_changes").into(),
+            DiffBase::Merge { base_ref } => i18n::t!("ui.text.changes_since", value0 = base_ref).into(),
         }
     }
 
@@ -808,14 +810,22 @@ impl Render for ProjectDiff {
                 el.child(
                     v_flex()
                         .gap_1()
-                        .child(h_flex().justify_around().child(Label::new("No uncommitted changes")))
+                        .child(
+                            h_flex()
+                                .justify_around()
+                                .child(Label::new(i18n::t!("ui.text.no_uncommitted_changes"))),
+                        )
                         .map(|el| match remote_button {
                             Some(button) => el.child(h_flex().justify_around().child(button)),
-                            None => el.child(h_flex().justify_around().child(Label::new("Remote up to date"))),
+                            None => el.child(
+                                h_flex()
+                                    .justify_around()
+                                    .child(Label::new(i18n::t!("ui.text.remote_up_to_date"))),
+                            ),
                         })
                         .child(
                             h_flex().justify_around().mt_1().child(
-                                Button::new("project-diff-close-button", "Close")
+                                Button::new("project-diff-close-button", i18n::t!("common.close"))
                                     // .style(ButtonStyle::Transparent)
                                     .key_binding(KeyBinding::for_action_in(
                                         &CloseActiveItem::default(),
@@ -1059,9 +1069,9 @@ impl Render for ProjectDiffToolbar {
                 h_group_sm()
                     .when(button_states.selection, |el| {
                         el.child(
-                            Button::new("stage", "Toggle Staged")
+                            Button::new("stage", i18n::t!("ui.text.toggle_staged"))
                                 .tooltip(Tooltip::for_action_title_in(
-                                    "Toggle Staged",
+                                    i18n::t!("ui.text.toggle_staged"),
                                     &ToggleStaged,
                                     &focus_handle,
                                 ))
@@ -1073,9 +1083,9 @@ impl Render for ProjectDiffToolbar {
                     })
                     .when(!button_states.selection, |el| {
                         el.child(
-                            Button::new("stage", "Stage")
+                            Button::new("stage", i18n::t!("ui.text.stage"))
                                 .tooltip(Tooltip::for_action_title_in(
-                                    "Stage and go to next hunk",
+                                    i18n::t!("ui.text.stage_and_go_to_next_hunk"),
                                     &StageAndNext,
                                     &focus_handle,
                                 ))
@@ -1087,9 +1097,9 @@ impl Render for ProjectDiffToolbar {
                                 ),
                         )
                         .child(
-                            Button::new("unstage", "Unstage")
+                            Button::new("unstage", i18n::t!("ui.text.unstage"))
                                 .tooltip(Tooltip::for_action_title_in(
-                                    "Unstage and go to next hunk",
+                                    i18n::t!("ui.text.unstage_and_go_to_next_hunk"),
                                     &UnstageAndNext,
                                     &focus_handle,
                                 ))
@@ -1112,7 +1122,7 @@ impl Render for ProjectDiffToolbar {
                         IconButton::new("up", IconName::ArrowUp)
                             .shape(ui::IconButtonShape::Square)
                             .tooltip(Tooltip::for_action_title_in(
-                                "Go to previous hunk",
+                                i18n::t!("ui.text.go_to_previous_hunk"),
                                 &GoToPreviousHunk,
                                 &focus_handle,
                             ))
@@ -1125,7 +1135,7 @@ impl Render for ProjectDiffToolbar {
                         IconButton::new("down", IconName::ArrowDown)
                             .shape(ui::IconButtonShape::Square)
                             .tooltip(Tooltip::for_action_title_in(
-                                "Go to next hunk",
+                                i18n::t!("ui.text.go_to_next_hunk"),
                                 &GoToHunk,
                                 &focus_handle,
                             ))
@@ -1138,9 +1148,9 @@ impl Render for ProjectDiffToolbar {
                 h_group_sm()
                     .when(button_states.unstage_all && !button_states.stage_all, |el| {
                         el.child(
-                            Button::new("unstage-all", "Unstage All")
+                            Button::new("unstage-all", i18n::t!("ui.text.unstage_all"))
                                 .tooltip(Tooltip::for_action_title_in(
-                                    "Unstage all changes",
+                                    i18n::t!("ui.text.unstage_all_changes"),
                                     &UnstageAll,
                                     &focus_handle,
                                 ))
@@ -1152,10 +1162,10 @@ impl Render for ProjectDiffToolbar {
                             // todo make it so that changing to say "Unstaged"
                             // doesn't change the position.
                             div().child(
-                                Button::new("stage-all", "Stage All")
+                                Button::new("stage-all", i18n::t!("ui.text.stage_all"))
                                     .disabled(!button_states.stage_all)
                                     .tooltip(Tooltip::for_action_title_in(
-                                        "Stage all changes",
+                                        i18n::t!("ui.text.stage_all_changes"),
                                         &StageAll,
                                         &focus_handle,
                                     ))
@@ -1164,8 +1174,12 @@ impl Render for ProjectDiffToolbar {
                         )
                     })
                     .child(
-                        Button::new("commit", "Commit")
-                            .tooltip(Tooltip::for_action_title_in("Commit", &Commit, &focus_handle))
+                        Button::new("commit", i18n::t!("ui.text.commit"))
+                            .tooltip(Tooltip::for_action_title_in(
+                                i18n::t!("ui.text.commit"),
+                                &Commit,
+                                &focus_handle,
+                            ))
                             .on_click(cx.listener(|this, _, window, cx| {
                                 this.dispatch_action(&Commit, window, cx);
                             })),
@@ -1236,12 +1250,13 @@ impl RenderOnce for ProjectDiffEmptyState {
                 .map(|this| {
                     if ahead_of_remote {
                         let ahead_count = change_count(branch).0;
-                        let ahead_string = format!("{} Commits Ahead", ahead_count);
+                        let ahead_string = i18n::t!("ui.text.commits_ahead", value0 = ahead_count);
                         this.child(
                             v_flex()
                                 .child(Headline::new(ahead_string).size(HeadlineSize::Small))
                                 .child(
-                                    Label::new(format!("Push your changes to {}", branch.name())).color(Color::Muted),
+                                    Label::new(i18n::t!("ui.text.push_your_changes_to", value0 = branch.name()))
+                                        .color(Color::Muted),
                                 ),
                         )
                         .child(div().child(render_push_button(
@@ -1252,12 +1267,15 @@ impl RenderOnce for ProjectDiffEmptyState {
                     } else if branch_not_on_remote {
                         this.child(
                             v_flex()
-                                .child(Headline::new("Publish Branch").size(HeadlineSize::Small))
-                                .child(Label::new(format!("Create {} on remote", branch.name())).color(Color::Muted)),
+                                .child(Headline::new(i18n::t!("ui.text.publish_branch")).size(HeadlineSize::Small))
+                                .child(
+                                    Label::new(i18n::t!("ui.text.create_on_remote", value0 = branch.name()))
+                                        .color(Color::Muted),
+                                ),
                         )
                         .child(div().child(render_publish_button(self.focus_handle, "publish".into())))
                     } else {
-                        this.child(Label::new("Remote status unknown").color(Color::Muted))
+                        this.child(Label::new(i18n::t!("ui.text.remote_status_unknown")).color(Color::Muted))
                     }
                 })
         };
@@ -1268,11 +1286,12 @@ impl RenderOnce for ProjectDiffEmptyState {
                 .when(self.no_repo, |this| {
                     // TODO: add git init
                     this.text_center()
-                        .child(Label::new("No Repository").color(Color::Muted))
+                        .child(Label::new(i18n::t!("ui.text.no_repository")).color(Color::Muted))
                 })
                 .map(|this| {
                     if not_ahead_or_behind && self.current_branch.is_some() {
-                        this.text_center().child(Label::new("No Changes").color(Color::Muted))
+                        this.text_center()
+                            .child(Label::new(i18n::t!("ui.text.no_changes")).color(Color::Muted))
                     } else {
                         this.when_some(self.current_branch.as_ref(), |this, branch| {
                             this.child(has_branch_container(branch))
@@ -1357,7 +1376,7 @@ mod preview {
                     .children(vec![
                         example_group(vec![
                             single_example(
-                                "No Repo",
+                                i18n::t!("ui.text.no_repo"),
                                 div().w(width).h(height).child(no_repo_state).into_any_element(),
                             ),
                             single_example(
@@ -1365,7 +1384,7 @@ mod preview {
                                 div().w(width).h(height).child(no_changes_state).into_any_element(),
                             ),
                             single_example(
-                                "Unknown Upstream",
+                                i18n::t!("ui.text.unknown_upstream"),
                                 div()
                                     .w(width)
                                     .h(height)
@@ -1373,7 +1392,7 @@ mod preview {
                                     .into_any_element(),
                             ),
                             single_example(
-                                "Ahead of Remote",
+                                i18n::t!("ui.text.ahead_of_remote"),
                                 div()
                                     .w(width)
                                     .h(height)

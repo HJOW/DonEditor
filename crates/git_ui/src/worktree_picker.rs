@@ -84,10 +84,12 @@ impl WorktreeList {
             .map(|repository| repository.update(cx, |repository, _| repository.default_branch(false)));
 
         cx.spawn_in(window, async move |this, cx| {
-            let all_worktrees = all_worktrees_request.context("No active repository")?.await??;
+            let all_worktrees = all_worktrees_request
+                .context(i18n::t!("ui.text.no_active_repository"))?
+                .await??;
 
             let default_branch = default_branch_request
-                .context("No active repository")?
+                .context(i18n::t!("ui.text.no_active_repository"))?
                 .await
                 .map(Result::ok)
                 .ok()
@@ -256,7 +258,7 @@ impl WorktreeListDelegate {
                         files: false,
                         directories: true,
                         multiple: false,
-                        prompt: Some("Select directory for new worktree".into()),
+                        prompt: Some(i18n::t!("ui.text.select_directory_for_new_worktree").into()),
                     },
                     DirectoryLister::Project(this.project().clone()),
                     window,
@@ -274,7 +276,7 @@ impl WorktreeListDelegate {
             let Some(paths) = worktree_path.await? else {
                 return anyhow::Ok(());
             };
-            let path = paths.first().cloned().context("No path selected")?;
+            let path = paths.first().cloned().context(i18n::t!("ui.text.no_path_selected"))?;
 
             repo.update(cx, |repo, _| repo.create_worktree(branch.clone(), path.clone(), commit))?
                 .await??;
@@ -309,7 +311,9 @@ impl WorktreeListDelegate {
 
             anyhow::Ok(())
         })
-        .detach_and_prompt_err("Failed to create worktree", window, cx, |e, _, _| Some(e.to_string()));
+        .detach_and_prompt_err(i18n::t!("ui.text.failed_to_create_worktree"), window, cx, |e, _, _| {
+            Some(e.to_string())
+        });
     }
 
     fn open_worktree(
@@ -343,7 +347,9 @@ impl WorktreeListDelegate {
                 open_task?.await?;
                 anyhow::Ok(())
             })
-            .detach_and_prompt_err("Failed to open worktree", window, cx, |e, _, _| Some(e.to_string()));
+            .detach_and_prompt_err(i18n::t!("ui.text.failed_to_open_worktree"), window, cx, |e, _, _| {
+                Some(e.to_string())
+            });
         } else if let Some(connection_options) = connection_options {
             let window_handle = window.window_handle();
             let path = path.to_path_buf();
@@ -358,7 +364,9 @@ impl WorktreeListDelegate {
                 )
                 .await
             })
-            .detach_and_prompt_err("Failed to open worktree", window, cx, |e, _, _| Some(e.to_string()));
+            .detach_and_prompt_err(i18n::t!("ui.text.failed_to_open_worktree"), window, cx, |e, _, _| {
+                Some(e.to_string())
+            });
         }
 
         cx.emit(DismissEvent);
@@ -402,7 +410,7 @@ async fn open_remote_worktree(
             window,
             cx,
         )
-        .prompt_err("Failed to connect", window, cx, |_, _, _| None)
+        .prompt_err(i18n::t!("ui.text.failed_to_connect"), window, cx, |_, _, _| None)
     })?;
 
     let session = connect_task.await;
@@ -465,7 +473,7 @@ impl PickerDelegate for WorktreeListDelegate {
     type ListItem = ListItem;
 
     fn placeholder_text(&self, _window: &mut Window, _cx: &mut App) -> Arc<str> {
-        "Select worktree…".into()
+        i18n::t!("ui.text.select_worktree").into()
     }
 
     fn editor_position(&self) -> PickerEditorPosition {
@@ -580,10 +588,13 @@ impl PickerDelegate for WorktreeListDelegate {
 
         let (branch_name, sublabel) = if entry.is_new {
             (
-                Label::new(format!("Create Worktree: \"{}\"…", entry.worktree.branch()))
+                Label::new(i18n::t!("ui.text.create_worktree", value0 = entry.worktree.branch()))
                     .truncate()
                     .into_any_element(),
-                format!("based off {}", self.base_branch(cx).unwrap_or("the current branch")),
+                i18n::t!(
+                    "ui.text.based_off",
+                    value0 = self.base_branch(cx).unwrap_or("the current branch")
+                ),
             )
         } else {
             let branch = entry.worktree.branch();
@@ -639,7 +650,7 @@ impl PickerDelegate for WorktreeListDelegate {
     }
 
     fn no_matches_text(&self, _window: &mut Window, _cx: &mut App) -> Option<SharedString> {
-        Some("No worktrees found".into())
+        Some(i18n::t!("ui.text.no_worktrees_found").into())
     }
 
     fn render_footer(&self, _: &mut Window, cx: &mut Context<Picker<Self>>) -> Option<AnyElement> {
@@ -657,26 +668,32 @@ impl PickerDelegate for WorktreeListDelegate {
 
         if is_creating {
             let from_default_button = self.default_branch.as_ref().map(|default_branch| {
-                Button::new("worktree-from-default", format!("Create from: {default_branch}"))
-                    .key_binding(
-                        KeyBinding::for_action_in(&WorktreeFromDefault, &focus_handle, cx)
-                            .map(|kb| kb.size(TextSize::Small.rems(cx))),
-                    )
-                    .on_click(|_, window, cx| window.dispatch_action(WorktreeFromDefault.boxed_clone(), cx))
+                Button::new(
+                    "worktree-from-default",
+                    i18n::t!("ui.text.create_from_default_branch", default_branch = default_branch),
+                )
+                .key_binding(
+                    KeyBinding::for_action_in(&WorktreeFromDefault, &focus_handle, cx)
+                        .map(|kb| kb.size(TextSize::Small.rems(cx))),
+                )
+                .on_click(|_, window, cx| window.dispatch_action(WorktreeFromDefault.boxed_clone(), cx))
             });
 
-            let current_branch = self.base_branch(cx).unwrap_or("current branch");
+            let current_branch = self.base_branch(cx).unwrap_or(i18n::t!("ui.text.current_branch"));
 
             Some(
                 footer_container
                     .when_some(from_default_button, |this, button| this.child(button))
                     .child(
-                        Button::new("worktree-from-current", format!("Create from: {current_branch}"))
-                            .key_binding(
-                                KeyBinding::for_action_in(&menu::Confirm, &focus_handle, cx)
-                                    .map(|kb| kb.size(TextSize::Small.rems(cx))),
-                            )
-                            .on_click(|_, window, cx| window.dispatch_action(menu::Confirm.boxed_clone(), cx)),
+                        Button::new(
+                            "worktree-from-current",
+                            i18n::t!("ui.text.create_from_current_branch", current_branch = current_branch),
+                        )
+                        .key_binding(
+                            KeyBinding::for_action_in(&menu::Confirm, &focus_handle, cx)
+                                .map(|kb| kb.size(TextSize::Small.rems(cx))),
+                        )
+                        .on_click(|_, window, cx| window.dispatch_action(menu::Confirm.boxed_clone(), cx)),
                     )
                     .into_any(),
             )
@@ -684,7 +701,7 @@ impl PickerDelegate for WorktreeListDelegate {
             Some(
                 footer_container
                     .child(
-                        Button::new("open-in-new-window", "Open in New Window")
+                        Button::new("open-in-new-window", i18n::t!("ui.text.open_in_new_window"))
                             .key_binding(
                                 KeyBinding::for_action_in(&menu::Confirm, &focus_handle, cx)
                                     .map(|kb| kb.size(TextSize::Small.rems(cx))),
@@ -692,7 +709,7 @@ impl PickerDelegate for WorktreeListDelegate {
                             .on_click(|_, window, cx| window.dispatch_action(menu::Confirm.boxed_clone(), cx)),
                     )
                     .child(
-                        Button::new("open-in-window", "Open")
+                        Button::new("open-in-window", i18n::t!("file_finder.open"))
                             .key_binding(
                                 KeyBinding::for_action_in(&menu::SecondaryConfirm, &focus_handle, cx)
                                     .map(|kb| kb.size(TextSize::Small.rems(cx))),

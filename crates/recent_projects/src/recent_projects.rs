@@ -330,8 +330,10 @@ impl PickerDelegate for RecentProjectsDelegate {
                 window.keystroke_text_for(&menu::Confirm),
             )
         };
-        Arc::from(format!(
-            "{reuse_window} reuses this window, {create_window} opens a new one",
+        Arc::from(i18n::t!(
+            "ui.text.reuse_window_reuses_this_window_create_window_opens_a_new_one",
+            reuse_window = reuse_window,
+            create_window = create_window
         ))
     }
 

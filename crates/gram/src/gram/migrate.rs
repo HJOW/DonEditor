@@ -225,20 +225,22 @@ impl Render for MigrationBanner {
                     ),
             )
             .child(
-                Button::new("backup-and-migrate", "Backup and Update").on_click(move |_, window, cx| {
-                    let fs = <dyn Fs>::global(cx);
-                    match migration_type {
-                        Some(MigrationType::Keymap) => {
-                            cx.background_spawn(write_keymap_migration(fs.clone()))
-                                .detach_and_notify_err(window, cx);
+                Button::new("backup-and-migrate", i18n::t!("ui.text.backup_and_update")).on_click(
+                    move |_, window, cx| {
+                        let fs = <dyn Fs>::global(cx);
+                        match migration_type {
+                            Some(MigrationType::Keymap) => {
+                                cx.background_spawn(write_keymap_migration(fs.clone()))
+                                    .detach_and_notify_err(window, cx);
+                            }
+                            Some(MigrationType::Settings) => {
+                                cx.background_spawn(write_settings_migration(fs.clone()))
+                                    .detach_and_notify_err(window, cx);
+                            }
+                            None => unreachable!(),
                         }
-                        Some(MigrationType::Settings) => {
-                            cx.background_spawn(write_settings_migration(fs.clone()))
-                                .detach_and_notify_err(window, cx);
-                        }
-                        None => unreachable!(),
-                    }
-                }),
+                    },
+                ),
             )
             .into_any_element()
     }

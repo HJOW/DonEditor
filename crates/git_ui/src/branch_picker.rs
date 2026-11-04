@@ -139,9 +139,11 @@ impl BranchList {
             .map(|repository| repository.update(cx, |repository, _| repository.default_branch(false)));
 
         cx.spawn_in(window, async move |this, cx| {
-            let mut all_branches = all_branches_request.context("No active repository")?.await??;
+            let mut all_branches = all_branches_request
+                .context(i18n::t!("ui.text.no_active_repository"))?
+                .await??;
             let default_branch = default_branch_request
-                .context("No active repository")?
+                .context(i18n::t!("ui.text.no_active_repository"))?
                 .await
                 .map(Result::ok)
                 .ok()
@@ -388,7 +390,7 @@ impl BranchFilter {
 
     fn header_label(self) -> &'static str {
         match self {
-            Self::All => "Branches",
+            Self::All => i18n::t!("ui.text.branches"),
             Self::Local => "Local Branches",
             Self::Remote => "Remotes",
         }
@@ -880,7 +882,7 @@ impl PickerDelegate for BranchListDelegate {
         };
 
         let entry_title = match entry {
-            Entry::NewUrl { .. } => Label::new("Create Remote Repository")
+            Entry::NewUrl { .. } => Label::new(i18n::t!("ui.text.create_remote_repository"))
                 .single_line()
                 .truncate()
                 .into_any_element(),
@@ -1072,7 +1074,7 @@ impl PickerDelegate for BranchListDelegate {
                 let delete_and_select_btns = h_flex()
                     .gap_1()
                     .child(
-                        Button::new("delete-branch", "Delete")
+                        Button::new("delete-branch", i18n::t!("project_panel.delete"))
                             .key_binding(
                                 KeyBinding::for_action_in(&branch_picker::DeleteBranch, &focus_handle, cx)
                                     .map(|kb| kb.size(TextSize::Small.rems(cx))),
@@ -1082,7 +1084,7 @@ impl PickerDelegate for BranchListDelegate {
                             }),
                     )
                     .child(
-                        Button::new("select_branch", "Select")
+                        Button::new("select_branch", i18n::t!("ui.text.select"))
                             .key_binding(
                                 KeyBinding::for_action_in(&menu::Confirm, &focus_handle, cx)
                                     .map(|kb| kb.size(TextSize::Small.rems(cx))),
@@ -1099,7 +1101,7 @@ impl PickerDelegate for BranchListDelegate {
                                 this.justify_end()
                                     .when_some(branch_from_default_button, |this, button| {
                                         this.child(button).child(
-                                            Button::new("create", "Create")
+                                            Button::new("create", i18n::t!("ui.text.create"))
                                                 .key_binding(
                                                     KeyBinding::for_action_in(&menu::Confirm, &focus_handle, cx)
                                                         .map(|kb| kb.size(TextSize::Small.rems(cx))),
@@ -1156,7 +1158,7 @@ impl PickerDelegate for BranchListDelegate {
                         .justify_end()
                         .when_some(branch_from_default_button, |this, button| this.child(button))
                         .child(
-                            Button::new("branch-from-default", "Create")
+                            Button::new("branch-from-default", i18n::t!("ui.text.create"))
                                 .key_binding(
                                     KeyBinding::for_action_in(&menu::Confirm, &focus_handle, cx)
                                         .map(|kb| kb.size(TextSize::Small.rems(cx))),
@@ -1172,7 +1174,7 @@ impl PickerDelegate for BranchListDelegate {
                 footer_container()
                     .justify_end()
                     .child(
-                        Button::new("branch-from-default", "Confirm")
+                        Button::new("branch-from-default", i18n::t!("ui.text.confirm"))
                             .key_binding(
                                 KeyBinding::for_action_in(&menu::Confirm, &focus_handle, cx)
                                     .map(|kb| kb.size(TextSize::Small.rems(cx))),

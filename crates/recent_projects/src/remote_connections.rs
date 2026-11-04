@@ -199,7 +199,7 @@ impl RemoteConnectionPrompt {
 
     pub fn confirm(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         if let Some((_, tx)) = self.prompt.take() {
-            self.status_message = Some("Connecting".into());
+            self.status_message = Some(i18n::t!("ui.text.connecting").into());
 
             self.editor.update(cx, |editor, cx| {
                 let pw = editor.text(cx);
@@ -264,7 +264,9 @@ impl Render for RemoteConnectionPrompt {
                         .child(MarkdownElement::new(prompt.0.clone(), markdown_style))
                         .child(self.editor.clone()),
                 )
-                .when(window.capslock().on, |el| el.child(Label::new("⚠️ ⇪ is on")))
+                .when(window.capslock().on, |el| {
+                    el.child(Label::new(i18n::t!("ui.text.is_on")))
+                })
             })
     }
 }
@@ -584,11 +586,11 @@ pub async fn open_remote_project(
                         window.prompt(
                             PromptLevel::Critical,
                             match connection_options {
-                                RemoteConnectionOptions::Ssh(_) => "Failed to connect over SSH",
-                                RemoteConnectionOptions::Wsl(_) => "Failed to connect to WSL",
+                                RemoteConnectionOptions::Ssh(_) => i18n::t!("ui.text.failed_to_connect_over_ssh"),
+                                RemoteConnectionOptions::Wsl(_) => i18n::t!("ui.text.failed_to_connect_to_wsl"),
                             },
                             Some(&format!("{e:#}")),
-                            &["Retry", "Cancel"],
+                            &[i18n::t!("ui.text.retry"), i18n::t!("common.cancel")],
                             cx,
                         )
                     })?
@@ -637,11 +639,11 @@ pub async fn open_remote_project(
                         window.prompt(
                             PromptLevel::Critical,
                             match connection_options {
-                                RemoteConnectionOptions::Ssh(_) => "Failed to connect over SSH",
-                                RemoteConnectionOptions::Wsl(_) => "Failed to connect to WSL",
+                                RemoteConnectionOptions::Ssh(_) => i18n::t!("ui.text.failed_to_connect_over_ssh"),
+                                RemoteConnectionOptions::Wsl(_) => i18n::t!("ui.text.failed_to_connect_to_wsl"),
                             },
                             Some(&format!("{e:#}")),
-                            &["Retry", "Cancel"],
+                            &[i18n::t!("ui.text.retry"), i18n::t!("common.cancel")],
                             cx,
                         )
                     })?

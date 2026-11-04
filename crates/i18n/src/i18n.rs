@@ -8,7 +8,9 @@
 //! 번역된 문자열은 프로세스가 끝날 때까지 살아 있는 `&'static str` 이므로
 //! `Panel::icon_tooltip` 처럼 `&'static str` 을 요구하는 곳에도 그대로 쓸 수 있다.
 
+#[cfg(feature = "gpui-settings")]
 use gpui::App;
+#[cfg(feature = "gpui-settings")]
 use settings::{RegisterSetting, Settings, SettingsContent, SettingsStore, UiLanguageContent};
 use std::{
     cell::Cell,
@@ -248,14 +250,17 @@ macro_rules! t {
 
 /// 설정 `ui_language` 를 읽어 표시 언어를 정하는 설정 항목
 #[derive(RegisterSetting)]
+#[cfg(feature = "gpui-settings")]
 pub struct UiLanguageSetting(pub UiLanguageContent);
 
+#[cfg(feature = "gpui-settings")]
 impl Settings for UiLanguageSetting {
     fn from_settings(content: &SettingsContent) -> Self {
         Self(content.ui_language.unwrap_or_default())
     }
 }
 
+#[cfg(feature = "gpui-settings")]
 impl UiLanguageSetting {
     /// 설정값(`auto`/`ko`/`en`)을 실제 표시 언어로 바꾼다
     pub fn resolve(&self) -> Language {
@@ -268,6 +273,7 @@ impl UiLanguageSetting {
 }
 
 /// 설정에 따라 표시 언어를 적용한다. 바뀌었으면 열려 있는 창을 다시 그리게 한다.
+#[cfg(feature = "gpui-settings")]
 fn apply_setting(cx: &mut App) {
     let resolved = UiLanguageSetting::get_global(cx).resolve();
     if resolved != language() {
@@ -278,6 +284,7 @@ fn apply_setting(cx: &mut App) {
 
 /// 설정을 읽어 표시 언어를 정하고, 이후 설정이 바뀔 때마다 다시 적용한다.
 /// 메뉴처럼 시작할 때 한 번 만드는 UI 보다 먼저 호출해야 한다.
+#[cfg(feature = "gpui-settings")]
 pub fn init(cx: &mut App) {
     apply_setting(cx);
     cx.observe_global::<SettingsStore>(apply_setting).detach();

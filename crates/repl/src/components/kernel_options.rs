@@ -145,12 +145,14 @@ impl PickerDelegate for KernelPickerDelegate {
             KernelSpecification::Jupyter(_) => (kernelspec.name(), "Jupyter", None),
             KernelSpecification::PythonEnv(_) => (
                 kernelspec.name(),
-                "Python Env",
+                i18n::t!("ui.text.python_env"),
                 Some(truncate_path(&kernelspec.path(), 42)),
             ),
-            KernelSpecification::Remote(_) => {
-                (kernelspec.name(), "Remote", Some(truncate_path(&kernelspec.path(), 42)))
-            }
+            KernelSpecification::Remote(_) => (
+                kernelspec.name(),
+                i18n::t!("ui.text.remote"),
+                Some(truncate_path(&kernelspec.path(), 42)),
+            ),
         };
 
         Some(
@@ -205,7 +207,7 @@ impl PickerDelegate for KernelPickerDelegate {
                 .p_1()
                 .gap_4()
                 .child(
-                    Button::new("kernel-docs", "Kernel Docs")
+                    Button::new("kernel-docs", i18n::t!("ui.text.kernel_docs"))
                         .icon(IconName::ArrowUpRight)
                         .icon_size(IconSize::Small)
                         .icon_color(Color::Muted)

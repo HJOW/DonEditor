@@ -802,7 +802,7 @@ impl Render for BufferDiagnosticsEditor {
                     div().h_flex().child(Label::new(label).color(Color::Muted)).child(
                         Button::new("open-file", filename)
                             .style(ButtonStyle::Transparent)
-                            .tooltip(Tooltip::text("Open File"))
+                            .tooltip(Tooltip::text(i18n::t!("pane.new.open_file")))
                             .on_click(cx.listener(|buffer_diagnostics, _, window, cx| {
                                 if let Some(workspace) = window.root::<Workspace>() {
                                     workspace.update(cx, |workspace, cx| {

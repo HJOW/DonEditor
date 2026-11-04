@@ -280,12 +280,11 @@ impl LspLogView {
                 .server_version
                 .as_ref()
                 .map(|version| version.as_ref())
-                .unwrap_or("Unknown"),
-            BINARY = info
-                .status
-                .binary
-                .as_ref()
-                .map_or_else(|| "Unknown".to_string(), |binary| format!("{:#?}", binary)),
+                .unwrap_or(i18n::t!("status.unknown_language")),
+            BINARY = info.status.binary.as_ref().map_or_else(
+                || i18n::t!("status.unknown_language").to_string(),
+                |binary| format!("{:#?}", binary)
+            ),
             WORKSPACE_FOLDERS = info
                 .status
                 .workspace_folders
@@ -301,7 +300,7 @@ impl LspLogView {
                 .map(|configuration| serde_json::to_string_pretty(&configuration))
                 .transpose()
                 .unwrap_or_else(|e| Some(format!("Failed to serialize configuration: {e}")))
-                .unwrap_or_else(|| "Unknown".to_string()),
+                .unwrap_or_else(|| i18n::t!("status.unknown_language").to_string()),
         );
         let editor = initialize_new_editor(server_info, false, window, cx);
         let editor_subscription = cx.subscribe(&editor, |_, _, event: &EditorEvent, cx: &mut Context<LspLogView>| {
@@ -316,7 +315,7 @@ impl LspLogView {
     pub(crate) fn menu_items<'a>(&'a self, cx: &'a App) -> Vec<LogMenuItem> {
         let log_store = self.log_store.read(cx);
 
-        let unknown_server = LanguageServerName::new_static("unknown server");
+        let unknown_server = LanguageServerName::new_static(i18n::t!("ui.text.unknown_server"));
 
         let mut rows = log_store
             .language_servers
@@ -329,7 +328,7 @@ impl LspLogView {
                         .worktree_id
                         .and_then(|id| self.project.read(cx).worktree_for_id(id, cx))
                         .map(|worktree| worktree.read(cx).root_name_str().to_string())
-                        .unwrap_or_else(|| "Unknown worktree".to_string());
+                        .unwrap_or_else(|| i18n::t!("ui.text.unknown_worktree").to_string());
 
                     LogMenuItem {
                         server_id: *server_id,
@@ -642,7 +641,7 @@ impl Item for LspLogView {
     }
 
     fn tab_content_text(&self, _detail: usize, _cx: &App) -> SharedString {
-        "LSP Logs".into()
+        i18n::t!("ui.text.lsp_logs").into()
     }
 
     fn as_searchable(&self, handle: &Entity<Self>, _: &App) -> Option<Box<dyn SearchableItemHandle>> {
@@ -825,7 +824,7 @@ impl Render for LspLogToolbarItemView {
                     current_server
                         .as_ref()
                         .map(|row| Cow::Owned(format!("{} ({})", row.server_name.0, row.worktree_root_name,)))
-                        .unwrap_or_else(|| "No server selected".into()),
+                        .unwrap_or_else(|| i18n::t!("ui.text.no_server_selected").into()),
                 )
                 .icon(IconName::ChevronDown)
                 .icon_size(IconSize::Small)
@@ -870,10 +869,10 @@ impl Render for LspLogToolbarItemView {
             let rpc_trace_enabled = server.rpc_trace_enabled;
             let log_view = log_view.clone();
             let label = match server.selected_entry {
-                LogKind::Rpc => RPC_MESSAGES,
-                LogKind::Trace => SERVER_TRACE,
-                LogKind::Logs => SERVER_LOGS,
-                LogKind::ServerInfo => SERVER_INFO,
+                LogKind::Rpc => i18n::t!("ui.text.rpc_messages"),
+                LogKind::Trace => i18n::t!("ui.text.server_trace"),
+                LogKind::Logs => i18n::t!("ui.text.server_logs"),
+                LogKind::ServerInfo => i18n::t!("ui.text.server_info"),
             };
             PopoverMenu::new("LspViewSelector")
                 .anchor(Corner::TopLeft)
@@ -888,14 +887,14 @@ impl Render for LspLogToolbarItemView {
                     let log_view = log_view.clone();
                     Some(ContextMenu::build(window, cx, move |this, window, _| {
                         this.entry(
-                            SERVER_LOGS,
+                            i18n::t!("ui.text.server_logs"),
                             None,
                             window.handler_for(&log_view, move |view, window, cx| {
                                 view.show_logs_for_server(server_id, window, cx);
                             }),
                         )
                         .entry(
-                            SERVER_TRACE,
+                            i18n::t!("ui.text.server_trace"),
                             None,
                             window.handler_for(&log_view, move |view, window, cx| {
                                 view.show_trace_for_server(server_id, window, cx);
@@ -908,7 +907,7 @@ impl Render for LspLogToolbarItemView {
                                     h_flex()
                                         .w_full()
                                         .justify_between()
-                                        .child(Label::new(RPC_MESSAGES))
+                                        .child(Label::new(i18n::t!("ui.text.rpc_messages")))
                                         .child(
                                             div().child(
                                                 Checkbox::new(
@@ -941,7 +940,7 @@ impl Render for LspLogToolbarItemView {
                             }),
                         )
                         .entry(
-                            SERVER_INFO,
+                            i18n::t!("ui.text.server_info"),
                             None,
                             window.handler_for(&log_view, move |view, window, cx| {
                                 view.show_server_info(server_id, window, cx);
@@ -967,10 +966,13 @@ impl Render for LspLogToolbarItemView {
                                 PopoverMenu::new("lsp-trace-level-menu")
                                     .anchor(Corner::TopLeft)
                                     .trigger(
-                                        Button::new("language_server_trace_level_selector", "Trace level")
-                                            .icon(IconName::ChevronDown)
-                                            .icon_size(IconSize::Small)
-                                            .icon_color(Color::Muted),
+                                        Button::new(
+                                            "language_server_trace_level_selector",
+                                            i18n::t!("ui.text.trace_level"),
+                                        )
+                                        .icon(IconName::ChevronDown)
+                                        .icon_size(IconSize::Small)
+                                        .icon_color(Color::Muted),
                                     )
                                     .menu({
                                         let log_view = log_view;
@@ -988,9 +990,9 @@ impl Render for LspLogToolbarItemView {
                                                 let log_view = log_view.clone();
 
                                                 for (option, label) in [
-                                                    (TraceValue::Off, "Off"),
-                                                    (TraceValue::Messages, "Messages"),
-                                                    (TraceValue::Verbose, "Verbose"),
+                                                    (TraceValue::Off, i18n::t!("ui.text.off")),
+                                                    (TraceValue::Messages, i18n::t!("ui.text.messages")),
+                                                    (TraceValue::Verbose, i18n::t!("ui.text.verbose")),
                                                 ] {
                                                     menu = menu.entry(label, None, {
                                                         let log_view = log_view.clone();
@@ -1020,10 +1022,13 @@ impl Render for LspLogToolbarItemView {
                                 PopoverMenu::new("lsp-log-level-menu")
                                     .anchor(Corner::TopLeft)
                                     .trigger(
-                                        Button::new("language_server_log_level_selector", "Log level")
-                                            .icon(IconName::ChevronDown)
-                                            .icon_size(IconSize::Small)
-                                            .icon_color(Color::Muted),
+                                        Button::new(
+                                            "language_server_log_level_selector",
+                                            i18n::t!("ui.text.log_level"),
+                                        )
+                                        .icon(IconName::ChevronDown)
+                                        .icon_size(IconSize::Small)
+                                        .icon_color(Color::Muted),
                                     )
                                     .menu({
                                         let log_view = log_view;
@@ -1041,10 +1046,10 @@ impl Render for LspLogToolbarItemView {
                                                 let log_view = log_view.clone();
 
                                                 for (option, label) in [
-                                                    (MessageType::LOG, "Log"),
-                                                    (MessageType::INFO, "Info"),
-                                                    (MessageType::WARNING, "Warning"),
-                                                    (MessageType::ERROR, "Error"),
+                                                    (MessageType::LOG, i18n::t!("ui.text.log")),
+                                                    (MessageType::INFO, i18n::t!("ui.text.info")),
+                                                    (MessageType::WARNING, i18n::t!("ui.text.warning")),
+                                                    (MessageType::ERROR, i18n::t!("ui.text.error")),
                                                 ] {
                                                     menu = menu.entry(label, None, {
                                                         let log_view = log_view.clone();
@@ -1072,17 +1077,19 @@ impl Render for LspLogToolbarItemView {
                     })),
             )
             .child(
-                Button::new("clear_log_button", "Clear").on_click(cx.listener(|this, _, window, cx| {
-                    if let Some(log_view) = this.log_view.as_ref() {
-                        log_view.update(cx, |log_view, cx| {
-                            log_view.editor.update(cx, |editor, cx| {
-                                editor.set_read_only(false);
-                                editor.clear(window, cx);
-                                editor.set_read_only(true);
-                            });
-                        })
-                    }
-                })),
+                Button::new("clear_log_button", i18n::t!("terminal.clear")).on_click(cx.listener(
+                    |this, _, window, cx| {
+                        if let Some(log_view) = this.log_view.as_ref() {
+                            log_view.update(cx, |log_view, cx| {
+                                log_view.editor.update(cx, |editor, cx| {
+                                    editor.set_read_only(false);
+                                    editor.clear(window, cx);
+                                    editor.set_read_only(true);
+                                });
+                            })
+                        }
+                    },
+                )),
             )
     }
 }
@@ -1103,11 +1110,6 @@ fn initialize_new_editor(content: String, move_to_end: bool, window: &mut Window
         editor
     })
 }
-
-const RPC_MESSAGES: &str = "RPC Messages";
-const SERVER_LOGS: &str = "Server Logs";
-const SERVER_TRACE: &str = "Server Trace";
-const SERVER_INFO: &str = "Server Info";
 
 impl Default for LspLogToolbarItemView {
     fn default() -> Self {

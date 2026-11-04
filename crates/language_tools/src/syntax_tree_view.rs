@@ -467,17 +467,22 @@ impl Render for SyntaxTreeView {
             } else {
                 let inner_content = v_flex().items_center().text_center().gap_2().max_w_3_5().map(|this| {
                     if editor_state.is_some_and(|state| !state.has_language()) {
-                        this.child(Label::new("Current editor has no associated language"))
-                            .child(
-                                Label::new(concat!(
-                                    "Try assigning a language or",
-                                    "switching to a different buffer"
-                                ))
-                                .size(LabelSize::Small),
-                            )
+                        this.child(Label::new(i18n::t!(
+                            "ui.text.current_editor_has_no_associated_language"
+                        )))
+                        .child(
+                            Label::new(concat!(
+                                i18n::t!("ui.text.try_assigning_a_language_or"),
+                                i18n::t!("ui.text.switching_to_a_different_buffer")
+                            ))
+                            .size(LabelSize::Small),
+                        )
                     } else {
-                        this.child(Label::new("Not attached to an editor"))
-                            .child(Label::new("Focus an editor to show a new tree view").size(LabelSize::Small))
+                        this.child(Label::new(i18n::t!("ui.text.not_attached_to_an_editor")))
+                            .child(
+                                Label::new(i18n::t!("ui.text.focus_an_editor_to_show_a_new_tree_view"))
+                                    .size(LabelSize::Small),
+                            )
                     }
                 });
 
@@ -505,7 +510,7 @@ impl Item for SyntaxTreeView {
     fn to_item_events(_: &Self::Event, _: impl FnMut(workspace::item::ItemEvent)) {}
 
     fn tab_content_text(&self, _detail: usize, _cx: &App) -> SharedString {
-        "Syntax Tree".into()
+        i18n::t!("ui.text.syntax_tree").into()
     }
 
     fn can_split(&self) -> bool {
@@ -610,7 +615,10 @@ impl SyntaxTreeToolbarItemView {
                             let active_tab_name =
                                 editor.read_with(cx, |editor, cx| editor.tab_content_text(Default::default(), cx));
 
-                            Tooltip::text(format!("Update view to '{active_tab_name}'"))
+                            Tooltip::text(i18n::t!(
+                                "ui.text.update_view_to_active_tab_name",
+                                active_tab_name = active_tab_name
+                            ))
                         })
                         .on_click(cx.listener(|this, _, window, cx| {
                             this.update_active_editor(&Default::default(), window, cx);

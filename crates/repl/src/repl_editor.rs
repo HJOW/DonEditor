@@ -100,7 +100,7 @@ pub fn run(editor: WeakEntity<Editor>, move_down: bool, window: &mut Window, cx:
         let kernel_specification = store
             .read(cx)
             .active_kernelspec(project_path.worktree_id, Some(language.clone()), cx)
-            .with_context(|| format!("No kernel found for language: {}", language.name()))?;
+            .with_context(|| i18n::t!("ui.text.no_kernel_found_for_language", value0 = language.name()))?;
 
         let fs = store.read(cx).fs().clone();
 

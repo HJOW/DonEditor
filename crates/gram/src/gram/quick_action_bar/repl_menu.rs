@@ -128,9 +128,9 @@ impl QuickActionBar {
                     .custom_entry(
                         move |_window, _cx| {
                             Label::new(if has_nonempty_selection {
-                                "Run Selection"
+                                i18n::t!("ui.text.run_selection")
                             } else {
-                                "Run Line"
+                                i18n::t!("ui.text.run_line")
                             })
                             .into_any_element()
                         },
@@ -143,7 +143,7 @@ impl QuickActionBar {
                     )
                     .custom_entry(
                         move |_window, _cx| {
-                            Label::new("Interrupt")
+                            Label::new(i18n::t!("ui.text.interrupt"))
                                 .size(LabelSize::Small)
                                 .color(Color::Error)
                                 .into_any_element()
@@ -157,7 +157,7 @@ impl QuickActionBar {
                     )
                     .custom_entry(
                         move |_window, _cx| {
-                            Label::new("Clear Outputs")
+                            Label::new(i18n::t!("ui.text.clear_outputs"))
                                 .size(LabelSize::Small)
                                 .color(Color::Muted)
                                 .into_any_element()
@@ -172,7 +172,7 @@ impl QuickActionBar {
                     .separator()
                     .custom_entry(
                         move |_window, _cx| {
-                            Label::new("Shut Down Kernel")
+                            Label::new(i18n::t!("ui.text.shut_down_kernel"))
                                 .size(LabelSize::Small)
                                 .color(Color::Error)
                                 .into_any_element()
@@ -186,7 +186,7 @@ impl QuickActionBar {
                     )
                     .custom_entry(
                         move |_window, _cx| {
-                            Label::new("Restart Kernel")
+                            Label::new(i18n::t!("ui.text.restart_kernel"))
                                 .size(LabelSize::Small)
                                 .color(Color::Error)
                                 .into_any_element()
@@ -198,9 +198,9 @@ impl QuickActionBar {
                         },
                     )
                     .separator()
-                    .action("View Sessions", Box::new(repl::Sessions))
+                    .action(i18n::t!("ui.text.view_sessions"), Box::new(repl::Sessions))
                     // TODO: Add shut down all kernels action
-                    // .action("Shut Down all Kernels", Box::new(gpui::NoAction))
+                    // .action(i18n::t!("ui.text.shut_down_all_kernels"), Box::new(gpui::NoAction))
                 })
                 .into()
             })
@@ -213,7 +213,7 @@ impl QuickActionBar {
                     )
                     .width(rems(1.))
                     .disabled(menu_state.popover_disabled),
-                Tooltip::text("REPL Menu"),
+                Tooltip::text(i18n::t!("ui.text.repl_menu")),
             );
 
         let button = ButtonLike::new_rounded_left("toggle_repl_icon")
@@ -249,7 +249,8 @@ impl QuickActionBar {
         kernel_specification: KernelSpecification,
         cx: &mut Context<Self>,
     ) -> AnyElement {
-        let tooltip: SharedString = SharedString::from(format!("Start REPL for {}", kernel_specification.name()));
+        let tooltip: SharedString =
+            SharedString::from(i18n::t!("ui.text.start_repl_for", value0 = kernel_specification.name()));
 
         h_flex()
             .child(self.render_kernel_selector(cx))
@@ -306,7 +307,7 @@ impl QuickActionBar {
                                 Label::new(if let Some(name) = current_kernel_name {
                                     name
                                 } else {
-                                    SharedString::from("Select Kernel")
+                                    SharedString::from(i18n::t!("ui.text.select_kernel"))
                                 })
                                 .size(LabelSize::Small)
                                 .color(if current_kernelspec.is_some() {
@@ -323,14 +324,17 @@ impl QuickActionBar {
                                 .size(IconSize::XSmall),
                         ),
                 ),
-            Tooltip::text("Select Kernel"),
+            Tooltip::text(i18n::t!("ui.text.select_kernel")),
         )
         .with_handle(menu_handle)
         .into_any_element()
     }
 
     pub fn render_repl_setup(&self, language: &str, cx: &mut Context<Self>) -> AnyElement {
-        let tooltip: SharedString = SharedString::from(format!("Setup Don Editor REPL for {language}"));
+        let tooltip: SharedString = SharedString::from(i18n::t!(
+            "ui.text.setup_don_editor_repl_for_language",
+            language = language
+        ));
         h_flex()
             .gap(DynamicSpacing::Base06.rems(cx))
             .child(self.render_kernel_selector(cx))
@@ -355,7 +359,7 @@ fn session_state(session: Entity<Session>, cx: &mut App) -> ReplMenuState {
 
     let fill_fields = || {
         ReplMenuState {
-            tooltip: "Nothing running".into(),
+            tooltip: i18n::t!("ui.text.nothing_running").into(),
             icon: IconName::ReplNeutral,
             icon_color: Color::Default,
             icon_is_animating: false,
@@ -379,15 +383,33 @@ fn session_state(session: Entity<Session>, cx: &mut App) -> ReplMenuState {
         ..fill_fields()
     };
 
-    let starting = || transitional(format!("{kernel_name} is starting").into(), true, true);
+    let starting = || {
+        transitional(
+            i18n::t!("ui.text.kernel_name_is_starting", kernel_name = kernel_name).into(),
+            true,
+            true,
+        )
+    };
     let restarting = || transitional(format!("Restarting {kernel_name}").into(), true, true);
-    let shutting_down = || transitional(format!("{kernel_name} is shutting down").into(), false, true);
+    let shutting_down = || {
+        transitional(
+            i18n::t!("ui.text.kernel_name_is_shutting_down", kernel_name = kernel_name).into(),
+            false,
+            true,
+        )
+    };
     let auto_restarting = || transitional(format!("Auto-restarting {kernel_name}").into(), true, true);
-    let unknown = || transitional(format!("{kernel_name} state unknown").into(), false, true);
+    let unknown = || {
+        transitional(
+            i18n::t!("ui.text.kernel_name_state_unknown", kernel_name = kernel_name).into(),
+            false,
+            true,
+        )
+    };
     let other = |state: &str| transitional(format!("{kernel_name} state: {state}").into(), false, true);
 
     let shutdown = || ReplMenuState {
-        tooltip: "Nothing running".into(),
+        tooltip: i18n::t!("ui.text.nothing_running").into(),
         icon: IconName::ReplNeutral,
         icon_color: Color::Default,
         icon_is_animating: false,
@@ -401,7 +423,12 @@ fn session_state(session: Entity<Session>, cx: &mut App) -> ReplMenuState {
         Kernel::Restarting => restarting(),
         Kernel::Running(kernel) => match &kernel.execution_state() {
             ExecutionState::Idle => ReplMenuState {
-                tooltip: format!("Run code on {kernel_name} ({kernel_language})").into(),
+                tooltip: i18n::t!(
+                    "ui.text.run_code_on_kernel_name_kernel_language",
+                    kernel_name = kernel_name,
+                    kernel_language = kernel_language
+                )
+                .into(),
                 indicator: Some(Indicator::dot().color(Color::Success)),
                 status: session.kernel.status(),
                 ..fill_fields()
@@ -424,7 +451,12 @@ fn session_state(session: Entity<Session>, cx: &mut App) -> ReplMenuState {
         },
         Kernel::Starting(_) => starting(),
         Kernel::ErroredLaunch(e) => ReplMenuState {
-            tooltip: format!("Error with kernel {kernel_name}: {e}").into(),
+            tooltip: i18n::t!(
+                "ui.text.error_with_kernel_kernel_name_e",
+                kernel_name = kernel_name,
+                e = e
+            )
+            .into(),
             popover_disabled: false,
             indicator: Some(Indicator::dot().color(Color::Error)),
             status: session.kernel.status(),

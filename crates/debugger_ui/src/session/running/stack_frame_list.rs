@@ -552,7 +552,9 @@ impl StackFrameList {
                                             this.restart_stack_frame(stack_frame_id, cx);
                                         }
                                     }))
-                                    .tooltip(move |window, cx| Tooltip::text("Restart Stack Frame")(window, cx)),
+                                    .tooltip(move |window, cx| {
+                                        Tooltip::text(i18n::t!("ui.text.restart_stack_frame"))(window, cx)
+                                    }),
                             ),
                     )
                 },

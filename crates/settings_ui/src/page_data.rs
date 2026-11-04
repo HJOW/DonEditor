@@ -9,21 +9,22 @@ use crate::{
     SubPageLink, USER, all_language_names, sub_page_stack,
 };
 
+/// 빈 기본값을 공유하는 정적 문자열입니다.
 const DEFAULT_SHARED_STRING: SharedString = SharedString::new_static("");
-/// A default empty string reference. Useful in `pick` functions for cases either in dynamic item fields, or when dealing with `settings::Maybe`
-/// to avoid the "NO DEFAULT" case.
+/// 동적 항목과 선택적 설정에서 기본값이 없을 때 사용할 빈 문자열 참조입니다.
 const DEFAULT_EMPTY_SHARED_STRING: Option<&SharedString> = Some(&DEFAULT_SHARED_STRING);
 
+/// 설정 화면의 고정 메타데이터만 키로 번역하므로 파일명 등 사용자 값에는 영향을 주지 않습니다.
 pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
     vec![
         SettingsPage {
-            title: "General",
+            title: i18n::t!("settings.text.general"),
             items: vec![
-                SettingsPageItem::SectionHeader("General Settings"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.general_settings")),
                 // [DonEditor] 메뉴·패널·대화상자의 표시 언어 (한국어 UI)
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "UI Language",
-                    description: "The display language of menus, panels, and dialogs. Auto follows the OS language. 메뉴·패널·대화상자의 표시 언어입니다. 일부 화면은 다시 열어야 바뀔 수 있습니다.",
+                    title: i18n::t!("settings.text.ui_language"),
+                    description: i18n::t!("settings.text.the_display_language_of_menus_panels_and_dialogs_auto_fo_9b1c3fc9"),
                     aliases: Some(&["language", "locale", "korean", "한국어"]),
                     field: Box::new(SettingField {
                         json_path: Some("ui_language"),
@@ -39,8 +40,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "When Closing With No Tabs",
-                    description: "What to do when using the 'close active item' action with no tabs.",
+                    title: i18n::t!("settings.text.when_closing_with_no_tabs"),
+                    description: i18n::t!("settings.text.what_to_do_when_using_the_close_active_item_action_with_no_tabs"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("when_closing_with_no_tabs"),
@@ -58,8 +59,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "On Last Window Closed",
-                    description: "What to do when the last window is closed.",
+                    title: i18n::t!("settings.text.on_last_window_closed"),
+                    description: i18n::t!("settings.text.what_to_do_when_the_last_window_is_closed"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("on_last_window_closed"),
@@ -74,8 +75,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Use System Path Prompts",
-                    description: "Use native OS dialogs for 'Open' and 'Save As'.",
+                    title: i18n::t!("settings.text.use_system_path_prompts"),
+                    description: i18n::t!("settings.text.use_native_os_dialogs_for_open_and_save_as"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("use_system_path_prompts"),
@@ -90,8 +91,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Use System Prompts",
-                    description: "Use native OS dialogs for confirmations.",
+                    title: i18n::t!("settings.text.use_system_prompts"),
+                    description: i18n::t!("settings.text.use_native_os_dialogs_for_confirmations"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("use_system_prompts"),
@@ -106,8 +107,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Redact Private Values",
-                    description: "Hide the values of variables in private files.",
+                    title: i18n::t!("settings.text.redact_private_values"),
+                    description: i18n::t!("settings.text.hide_the_values_of_variables_in_private_files"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("redact_private_values"),
@@ -122,8 +123,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Private Files",
-                    description: "Globs to match against file paths to determine if a file is private.",
+                    title: i18n::t!("settings.text.private_files"),
+                    description: i18n::t!("settings.text.globs_to_match_against_file_paths_to_determine_if_a_file_is_private"),
                     aliases: None,
                     field: Box::new(
                         SettingField {
@@ -140,10 +141,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Workspace Restoration"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.workspace_restoration")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Restore Unsaved Buffers",
-                    description: "Whether or not to restore unsaved buffers on restart.",
+                    title: i18n::t!("settings.text.restore_unsaved_buffers"),
+                    description: i18n::t!("settings.text.whether_or_not_to_restore_unsaved_buffers_on_restart"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("session.restore_unsaved_buffers"),
@@ -164,8 +165,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Restore On Startup",
-                    description: "What to restore from the previous session when opening Gram.",
+                    title: i18n::t!("settings.text.restore_on_startup"),
+                    description: i18n::t!("settings.text.what_to_restore_from_the_previous_session_when_opening_gram"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("restore_on_startup"),
@@ -179,11 +180,11 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Profiles"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.profiles")),
                 SettingsPageItem::SettingItem(SettingItem {
                     files: USER,
-                    title: "Settings Profiles",
-                    description: "Any number of settings profiles that are temporarily applied on top of your existing user settings.",
+                    title: i18n::t!("settings.text.settings_profiles"),
+                    description: i18n::t!("settings.text.any_number_of_settings_profiles_that_are_temporarily_app_1f7ee4da"),
                     aliases: None,
                     field: Box::new(
                         SettingField {
@@ -201,14 +202,14 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
             ],
         },
         SettingsPage {
-            title: "Appearance",
+            title: i18n::t!("settings.text.appearance"),
             items: vec![
-                SettingsPageItem::SectionHeader("Theme"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.theme")),
                 SettingsPageItem::DynamicItem(DynamicItem {
                     discriminant: SettingItem {
                         files: USER,
-                        title: "Theme Mode",
-                        description: "Choose a static, fixed theme or dynamically select themes based on appearance and light/dark modes.",
+                        title: i18n::t!("settings.text.theme_mode"),
+                        description: i18n::t!("settings.text.choose_a_static_fixed_theme_or_dynamically_select_themes_7e7ad842"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("theme$"),
@@ -267,8 +268,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                             settings::ThemeSelectionDiscriminants::Static => vec![
                                 SettingItem {
                                     files: USER,
-                                    title: "Theme Name",
-                                    description: "The name of your selected theme.",
+                                    title: i18n::t!("settings.text.theme_name"),
+                                    description: i18n::t!("settings.text.the_name_of_your_selected_theme"),
                                     aliases: None,
                                     field: Box::new(SettingField {
                                         json_path: Some("theme"),
@@ -293,8 +294,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                             settings::ThemeSelectionDiscriminants::Dynamic => vec![
                                 SettingItem {
                                     files: USER,
-                                    title: "Mode",
-                                    description: "Choose whether to use the selected light or dark theme or to follow your OS appearance configuration.",
+                                    title: i18n::t!("settings.text.mode"),
+                                    description: i18n::t!("settings.text.choose_whether_to_use_the_selected_light_or_dark_theme_o_df2c4be7"),
                                     aliases: None,
                                     field: Box::new(SettingField {
                                         json_path: Some("theme.mode"),
@@ -317,8 +318,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                                 },
                                 SettingItem {
                                     files: USER,
-                                    title: "Light Theme",
-                                    description: "The theme to use when mode is set to light, or when mode is set to system and it is in light mode.",
+                                    title: i18n::t!("settings.text.light_theme"),
+                                    description: i18n::t!("settings.text.the_theme_to_use_when_mode_is_set_to_light_or_when_mode__75dd10ea"),
                                     aliases: None,
                                     field: Box::new(SettingField {
                                         json_path: Some("theme.light"),
@@ -341,8 +342,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                                 },
                                 SettingItem {
                                     files: USER,
-                                    title: "Dark Theme",
-                                    description: "The theme to use when mode is set to dark, or when mode is set to system and it is in dark mode.",
+                                    title: i18n::t!("settings.text.dark_theme"),
+                                    description: i18n::t!("settings.text.the_theme_to_use_when_mode_is_set_to_dark_or_when_mode_i_c64ddc88"),
                                     aliases: None,
                                     field: Box::new(SettingField {
                                         json_path: Some("theme.dark"),
@@ -370,8 +371,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                 SettingsPageItem::DynamicItem(DynamicItem {
                     discriminant: SettingItem {
                         files: USER,
-                        title: "Icon Theme",
-                        description: "The custom set of icons Don Editor will associate with files and directories.",
+                        title: i18n::t!("settings.text.icon_theme"),
+                        description: i18n::t!("settings.text.the_custom_set_of_icons_don_editor_will_associate_with_f_9e9c69ac"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("icon_theme$"),
@@ -430,8 +431,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                             settings::IconThemeSelectionDiscriminants::Static => vec![
                                 SettingItem {
                                     files: USER,
-                                    title: "Icon Theme Name",
-                                    description: "The name of your selected icon theme.",
+                                    title: i18n::t!("settings.text.icon_theme_name"),
+                                    description: i18n::t!("settings.text.the_name_of_your_selected_icon_theme"),
                                     aliases: None,
                                     field: Box::new(SettingField {
                                         json_path: Some("icon_theme$string"),
@@ -456,8 +457,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                             settings::IconThemeSelectionDiscriminants::Dynamic => vec![
                                 SettingItem {
                                     files: USER,
-                                    title: "Mode",
-                                    description: "Choose whether to use the selected light or dark icon theme or to follow your OS appearance configuration.",
+                                    title: i18n::t!("settings.text.mode"),
+                                    description: i18n::t!("settings.text.choose_whether_to_use_the_selected_light_or_dark_icon_th_aac9aeb9"),
                                     aliases: None,
                                     field: Box::new(SettingField {
                                         json_path: Some("icon_theme"),
@@ -480,8 +481,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                                 },
                                 SettingItem {
                                     files: USER,
-                                    title: "Light Icon Theme",
-                                    description: "The icon theme to use when mode is set to light, or when mode is set to system and it is in light mode.",
+                                    title: i18n::t!("settings.text.light_icon_theme"),
+                                    description: i18n::t!("settings.text.the_icon_theme_to_use_when_mode_is_set_to_light_or_when__d8a02fe5"),
                                     aliases: None,
                                     field: Box::new(SettingField {
                                         json_path: Some("icon_theme.light"),
@@ -504,8 +505,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                                 },
                                 SettingItem {
                                     files: USER,
-                                    title: "Dark Icon Theme",
-                                    description: "The icon theme to use when mode is set to dark, or when mode is set to system and it is in dark mode.",
+                                    title: i18n::t!("settings.text.dark_icon_theme"),
+                                    description: i18n::t!("settings.text.the_icon_theme_to_use_when_mode_is_set_to_dark_or_when_m_9fca8a7e"),
                                     aliases: None,
                                     field: Box::new(SettingField {
                                         json_path: Some("icon_theme.dark"),
@@ -530,10 +531,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         }
                     }).collect(),
                 }),
-                SettingsPageItem::SectionHeader("Buffer Font"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.buffer_font")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Font Family",
-                    description: "Font family for editor text.",
+                    title: i18n::t!("settings.text.font_family"),
+                    description: i18n::t!("settings.text.font_family_for_editor_text"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("buffer_font_family"),
@@ -544,8 +545,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Font Size",
-                    description: "Font size for editor text.",
+                    title: i18n::t!("settings.text.font_size"),
+                    description: i18n::t!("settings.text.font_size_for_editor_text"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("buffer_font_size"),
@@ -556,8 +557,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Font Weight",
-                    description: "Font weight for editor text (100-900).",
+                    title: i18n::t!("settings.text.font_weight"),
+                    description: i18n::t!("settings.text.font_weight_for_editor_text_100_900"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("buffer_font_weight"),
@@ -570,8 +571,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                 SettingsPageItem::DynamicItem(DynamicItem {
                     discriminant: SettingItem {
                         files: USER,
-                        title: "Line Height",
-                        description: "Line height for editor text.",
+                        title: i18n::t!("settings.text.line_height"),
+                        description: i18n::t!("settings.text.line_height_for_editor_text"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("buffer_line_height$"),
@@ -617,8 +618,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                             settings::BufferLineHeightDiscriminants::Custom => vec![
                                 SettingItem {
                                     files: USER,
-                                    title: "Custom Line Height",
-                                    description: "Custom line height value (must be at least 1.0).",
+                                    title: i18n::t!("settings.text.custom_line_height"),
+                                    description: i18n::t!("settings.text.custom_line_height_value_must_be_at_least_1_0"),
                                     aliases: None,
                                     field: Box::new(SettingField {
                                         json_path: Some("buffer_line_height"),
@@ -645,8 +646,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
                     files: USER,
-                    title: "Font Features",
-                    description: "The OpenType features to enable for rendering in text buffers.",
+                    title: i18n::t!("settings.text.font_features"),
+                    description: i18n::t!("settings.text.the_opentype_features_to_enable_for_rendering_in_text_buffers"),
                     aliases: None,
                     field: Box::new(
                         SettingField {
@@ -665,8 +666,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
                     files: USER,
-                    title: "Font Fallbacks",
-                    description: "The font fallbacks to use for rendering in text buffers.",
+                    title: i18n::t!("settings.text.font_fallbacks"),
+                    description: i18n::t!("settings.text.the_font_fallbacks_to_use_for_rendering_in_text_buffers"),
                     aliases: None,
                     field: Box::new(
                         SettingField {
@@ -683,10 +684,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     ),
                     metadata: None,
                 }),
-                SettingsPageItem::SectionHeader("UI Font"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.ui_font")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Font Family",
-                    description: "Font family for UI elements.",
+                    title: i18n::t!("settings.text.font_family"),
+                    description: i18n::t!("settings.text.font_family_for_ui_elements"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("ui_font_family"),
@@ -697,8 +698,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Font Size",
-                    description: "Font size for UI elements.",
+                    title: i18n::t!("settings.text.font_size"),
+                    description: i18n::t!("settings.text.font_size_for_ui_elements"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("ui_font_size"),
@@ -709,8 +710,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Font Weight",
-                    description: "Font weight for UI elements (100-900).",
+                    title: i18n::t!("settings.text.font_weight"),
+                    description: i18n::t!("settings.text.font_weight_for_ui_elements_100_900"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("ui_font_weight"),
@@ -722,8 +723,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
                     files: USER,
-                    title: "Font Features",
-                    description: "The OpenType features to enable for rendering in UI elements.",
+                    title: i18n::t!("settings.text.font_features"),
+                    description: i18n::t!("settings.text.the_opentype_features_to_enable_for_rendering_in_ui_elements"),
                     aliases: None,
                     field: Box::new(
                         SettingField {
@@ -742,8 +743,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
                     files: USER,
-                    title: "Font Fallbacks",
-                    description: "The font fallbacks to use for rendering in the UI.",
+                    title: i18n::t!("settings.text.font_fallbacks"),
+                    description: i18n::t!("settings.text.the_font_fallbacks_to_use_for_rendering_in_the_ui"),
                     aliases: None,
                     field: Box::new(
                         SettingField {
@@ -760,10 +761,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     ),
                     metadata: None,
                 }),
-                SettingsPageItem::SectionHeader("Text Rendering"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.text_rendering")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Text Rendering Mode",
-                    description: "The text rendering mode to use.",
+                    title: i18n::t!("settings.text.text_rendering_mode"),
+                    description: i18n::t!("settings.text.the_text_rendering_mode_to_use"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("text_rendering_mode"),
@@ -777,10 +778,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Cursor"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.cursor")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Multi Cursor Modifier",
-                    description: "Modifier key for adding multiple cursors.",
+                    title: i18n::t!("settings.text.multi_cursor_modifier"),
+                    description: i18n::t!("settings.text.modifier_key_for_adding_multiple_cursors"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("multi_cursor_modifier"),
@@ -796,8 +797,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Cursor Blink",
-                    description: "Whether the cursor blinks in the editor.",
+                    title: i18n::t!("settings.text.cursor_blink"),
+                    description: i18n::t!("settings.text.whether_the_cursor_blinks_in_the_editor"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("cursor_blink"),
@@ -808,8 +809,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Cursor Shape",
-                    description: "Cursor shape for the editor.",
+                    title: i18n::t!("settings.text.cursor_shape"),
+                    description: i18n::t!("settings.text.cursor_shape_for_the_editor"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("cursor_shape"),
@@ -820,8 +821,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Hide Mouse",
-                    description: "When to hide the mouse cursor.",
+                    title: i18n::t!("settings.text.hide_mouse"),
+                    description: i18n::t!("settings.text.when_to_hide_the_mouse_cursor"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("hide_mouse"),
@@ -831,10 +832,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Highlighting"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.highlighting")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Unnecessary Code Fade",
-                    description: "How much to fade out unused code (0.0 - 0.9).",
+                    title: i18n::t!("settings.text.unnecessary_code_fade"),
+                    description: i18n::t!("settings.text.how_much_to_fade_out_unused_code_0_0_0_9"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("unnecessary_code_fade"),
@@ -850,8 +851,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Current Line Highlight",
-                    description: "How to highlight the current line.",
+                    title: i18n::t!("settings.text.current_line_highlight"),
+                    description: i18n::t!("settings.text.how_to_highlight_the_current_line"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("current_line_highlight"),
@@ -867,8 +868,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Selection Highlight",
-                    description: "Highlight all occurrences of selected text.",
+                    title: i18n::t!("settings.text.selection_highlight"),
+                    description: i18n::t!("settings.text.highlight_all_occurrences_of_selected_text"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("selection_highlight"),
@@ -884,8 +885,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Rounded Selection",
-                    description: "Whether the text selection should have rounded corners.",
+                    title: i18n::t!("settings.text.rounded_selection"),
+                    description: i18n::t!("settings.text.whether_the_text_selection_should_have_rounded_corners"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("rounded_selection"),
@@ -896,8 +897,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Minimum Contrast For Highlights",
-                    description: "The minimum APCA perceptual contrast to maintain when rendering text over highlight backgrounds.",
+                    title: i18n::t!("settings.text.minimum_contrast_for_highlights"),
+                    description: i18n::t!("settings.text.the_minimum_apca_perceptual_contrast_to_maintain_when_re_c4152458"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("minimum_contrast_for_highlights"),
@@ -915,10 +916,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Guides"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.guides")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show Wrap Guides",
-                    description: "Show wrap guides (vertical rulers).",
+                    title: i18n::t!("settings.text.show_wrap_guides"),
+                    description: i18n::t!("settings.text.show_wrap_guides_vertical_rulers"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("show_wrap_guides"),
@@ -944,8 +945,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                 }),
                 // todo(settings_ui): This needs a custom component
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Wrap Guides",
-                    description: "Character counts at which to show wrap guides.",
+                    title: i18n::t!("settings.text.wrap_guides"),
+                    description: i18n::t!("settings.text.character_counts_at_which_to_show_wrap_guides"),
                     aliases: None,
                     field: Box::new(
                         SettingField {
@@ -967,10 +968,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER | PROJECT,
                 }),
-                SettingsPageItem::SectionHeader("Decorations"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.decorations")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Client Side Decoration Rounding",
-                    description: "Defines window border radius for platforms that use client side decorations.",
+                    title: i18n::t!("settings.text.client_side_decoration_rounding"),
+                    description: i18n::t!("settings.text.defines_window_border_radius_for_platforms_that_use_clie_14c73585"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("client_side_decoration_rounding"),
@@ -986,8 +987,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Client Side Decoration Shadow",
-                    description: "Defines window shadow size for platforms that use client side decorations.",
+                    title: i18n::t!("settings.text.client_side_decoration_shadow"),
+                    description: i18n::t!("settings.text.defines_window_shadow_size_for_platforms_that_use_client_ca206eee"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("client_side_decoration_shadow"),
@@ -1005,13 +1006,13 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
             ],
         },
         SettingsPage {
-            title: "Keymap",
+            title: i18n::t!("settings.text.keymap"),
             items: vec![
-                SettingsPageItem::SectionHeader("Keybindings"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.keybindings")),
                 SettingsPageItem::ActionLink(ActionLink {
-                    title: "Edit Keybindings".into(),
-                    description: Some("Customize keybindings in the keymap editor.".into()),
-                    button_text: "Open Keymap".into(),
+                    title: i18n::t!("settings.text.edit_keybindings").into(),
+                    description: Some(i18n::t!("ui.text.customize_keybindings_in_the_keymap_editor").into()),
+                    button_text: i18n::t!("settings.text.open_keymap").into(),
                     on_click: Arc::new(|settings_window, window, cx| {
                         let Some(original_window) = settings_window.original_window else {
                             return;
@@ -1026,10 +1027,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         window.remove_window();
                     }),
                 }),
-                SettingsPageItem::SectionHeader("Base Keymap"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.base_keymap")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Base Keymap",
-                    description: "The name of a base set of key bindings to use.",
+                    title: i18n::t!("settings.text.base_keymap"),
+                    description: i18n::t!("settings.text.the_name_of_a_base_set_of_key_bindings_to_use"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("base_keymap"),
@@ -1044,12 +1045,12 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     })),
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Modal Editing"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.modal_editing")),
                 // todo(settings_ui): Vim/Helix Mode should be apart of one type because it's undefined
                 // behavior to have them both enabled at the same time
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Vim Mode",
-                    description: "Enable Vim mode and key bindings.",
+                    title: i18n::t!("settings.text.vim_mode"),
+                    description: i18n::t!("settings.text.enable_vim_mode_and_key_bindings"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("vim_mode"),
@@ -1062,8 +1063,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Helix Mode",
-                    description: "Enable Helix mode and key bindings.",
+                    title: i18n::t!("settings.text.helix_mode"),
+                    description: i18n::t!("settings.text.enable_helix_mode_and_key_bindings"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("helix_mode"),
@@ -1078,15 +1079,15 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
             ],
         },
         SettingsPage {
-            title: "Editor",
+            title: i18n::t!("settings.text.editor"),
             items: {
                 let mut items = vec![
-                    SettingsPageItem::SectionHeader("Auto Save"),
+                    SettingsPageItem::SectionHeader(i18n::t!("settings.text.auto_save")),
                     SettingsPageItem::DynamicItem(DynamicItem {
                         discriminant: SettingItem {
                             files: USER,
-                            title: "Auto Save Mode",
-                            description: "When to auto save buffer changes.",
+                            title: i18n::t!("settings.text.auto_save_mode"),
+                            description: i18n::t!("settings.text.when_to_auto_save_buffer_changes"),
                             aliases: None,
                             field: Box::new(SettingField {
                                 json_path: Some("autosave$"),
@@ -1137,8 +1138,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                                 settings::AutosaveSettingDiscriminants::AfterDelay => vec![
                                     SettingItem {
                                         files: USER,
-                                        title: "Delay (milliseconds)",
-                                        description: "Save after inactivity period (in milliseconds).",
+                                        title: i18n::t!("settings.text.delay_milliseconds"),
+                                        description: i18n::t!("settings.text.save_after_inactivity_period_in_milliseconds"),
                                         aliases: None,
                                         field: Box::new(SettingField {
                                             json_path: Some("autosave.after_delay.milliseconds"),
@@ -1166,10 +1167,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                             }
                         }).collect(),
                     }),
-                    SettingsPageItem::SectionHeader("which-key"),
+                    SettingsPageItem::SectionHeader(i18n::t!("settings.text.which_key")),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "which-key",
-                        description: "Display menu with matching key bindings while a multi-stroke is pending.",
+                        title: i18n::t!("settings.text.which_key"),
+                        description: i18n::t!("settings.text.display_menu_with_matching_key_bindings_while_a_multi_st_e282054a"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("which_key.enabled"),
@@ -1190,8 +1191,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Menu Delay",
-                        description: "Delay in milliseconds before the which-key menu appears.",
+                        title: i18n::t!("settings.text.menu_delay"),
+                        description: i18n::t!("settings.text.delay_in_milliseconds_before_the_which_key_menu_appears"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("which_key.delay_ms"),
@@ -1211,10 +1212,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         metadata: None,
                         files: USER,
                     }),
-                    SettingsPageItem::SectionHeader("Multibuffer"),
+                    SettingsPageItem::SectionHeader(i18n::t!("settings.text.multibuffer")),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Double Click In Multibuffer",
-                        description: "What to do when multibuffer is double-clicked in some of its excerpts.",
+                        title: i18n::t!("settings.text.double_click_in_multibuffer"),
+                        description: i18n::t!("settings.text.what_to_do_when_multibuffer_is_double_clicked_in_some_of_b2cd4d1f"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("double_click_in_multibuffer"),
@@ -1229,8 +1230,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Expand Excerpt Lines",
-                        description: "How many lines to expand the multibuffer excerpts by default.",
+                        title: i18n::t!("settings.text.expand_excerpt_lines"),
+                        description: i18n::t!("settings.text.how_many_lines_to_expand_the_multibuffer_excerpts_by_default"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("expand_excerpt_lines"),
@@ -1245,8 +1246,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Excerpt Context Lines",
-                        description: "How many lines of context to provide in multibuffer excerpts by default.",
+                        title: i18n::t!("settings.text.excerpt_context_lines"),
+                        description: i18n::t!("settings.text.how_many_lines_of_context_to_provide_in_multibuffer_exce_39e6fc0e"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("excerpt_context_lines"),
@@ -1261,8 +1262,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Expand Outlines With Depth",
-                        description: "Default depth to expand outline items in the current file.",
+                        title: i18n::t!("settings.text.expand_outlines_with_depth"),
+                        description: i18n::t!("settings.text.default_depth_to_expand_outline_items_in_the_current_file"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("outline_panel.expand_outlines_with_depth"),
@@ -1284,10 +1285,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         metadata: None,
                         files: USER,
                     }),
-                    SettingsPageItem::SectionHeader("Scrolling"),
+                    SettingsPageItem::SectionHeader(i18n::t!("settings.text.scrolling")),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Scroll Beyond Last Line",
-                        description: "Whether the editor will scroll beyond the last line.",
+                        title: i18n::t!("settings.text.scroll_beyond_last_line"),
+                        description: i18n::t!("settings.text.whether_the_editor_will_scroll_beyond_the_last_line"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("scroll_beyond_last_line"),
@@ -1302,8 +1303,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Vertical Scroll Margin",
-                        description: "The number of lines to keep above/below the cursor when auto-scrolling.",
+                        title: i18n::t!("settings.text.vertical_scroll_margin"),
+                        description: i18n::t!("settings.text.the_number_of_lines_to_keep_above_below_the_cursor_when__ab1e843f"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("vertical_scroll_margin"),
@@ -1318,8 +1319,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Horizontal Scroll Margin",
-                        description: "The number of characters to keep on either side when scrolling with the mouse.",
+                        title: i18n::t!("settings.text.horizontal_scroll_margin"),
+                        description: i18n::t!("settings.text.the_number_of_characters_to_keep_on_either_side_when_scr_23bab5b3"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("horizontal_scroll_margin"),
@@ -1334,8 +1335,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Scroll Sensitivity",
-                        description: "Scroll sensitivity multiplier for both horizontal and vertical scrolling.",
+                        title: i18n::t!("settings.text.scroll_sensitivity"),
+                        description: i18n::t!("settings.text.scroll_sensitivity_multiplier_for_both_horizontal_and_ve_1fa0fb5a"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("scroll_sensitivity"),
@@ -1350,8 +1351,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Fast Scroll Sensitivity",
-                        description: "Fast scroll sensitivity multiplier for both horizontal and vertical scrolling.",
+                        title: i18n::t!("settings.text.fast_scroll_sensitivity"),
+                        description: i18n::t!("settings.text.fast_scroll_sensitivity_multiplier_for_both_horizontal_a_9620e46f"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("fast_scroll_sensitivity"),
@@ -1366,8 +1367,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Autoscroll On Clicks",
-                        description: "Whether to scroll when clicking near the edge of the visible text area.",
+                        title: i18n::t!("settings.text.autoscroll_on_clicks"),
+                        description: i18n::t!("settings.text.whether_to_scroll_when_clicking_near_the_edge_of_the_vis_d7de6c3e"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("autoscroll_on_clicks"),
@@ -1382,8 +1383,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Sticky Scroll",
-                        description: "Whether to stick scopes to the top of the editor",
+                        title: i18n::t!("settings.text.sticky_scroll"),
+                        description: i18n::t!("settings.text.whether_to_stick_scopes_to_the_top_of_the_editor"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("sticky_scroll.enabled"),
@@ -1398,8 +1399,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Smooth Scroll",
-                        description: "Whether to animate scrolling with a smooth easing effect.",
+                        title: i18n::t!("settings.text.smooth_scroll"),
+                        description: i18n::t!("settings.text.whether_to_animate_scrolling_with_a_smooth_easing_effect"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("smooth_scroll.enabled"),
@@ -1414,8 +1415,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Scroll Animation Duration",
-                        description: "Duration of scroll animation",
+                        title: i18n::t!("settings.text.scroll_animation_duration"),
+                        description: i18n::t!("settings.text.duration_of_scroll_animation"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("smooth_scroll.duration"),
@@ -1430,10 +1431,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
 
-                    SettingsPageItem::SectionHeader("Signature Help"),
+                    SettingsPageItem::SectionHeader(i18n::t!("settings.text.signature_help")),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Auto Signature Help",
-                        description: "Automatically show a signature help pop-up.",
+                        title: i18n::t!("settings.text.auto_signature_help"),
+                        description: i18n::t!("settings.text.automatically_show_a_signature_help_pop_up"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("auto_signature_help"),
@@ -1448,8 +1449,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Show Signature Help After Edits",
-                        description: "Show the signature help pop-up after completions or bracket pairs are inserted.",
+                        title: i18n::t!("settings.text.show_signature_help_after_edits"),
+                        description: i18n::t!("settings.text.show_the_signature_help_pop_up_after_completions_or_brac_eb674538"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("show_signature_help_after_edits"),
@@ -1467,8 +1468,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Snippet Sort Order",
-                        description: "Determines how snippets are sorted relative to other completion items.",
+                        title: i18n::t!("settings.text.snippet_sort_order"),
+                        description: i18n::t!("settings.text.determines_how_snippets_are_sorted_relative_to_other_com_a992bfbb"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("snippet_sort_order"),
@@ -1482,10 +1483,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         metadata: None,
                         files: USER,
                     }),
-                    SettingsPageItem::SectionHeader("Hover Popover"),
+                    SettingsPageItem::SectionHeader(i18n::t!("settings.text.hover_popover")),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Enabled",
-                        description: "Show the informational hover box when moving the mouse over symbols in the editor.",
+                        title: i18n::t!("settings.text.enabled"),
+                        description: i18n::t!("settings.text.show_the_informational_hover_box_when_moving_the_mouse_o_8182228c"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("hover_popover_enabled"),
@@ -1501,8 +1502,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     }),
                     // todo(settings ui): add units to this number input
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Delay",
-                        description: "Time to wait in milliseconds before showing the informational hover box.",
+                        title: i18n::t!("settings.text.delay"),
+                        description: i18n::t!("settings.text.time_to_wait_in_milliseconds_before_showing_the_informat_d1629466"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("hover_popover_enabled"),
@@ -1516,10 +1517,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         metadata: None,
                         files: USER,
                     }),
-                    SettingsPageItem::SectionHeader("Drag And Drop Selection"),
+                    SettingsPageItem::SectionHeader(i18n::t!("settings.text.drag_and_drop_selection")),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Enabled",
-                        description: "Enable drag and drop selection.",
+                        title: i18n::t!("settings.text.enabled"),
+                        description: i18n::t!("settings.text.enable_drag_and_drop_selection"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("drag_and_drop_selection.enabled"),
@@ -1542,8 +1543,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Delay",
-                        description: "Delay in milliseconds before drag and drop selection starts.",
+                        title: i18n::t!("settings.text.delay"),
+                        description: i18n::t!("settings.text.delay_in_milliseconds_before_drag_and_drop_selection_starts"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("drag_and_drop_selection.delay"),
@@ -1565,10 +1566,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         metadata: None,
                         files: USER,
                     }),
-                    SettingsPageItem::SectionHeader("Gutter"),
+                    SettingsPageItem::SectionHeader(i18n::t!("settings.text.gutter")),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Show Line Numbers",
-                        description: "Show line numbers in the gutter.",
+                        title: i18n::t!("settings.text.show_line_numbers"),
+                        description: i18n::t!("settings.text.show_line_numbers_in_the_gutter"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("gutter.line_numbers"),
@@ -1591,8 +1592,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Relative Line Numbers",
-                        description: "Controls line number display in the editor's gutter. \"disabled\" shows absolute line numbers, \"enabled\" shows relative line numbers for each absolute line, and \"wrapped\" shows relative line numbers for every line, absolute or wrapped.",
+                        title: i18n::t!("settings.text.relative_line_numbers"),
+                        description: i18n::t!("settings.text.controls_line_number_display_in_the_editor_s_gutter_disa_633ea61a"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("relative_line_numbers"),
@@ -1607,8 +1608,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Line Number Scale",
-                        description: "Relative size of line numbers displayed in the editor.",
+                        title: i18n::t!("settings.text.line_number_scale"),
+                        description: i18n::t!("settings.text.relative_size_of_line_numbers_displayed_in_the_editor"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("editor.line_number_scale"),
@@ -1621,8 +1622,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Show Runnables",
-                        description: "Show runnable buttons in the gutter.",
+                        title: i18n::t!("settings.text.show_runnables"),
+                        description: i18n::t!("settings.text.show_runnable_buttons_in_the_gutter"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("gutter.runnables"),
@@ -1645,8 +1646,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Show Breakpoints",
-                        description: "Show breakpoints in the gutter.",
+                        title: i18n::t!("settings.text.show_breakpoints"),
+                        description: i18n::t!("settings.text.show_breakpoints_in_the_gutter"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("gutter.breakpoints"),
@@ -1669,8 +1670,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Show Folds",
-                        description: "Show code folding controls in the gutter.",
+                        title: i18n::t!("settings.text.show_folds"),
+                        description: i18n::t!("settings.text.show_code_folding_controls_in_the_gutter"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("gutter.folds"),
@@ -1690,8 +1691,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Min Line Number Digits",
-                        description: "Minimum number of characters to reserve space for in the gutter.",
+                        title: i18n::t!("settings.text.min_line_number_digits"),
+                        description: i18n::t!("settings.text.minimum_number_of_characters_to_reserve_space_for_in_the_gutter"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("gutter.min_line_number_digits"),
@@ -1714,8 +1715,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Inline Code Actions",
-                        description: "Show code action button at start of buffer line.",
+                        title: i18n::t!("settings.text.inline_code_actions"),
+                        description: i18n::t!("settings.text.show_code_action_button_at_start_of_buffer_line"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("inline_code_actions"),
@@ -1729,10 +1730,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         metadata: None,
                         files: USER,
                     }),
-                    SettingsPageItem::SectionHeader("Scrollbar"),
+                    SettingsPageItem::SectionHeader(i18n::t!("settings.text.scrollbar")),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Show",
-                        description: "When to show the scrollbar in the editor.",
+                        title: i18n::t!("settings.text.show"),
+                        description: i18n::t!("settings.text.when_to_show_the_scrollbar_in_the_editor"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("scrollbar"),
@@ -1751,8 +1752,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Cursors",
-                        description: "Show cursor positions in the scrollbar.",
+                        title: i18n::t!("settings.text.cursors"),
+                        description: i18n::t!("settings.text.show_cursor_positions_in_the_scrollbar"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("scrollbar.cursors"),
@@ -1771,8 +1772,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Git Diff",
-                        description: "Show Git diff indicators in the scrollbar.",
+                        title: i18n::t!("settings.text.git_diff"),
+                        description: i18n::t!("settings.text.show_git_diff_indicators_in_the_scrollbar"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("scrollbar.git_diff"),
@@ -1796,8 +1797,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Search Results",
-                        description: "Show buffer search result indicators in the scrollbar.",
+                        title: i18n::t!("settings.text.search_results"),
+                        description: i18n::t!("settings.text.show_buffer_search_result_indicators_in_the_scrollbar"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("scrollbar.search_results"),
@@ -1821,8 +1822,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Selected Text",
-                        description: "Show selected text occurrences in the scrollbar.",
+                        title: i18n::t!("settings.text.selected_text"),
+                        description: i18n::t!("settings.text.show_selected_text_occurrences_in_the_scrollbar"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("scrollbar.selected_text"),
@@ -1846,8 +1847,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Selected Symbol",
-                        description: "Show selected symbol occurrences in the scrollbar.",
+                        title: i18n::t!("settings.text.selected_symbol"),
+                        description: i18n::t!("settings.text.show_selected_symbol_occurrences_in_the_scrollbar"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("scrollbar.selected_symbol"),
@@ -1871,8 +1872,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Diagnostics",
-                        description: "Which diagnostic indicators to show in the scrollbar.",
+                        title: i18n::t!("settings.text.diagnostics"),
+                        description: i18n::t!("settings.text.which_diagnostic_indicators_to_show_in_the_scrollbar"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("scrollbar.diagnostics"),
@@ -1896,8 +1897,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Horizontal Scrollbar",
-                        description: "When false, forcefully disables the horizontal scrollbar.",
+                        title: i18n::t!("settings.text.horizontal_scrollbar"),
+                        description: i18n::t!("settings.text.when_false_forcefully_disables_the_horizontal_scrollbar"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("scrollbar.axes.horizontal"),
@@ -1925,8 +1926,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Vertical Scrollbar",
-                        description: "When false, forcefully disables the vertical scrollbar.",
+                        title: i18n::t!("settings.text.vertical_scrollbar"),
+                        description: i18n::t!("settings.text.when_false_forcefully_disables_the_vertical_scrollbar"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("scrollbar.axes.vertical"),
@@ -1953,10 +1954,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         metadata: None,
                         files: USER,
                     }),
-                    SettingsPageItem::SectionHeader("Minimap"),
+                    SettingsPageItem::SectionHeader(i18n::t!("settings.text.minimap")),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Show",
-                        description: "When to show the minimap in the editor.",
+                        title: i18n::t!("settings.text.show"),
+                        description: i18n::t!("settings.text.when_to_show_the_minimap_in_the_editor"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("minimap.show"),
@@ -1972,8 +1973,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Display In",
-                        description: "Where to show the minimap in the editor.",
+                        title: i18n::t!("settings.text.display_in"),
+                        description: i18n::t!("settings.text.where_to_show_the_minimap_in_the_editor"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("minimap.display_in"),
@@ -1997,8 +1998,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Thumb",
-                        description: "When to show the minimap thumb.",
+                        title: i18n::t!("settings.text.thumb"),
+                        description: i18n::t!("settings.text.when_to_show_the_minimap_thumb"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("minimap.thumb"),
@@ -2017,8 +2018,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Thumb Border",
-                        description: "Border style for the minimap's scrollbar thumb.",
+                        title: i18n::t!("settings.text.thumb_border"),
+                        description: i18n::t!("settings.text.border_style_for_the_minimap_s_scrollbar_thumb"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("minimap.thumb_border"),
@@ -2042,8 +2043,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Current Line Highlight",
-                        description: "How to highlight the current line in the minimap.",
+                        title: i18n::t!("settings.text.current_line_highlight"),
+                        description: i18n::t!("settings.text.how_to_highlight_the_current_line_in_the_minimap"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("minimap.current_line_highlight"),
@@ -2067,8 +2068,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Max Width Columns",
-                        description: "Maximum number of columns to display in the minimap.",
+                        title: i18n::t!("settings.text.max_width_columns"),
+                        description: i18n::t!("settings.text.maximum_number_of_columns_to_display_in_the_minimap"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("minimap.max_width_columns"),
@@ -2091,10 +2092,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         metadata: None,
                         files: USER,
                     }),
-                    SettingsPageItem::SectionHeader("Toolbar"),
+                    SettingsPageItem::SectionHeader(i18n::t!("settings.text.toolbar")),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Breadcrumbs",
-                        description: "Show breadcrumbs.",
+                        title: i18n::t!("settings.text.breadcrumbs"),
+                        description: i18n::t!("settings.text.show_breadcrumbs"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("toolbar.breadcrumbs"),
@@ -2118,8 +2119,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Quick Actions",
-                        description: "Show quick action buttons (e.g., search, selection, editor controls, etc.).",
+                        title: i18n::t!("settings.text.quick_actions"),
+                        description: i18n::t!("settings.text.show_quick_action_buttons_e_g_search_selection_editor_controls_etc"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("toolbar.quick_actions"),
@@ -2143,8 +2144,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Selections Menu",
-                        description: "Show the selections menu in the editor toolbar.",
+                        title: i18n::t!("settings.text.selections_menu"),
+                        description: i18n::t!("settings.text.show_the_selections_menu_in_the_editor_toolbar"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("toolbar.selections_menu"),
@@ -2168,8 +2169,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Code Actions",
-                        description: "Show code action buttons in the editor toolbar.",
+                        title: i18n::t!("settings.text.code_actions"),
+                        description: i18n::t!("settings.text.show_code_action_buttons_in_the_editor_toolbar"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("toolbar.code_actions"),
@@ -2198,15 +2199,15 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
             },
         },
         SettingsPage {
-            title: "Languages & Tools",
+            title: i18n::t!("settings.text.languages_tools"),
             items: {
                 let mut items = vec![];
                 items.extend(non_editor_language_settings_data());
                 items.extend([
-                    SettingsPageItem::SectionHeader("File Types"),
+                    SettingsPageItem::SectionHeader(i18n::t!("settings.text.file_types")),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "File Type Associations",
-                        description: "A mapping from languages to files and file extensions that should be treated as that language.",
+                        title: i18n::t!("settings.text.file_type_associations"),
+                        description: i18n::t!("settings.text.a_mapping_from_languages_to_files_and_file_extensions_th_34d6f0be"),
                         aliases: None,
                         field: Box::new(
                             SettingField {
@@ -2227,10 +2228,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                 ]);
 
                 items.extend([
-                    SettingsPageItem::SectionHeader("Diagnostics"),
+                    SettingsPageItem::SectionHeader(i18n::t!("settings.text.diagnostics")),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Max Severity",
-                        description: "Which level to use to filter out diagnostics displayed in the editor.",
+                        title: i18n::t!("settings.text.max_severity"),
+                        description: i18n::t!("settings.text.which_level_to_use_to_filter_out_diagnostics_displayed_in_the_editor"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("diagnostics_max_severity"),
@@ -2244,8 +2245,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Include Warnings",
-                        description: "Whether to show warnings or not by default.",
+                        title: i18n::t!("settings.text.include_warnings"),
+                        description: i18n::t!("settings.text.whether_to_show_warnings_or_not_by_default"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("diagnostics.include_warnings"),
@@ -2264,10 +2265,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         metadata: None,
                         files: USER,
                     }),
-                    SettingsPageItem::SectionHeader("Inline Diagnostics"),
+                    SettingsPageItem::SectionHeader(i18n::t!("settings.text.inline_diagnostics")),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Enabled",
-                        description: "Whether to show diagnostics inline or not.",
+                        title: i18n::t!("settings.text.enabled"),
+                        description: i18n::t!("settings.text.whether_to_show_diagnostics_inline_or_not"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("diagnostics.inline.enabled"),
@@ -2289,8 +2290,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Update Debounce",
-                        description: "The delay in milliseconds to show inline diagnostics after the last diagnostic update.",
+                        title: i18n::t!("settings.text.update_debounce"),
+                        description: i18n::t!("settings.text.the_delay_in_milliseconds_to_show_inline_diagnostics_aft_61a5d105"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("diagnostics.inline.update_debounce_ms"),
@@ -2312,8 +2313,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Padding",
-                        description: "The amount of padding between the end of the source line and the start of the inline diagnostic.",
+                        title: i18n::t!("settings.text.padding"),
+                        description: i18n::t!("settings.text.the_amount_of_padding_between_the_end_of_the_source_line_880419bd"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("diagnostics.inline.padding"),
@@ -2335,8 +2336,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         files: USER,
                     }),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Minimum Column",
-                        description: "The minimum column at which to display inline diagnostics.",
+                        title: i18n::t!("settings.text.minimum_column"),
+                        description: i18n::t!("settings.text.the_minimum_column_at_which_to_display_inline_diagnostics"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("diagnostics.inline.min_column"),
@@ -2357,10 +2358,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         metadata: None,
                         files: USER,
                     }),
-                    SettingsPageItem::SectionHeader("LSP Pull Diagnostics"),
+                    SettingsPageItem::SectionHeader(i18n::t!("settings.text.lsp_pull_diagnostics")),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Enabled",
-                        description: "Whether to pull for language server-powered diagnostics or not.",
+                        title: i18n::t!("settings.text.enabled"),
+                        description: i18n::t!("settings.text.whether_to_pull_for_language_server_powered_diagnostics_or_not"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("diagnostics.lsp_pull_diagnostics.enabled"),
@@ -2383,8 +2384,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     }),
                     // todo(settings_ui): Needs unit
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Debounce",
-                        description: "Minimum time to wait before pulling diagnostics from the language server(s).",
+                        title: i18n::t!("settings.text.debounce"),
+                        description: i18n::t!("settings.text.minimum_time_to_wait_before_pulling_diagnostics_from_the_0d82be4b"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("diagnostics.lsp_pull_diagnostics.debounce_ms"),
@@ -2405,10 +2406,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                         metadata: None,
                         files: USER,
                     }),
-                    SettingsPageItem::SectionHeader("LSP Highlights"),
+                    SettingsPageItem::SectionHeader(i18n::t!("settings.text.lsp_highlights")),
                     SettingsPageItem::SettingItem(SettingItem {
-                        title: "Debounce",
-                        description: "The debounce delay before querying highlights from the language.",
+                        title: i18n::t!("settings.text.debounce"),
+                        description: i18n::t!("settings.text.the_debounce_delay_before_querying_highlights_from_the_language"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("lsp_highlight_debounce"),
@@ -2424,7 +2425,7 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
 
                 // todo(settings_ui): Refresh on extension (un)/installed
                 // Note that `crates/json_schema_store` solves the same problem, there is probably a way to unify the two
-                items.push(SettingsPageItem::SectionHeader(LANGUAGES_SECTION_HEADER));
+                items.push(SettingsPageItem::SectionHeader(languages_section_header()));
                 items.extend(all_language_names(cx).into_iter().map(|language_name| {
                     let link = format!("languages.{language_name}");
                     SettingsPageItem::SubPageLink(SubPageLink {
@@ -2451,12 +2452,12 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
             },
         },
         SettingsPage {
-            title: "Search & Files",
+            title: i18n::t!("settings.text.search_files"),
             items: vec![
-                SettingsPageItem::SectionHeader("Search"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.search")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Whole Word",
-                    description: "Search for whole words by default.",
+                    title: i18n::t!("settings.text.whole_word"),
+                    description: i18n::t!("settings.text.search_for_whole_words_by_default"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("search.whole_word"),
@@ -2475,8 +2476,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Case Sensitive",
-                    description: "Search case-sensitively by default.",
+                    title: i18n::t!("settings.text.case_sensitive"),
+                    description: i18n::t!("settings.text.search_case_sensitively_by_default"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("search.case_sensitive"),
@@ -2500,8 +2501,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Use Smartcase Search",
-                    description: "Whether to automatically enable case-sensitive search based on the search query.",
+                    title: i18n::t!("settings.text.use_smartcase_search"),
+                    description: i18n::t!("settings.text.whether_to_automatically_enable_case_sensitive_search_ba_c60eb147"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("use_smartcase_search"),
@@ -2516,8 +2517,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Include Ignored",
-                    description: "Include ignored files in search results by default.",
+                    title: i18n::t!("settings.text.include_ignored"),
+                    description: i18n::t!("settings.text.include_ignored_files_in_search_results_by_default"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("search.include_ignored"),
@@ -2541,8 +2542,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Regex",
-                    description: "Use regex search by default.",
+                    title: i18n::t!("settings.text.regex"),
+                    description: i18n::t!("settings.text.use_regex_search_by_default"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("search.regex"),
@@ -2557,8 +2558,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Search Wrap",
-                    description: "Whether the editor search results will loop.",
+                    title: i18n::t!("settings.text.search_wrap"),
+                    description: i18n::t!("settings.text.whether_the_editor_search_results_will_loop"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("search_wrap"),
@@ -2571,8 +2572,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Center on Match",
-                    description: "Whether to center the current match in the editor",
+                    title: i18n::t!("settings.text.center_on_match"),
+                    description: i18n::t!("settings.text.whether_to_center_the_current_match_in_the_editor"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("editor.search.center_on_match"),
@@ -2595,8 +2596,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Seed Search Query From Cursor",
-                    description: "When to populate a new search's query based on the text under the cursor.",
+                    title: i18n::t!("settings.text.seed_search_query_from_cursor"),
+                    description: i18n::t!("settings.text.when_to_populate_a_new_search_s_query_based_on_the_text__223ea842"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("seed_search_query_from_cursor"),
@@ -2613,11 +2614,11 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("File Finder"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.file_finder")),
                 // todo: null by default
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Include Ignored in Search",
-                    description: "Use gitignored files when searching.",
+                    title: i18n::t!("settings.text.include_ignored_in_search"),
+                    description: i18n::t!("settings.text.use_gitignored_files_when_searching"),
                     aliases: None,
                     field: Box::new(
                         SettingField {
@@ -2641,8 +2642,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "File Icons",
-                    description: "Show file icons in the file finder.",
+                    title: i18n::t!("settings.text.file_icons"),
+                    description: i18n::t!("settings.text.show_file_icons_in_the_file_finder"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("file_finder.file_icons"),
@@ -2660,8 +2661,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Modal Max Width",
-                    description: "Determines how much space the file finder can take up in relation to the available window width.",
+                    title: i18n::t!("settings.text.modal_max_width"),
+                    description: i18n::t!("settings.text.determines_how_much_space_the_file_finder_can_take_up_in_cc9ecae1"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("file_finder.modal_max_width"),
@@ -2683,8 +2684,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Skip Focus For Active In Search",
-                    description: "Whether the file finder should skip focus for the active file in search results.",
+                    title: i18n::t!("settings.text.skip_focus_for_active_in_search"),
+                    description: i18n::t!("settings.text.whether_the_file_finder_should_skip_focus_for_the_active_363e6868"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("file_finder.skip_focus_for_active_in_search"),
@@ -2706,8 +2707,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Git Status",
-                    description: "Show the Git status in the file finder.",
+                    title: i18n::t!("settings.text.git_status"),
+                    description: i18n::t!("settings.text.show_the_git_status_in_the_file_finder"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("file_finder.git_status"),
@@ -2724,10 +2725,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("File Scan"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.file_scan")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "File Scan Exclusions",
-                    description: "Files or globs of files that will be excluded by Don Editor entirely. They will be skipped during file scans, file searches, and not be displayed in the project file tree. Takes precedence over \"File Scan Inclusions\"",
+                    title: i18n::t!("settings.text.file_scan_exclusions"),
+                    description: i18n::t!("settings.text.files_or_globs_of_files_that_will_be_excluded_by_don_edi_bb6d8cff"),
                     aliases: None,
                     field: Box::new(
                         SettingField {
@@ -2749,8 +2750,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "File Scan Inclusions",
-                    description: "Files or globs of files that will be included by Don Editor, even when ignored by git. This is useful for files that are not tracked by git, but are still important to your project. Note that globs that are overly broad can slow down Gram's file scanning. \"File Scan Exclusions\" takes precedence over these inclusions",
+                    title: i18n::t!("settings.text.file_scan_inclusions"),
+                    description: i18n::t!("settings.text.files_or_globs_of_files_that_will_be_included_by_don_edi_fe986050"),
                     aliases: None,
                     field: Box::new(
                         SettingField {
@@ -2772,8 +2773,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Restore File State",
-                    description: "Restore previous file state when reopening.",
+                    title: i18n::t!("settings.text.restore_file_state"),
+                    description: i18n::t!("settings.text.restore_previous_file_state_when_reopening"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("restore_on_file_reopen"),
@@ -2788,8 +2789,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Close on File Delete",
-                    description: "Automatically close files that have been deleted.",
+                    title: i18n::t!("settings.text.close_on_file_delete"),
+                    description: i18n::t!("settings.text.automatically_close_files_that_have_been_deleted"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("close_on_file_delete"),
@@ -2806,12 +2807,12 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
             ],
         },
         SettingsPage {
-            title: "Window & Layout",
+            title: i18n::t!("settings.text.window_layout"),
             items: vec![
-                SettingsPageItem::SectionHeader("Status Bar"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.status_bar")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show",
-                    description: "Display the status bar.",
+                    title: i18n::t!("settings.text.show"),
+                    description: i18n::t!("settings.text.display_the_status_bar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("status_bar.show"),
@@ -2833,8 +2834,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Position",
-                    description: "Show the status bar at the bottom or top of the window.",
+                    title: i18n::t!("settings.text.position"),
+                    description: i18n::t!("settings.text.show_the_status_bar_at_the_bottom_or_top_of_the_window"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("status_bar.position"),
@@ -2856,8 +2857,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Icon Size",
-                    description: "Size of the icons in the status bar",
+                    title: i18n::t!("settings.text.icon_size"),
+                    description: i18n::t!("settings.text.size_of_the_icons_in_the_status_bar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("status_bar.icon_size"),
@@ -2879,8 +2880,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Active File",
-                    description: "Show the active file name in the status bar.",
+                    title: i18n::t!("settings.text.active_file"),
+                    description: i18n::t!("settings.text.show_the_active_file_name_in_the_status_bar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("status_bar.active_file"),
@@ -2902,8 +2903,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Project Panel Button",
-                    description: "Show the project panel button in the status bar.",
+                    title: i18n::t!("settings.text.project_panel_button"),
+                    description: i18n::t!("settings.text.show_the_project_panel_button_in_the_status_bar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.button"),
@@ -2921,8 +2922,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Active Language Button",
-                    description: "Show the active language button in the status bar.",
+                    title: i18n::t!("settings.text.active_language_button"),
+                    description: i18n::t!("settings.text.show_the_active_language_button_in_the_status_bar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("status_bar.active_language_button"),
@@ -2944,8 +2945,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Active Encoding Button",
-                    description: "Control when to show the active encoding in the status bar.",
+                    title: i18n::t!("settings.text.active_encoding_button"),
+                    description: i18n::t!("settings.text.control_when_to_show_the_active_encoding_in_the_status_bar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("status_bar.active_encoding_button"),
@@ -2967,8 +2968,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Cursor Position Button",
-                    description: "Show the cursor position button in the status bar.",
+                    title: i18n::t!("settings.text.cursor_position_button"),
+                    description: i18n::t!("settings.text.show_the_cursor_position_button_in_the_status_bar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("status_bar.cursor_position_button"),
@@ -2990,8 +2991,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Terminal Button",
-                    description: "Show the terminal button in the status bar.",
+                    title: i18n::t!("settings.text.terminal_button"),
+                    description: i18n::t!("settings.text.show_the_terminal_button_in_the_status_bar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("terminal.button"),
@@ -3006,8 +3007,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Diagnostics Button",
-                    description: "Show the project diagnostics button in the status bar.",
+                    title: i18n::t!("settings.text.diagnostics_button"),
+                    description: i18n::t!("settings.text.show_the_project_diagnostics_button_in_the_status_bar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("diagnostics.button"),
@@ -3022,8 +3023,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Project Search Button",
-                    description: "Show the project search button in the status bar.",
+                    title: i18n::t!("settings.text.project_search_button"),
+                    description: i18n::t!("settings.text.show_the_project_search_button_in_the_status_bar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("search.button"),
@@ -3042,8 +3043,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Debugger Button",
-                    description: "Show the debugger button in the status bar.",
+                    title: i18n::t!("settings.text.debugger_button"),
+                    description: i18n::t!("settings.text.show_the_debugger_button_in_the_status_bar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("debugger.button"),
@@ -3057,10 +3058,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Title Bar"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.title_bar")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show Title Bar",
-                    description: "Show or hide the entire title bar.",
+                    title: i18n::t!("settings.text.show_title_bar"),
+                    description: i18n::t!("settings.text.show_or_hide_the_entire_title_bar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("title_bar.show"),
@@ -3082,8 +3083,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show Branch Icon",
-                    description: "Show the branch icon beside branch switcher in the titlebar.",
+                    title: i18n::t!("settings.text.show_branch_icon"),
+                    description: i18n::t!("settings.text.show_the_branch_icon_beside_branch_switcher_in_the_titlebar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("title_bar.show_branch_icon"),
@@ -3105,8 +3106,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show Branch Name",
-                    description: "Show the branch name button in the titlebar.",
+                    title: i18n::t!("settings.text.show_branch_name"),
+                    description: i18n::t!("settings.text.show_the_branch_name_button_in_the_titlebar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("title_bar.show_branch_name"),
@@ -3128,8 +3129,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show Project Items",
-                    description: "Show the project host and name in the titlebar.",
+                    title: i18n::t!("settings.text.show_project_items"),
+                    description: i18n::t!("settings.text.show_the_project_host_and_name_in_the_titlebar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("title_bar.show_project_items"),
@@ -3151,8 +3152,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show Onboarding Banner",
-                    description: "Show banners announcing new features in the titlebar.",
+                    title: i18n::t!("settings.text.show_onboarding_banner"),
+                    description: i18n::t!("settings.text.show_banners_announcing_new_features_in_the_titlebar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("title_bar.show_onboarding_banner"),
@@ -3174,8 +3175,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show Menus",
-                    description: "Show the menus in the titlebar.",
+                    title: i18n::t!("settings.text.show_menus"),
+                    description: i18n::t!("settings.text.show_the_menus_in_the_titlebar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("title_bar.show_menus"),
@@ -3192,10 +3193,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Tab Bar"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.tab_bar")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show Tab Bar",
-                    description: "Show the tab bar in the editor.",
+                    title: i18n::t!("settings.text.show_tab_bar"),
+                    description: i18n::t!("settings.text.show_the_tab_bar_in_the_editor"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("tab_bar.show"),
@@ -3208,8 +3209,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show Git Status In Tabs",
-                    description: "Show the Git file status on a tab item.",
+                    title: i18n::t!("settings.text.show_git_status_in_tabs"),
+                    description: i18n::t!("settings.text.show_the_git_file_status_on_a_tab_item"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("tabs.git_status"),
@@ -3224,8 +3225,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show File Icons In Tabs",
-                    description: "Show the file icon for a tab.",
+                    title: i18n::t!("settings.text.show_file_icons_in_tabs"),
+                    description: i18n::t!("settings.text.show_the_file_icon_for_a_tab"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("tabs.file_icons"),
@@ -3240,8 +3241,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Tab Close Position",
-                    description: "Position of the close button in a tab.",
+                    title: i18n::t!("settings.text.tab_close_position"),
+                    description: i18n::t!("settings.text.position_of_the_close_button_in_a_tab"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("tabs.close_position"),
@@ -3257,8 +3258,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
                     files: USER,
-                    title: "Maximum Tabs",
-                    description: "Maximum open tabs in a pane. Will not close an unsaved tab.",
+                    title: i18n::t!("settings.text.maximum_tabs"),
+                    description: i18n::t!("settings.text.maximum_open_tabs_in_a_pane_will_not_close_an_unsaved_tab"),
                     aliases: None,
                     // todo(settings_ui): The default for this value is null and it's use in code
                     // is complex, so I'm going to come back to this later
@@ -3275,8 +3276,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Pinned Tabs Layout",
-                    description: "Show pinned tabs in a separate row above unpinned tabs.",
+                    title: i18n::t!("settings.text.pinned_tabs_layout"),
+                    description: i18n::t!("settings.text.show_pinned_tabs_in_a_separate_row_above_unpinned_tabs"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("tab_bar.show_pinned_tabs_in_separate_row"),
@@ -3298,8 +3299,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Wrap Tabs",
-                    description: "Wrap tabs onto additional rows when the tab bar overflows.",
+                    title: i18n::t!("settings.text.wrap_tabs"),
+                    description: i18n::t!("settings.text.wrap_tabs_onto_additional_rows_when_the_tab_bar_overflows"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("tab_bar.wrap_tabs"),
@@ -3314,8 +3315,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show Navigation History Buttons",
-                    description: "Show the navigation history buttons in the tab bar.",
+                    title: i18n::t!("settings.text.show_navigation_history_buttons"),
+                    description: i18n::t!("settings.text.show_the_navigation_history_buttons_in_the_tab_bar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("tab_bar.show_nav_history_buttons"),
@@ -3337,8 +3338,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show Tab Bar Buttons",
-                    description: "Show the tab bar buttons (New, Split Pane, Zoom).",
+                    title: i18n::t!("settings.text.show_tab_bar_buttons"),
+                    description: i18n::t!("settings.text.show_the_tab_bar_buttons_new_split_pane_zoom"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("tab_bar.show_tab_bar_buttons"),
@@ -3359,10 +3360,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Tab Settings"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.tab_settings")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Activate On Close",
-                    description: "What to do after closing the current tab.",
+                    title: i18n::t!("settings.text.activate_on_close"),
+                    description: i18n::t!("settings.text.what_to_do_after_closing_the_current_tab"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("tabs.activate_on_close"),
@@ -3380,8 +3381,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Tab Show Diagnostics",
-                    description: "Which files containing diagnostic errors/warnings to mark in the tabs.",
+                    title: i18n::t!("settings.text.tab_show_diagnostics"),
+                    description: i18n::t!("settings.text.which_files_containing_diagnostic_errors_warnings_to_mar_67f03318"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("tabs.show_diagnostics"),
@@ -3399,8 +3400,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show Close Button",
-                    description: "Controls the appearance behavior of the tab's close button.",
+                    title: i18n::t!("settings.text.show_close_button"),
+                    description: i18n::t!("settings.text.controls_the_appearance_behavior_of_the_tab_s_close_button"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("tabs.show_close_button"),
@@ -3417,10 +3418,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Preview Tabs"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.preview_tabs")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Preview Tabs Enabled",
-                    description: "Show opened editors as preview tabs.",
+                    title: i18n::t!("settings.text.preview_tabs_enabled"),
+                    description: i18n::t!("settings.text.show_opened_editors_as_preview_tabs"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("preview_tabs.enabled"),
@@ -3438,8 +3439,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Enable Preview From Project Panel",
-                    description: "Whether to open tabs in preview mode when opened from the project panel with a single click.",
+                    title: i18n::t!("settings.text.enable_preview_from_project_panel"),
+                    description: i18n::t!("settings.text.whether_to_open_tabs_in_preview_mode_when_opened_from_th_a32b0bf4"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("preview_tabs.enable_preview_from_project_panel"),
@@ -3461,8 +3462,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Enable Preview From File Finder",
-                    description: "Whether to open tabs in preview mode when selected from the file finder.",
+                    title: i18n::t!("settings.text.enable_preview_from_file_finder"),
+                    description: i18n::t!("settings.text.whether_to_open_tabs_in_preview_mode_when_selected_from__ac999ca8"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("preview_tabs.enable_preview_from_file_finder"),
@@ -3484,8 +3485,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Enable Preview From Multibuffer",
-                    description: "Whether to open tabs in preview mode when opened from a multibuffer.",
+                    title: i18n::t!("settings.text.enable_preview_from_multibuffer"),
+                    description: i18n::t!("settings.text.whether_to_open_tabs_in_preview_mode_when_opened_from_a_multibuffer"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("preview_tabs.enable_preview_from_multibuffer"),
@@ -3507,8 +3508,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Enable Preview Multibuffer From Code Navigation",
-                    description: "Whether to open tabs in preview mode when code navigation is used to open a multibuffer.",
+                    title: i18n::t!("settings.text.enable_preview_multibuffer_from_code_navigation"),
+                    description: i18n::t!("settings.text.whether_to_open_tabs_in_preview_mode_when_code_navigatio_56814706"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("preview_tabs.enable_preview_multibuffer_from_code_navigation"),
@@ -3530,8 +3531,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Enable Preview File From Code Navigation",
-                    description: "Whether to open tabs in preview mode when code navigation is used to open a single file.",
+                    title: i18n::t!("settings.text.enable_preview_file_from_code_navigation"),
+                    description: i18n::t!("settings.text.whether_to_open_tabs_in_preview_mode_when_code_navigatio_e99a63ef"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("preview_tabs.enable_preview_file_from_code_navigation"),
@@ -3553,8 +3554,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Enable Keep Preview On Code Navigation",
-                    description: "Whether to keep tabs in preview mode when code navigation is used to navigate away from them. If `enable_preview_file_from_code_navigation` or `enable_preview_multibuffer_from_code_navigation` is also true, the new tab may replace the existing one.",
+                    title: i18n::t!("settings.text.enable_keep_preview_on_code_navigation"),
+                    description: i18n::t!("settings.text.whether_to_keep_tabs_in_preview_mode_when_code_navigatio_7d4b8e1d"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("preview_tabs.enable_keep_preview_on_code_navigation"),
@@ -3575,10 +3576,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Layout"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.layout")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Bottom Dock Layout",
-                    description: "Layout mode for the bottom dock.",
+                    title: i18n::t!("settings.text.bottom_dock_layout"),
+                    description: i18n::t!("settings.text.layout_mode_for_the_bottom_dock"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("bottom_dock_layout"),
@@ -3594,8 +3595,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
                     files: USER,
-                    title: "Centered Layout Left Padding",
-                    description: "Left padding for centered layout.",
+                    title: i18n::t!("settings.text.centered_layout_left_padding"),
+                    description: i18n::t!("settings.text.left_padding_for_centered_layout"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("centered_layout.left_padding"),
@@ -3619,8 +3620,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
                     files: USER,
-                    title: "Centered Layout Right Padding",
-                    description: "Right padding for centered layout.",
+                    title: i18n::t!("settings.text.centered_layout_right_padding"),
+                    description: i18n::t!("settings.text.right_padding_for_centered_layout"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("centered_layout.right_padding"),
@@ -3642,11 +3643,11 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     }),
                     metadata: None,
                 }),
-                SettingsPageItem::SectionHeader("Window"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.window")),
                 // todo(settings_ui): Should we filter by platform.as_ref()?
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Use System Window Tabs",
-                    description: "(macOS only) whether to allow Windows to tab together.",
+                    title: i18n::t!("settings.text.use_system_window_tabs"),
+                    description: i18n::t!("settings.text.macos_only_whether_to_allow_windows_to_tab_together"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("use_system_window_tabs"),
@@ -3661,8 +3662,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Window Decorations",
-                    description: "(Linux only) whether Don Editor or your compositor should draw window decorations.",
+                    title: i18n::t!("settings.text.window_decorations"),
+                    description: i18n::t!("settings.text.linux_only_whether_don_editor_or_your_compositor_should__f02be8d1"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("window_decorations"),
@@ -3677,8 +3678,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Option as Alt",
-                    description: "(Mac only) which Option keys should the editor treat as alt. Needs restart to take effect.",
+                    title: i18n::t!("settings.text.option_as_alt"),
+                    description: i18n::t!("settings.text.mac_only_which_option_keys_should_the_editor_treat_as_al_24b357c1"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("option_as_alt"),
@@ -3692,10 +3693,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Pane Modifiers"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.pane_modifiers")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Inactive Opacity",
-                    description: "Opacity of inactive panels (0.0 - 1.0).",
+                    title: i18n::t!("settings.text.inactive_opacity"),
+                    description: i18n::t!("settings.text.opacity_of_inactive_panels_0_0_1_0"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("active_pane_modifiers.inactive_opacity"),
@@ -3719,8 +3720,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Border Size",
-                    description: "Size of the border surrounding the active pane.",
+                    title: i18n::t!("settings.text.border_size"),
+                    description: i18n::t!("settings.text.size_of_the_border_surrounding_the_active_pane"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("active_pane_modifiers.border_size"),
@@ -3744,8 +3745,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Zoomed Padding",
-                    description: "Show padding for zoomed panes.",
+                    title: i18n::t!("settings.text.zoomed_padding"),
+                    description: i18n::t!("settings.text.show_padding_for_zoomed_panes"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("zoomed_padding"),
@@ -3757,10 +3758,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Pane Split Direction"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.pane_split_direction")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Vertical Split Direction",
-                    description: "Direction to split vertically.",
+                    title: i18n::t!("settings.text.vertical_split_direction"),
+                    description: i18n::t!("settings.text.direction_to_split_vertically"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("pane_split_direction_vertical"),
@@ -3778,8 +3779,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Horizontal Split Direction",
-                    description: "Direction to split horizontally.",
+                    title: i18n::t!("settings.text.horizontal_split_direction"),
+                    description: i18n::t!("settings.text.direction_to_split_horizontally"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("pane_split_direction_horizontal"),
@@ -3799,12 +3800,12 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
             ],
         },
         SettingsPage {
-            title: "Panels",
+            title: i18n::t!("settings.text.panels"),
             items: vec![
-                SettingsPageItem::SectionHeader("Project Panel"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.project_panel")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Project Panel Dock",
-                    description: "Where to dock the project panel.",
+                    title: i18n::t!("settings.text.project_panel_dock"),
+                    description: i18n::t!("settings.text.where_to_dock_the_project_panel"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.dock"),
@@ -3819,8 +3820,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Project Panel Default Width",
-                    description: "Default width of the project panel in pixels.",
+                    title: i18n::t!("settings.text.project_panel_default_width"),
+                    description: i18n::t!("settings.text.default_width_of_the_project_panel_in_pixels"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.default_width"),
@@ -3842,8 +3843,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Hide .gitignore",
-                    description: "Whether to hide the gitignore entries in the project panel.",
+                    title: i18n::t!("settings.text.hide_gitignore"),
+                    description: i18n::t!("settings.text.whether_to_hide_the_gitignore_entries_in_the_project_panel"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.hide_gitignore"),
@@ -3865,8 +3866,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Entry Spacing",
-                    description: "Spacing between worktree entries in the project panel.",
+                    title: i18n::t!("settings.text.entry_spacing"),
+                    description: i18n::t!("settings.text.spacing_between_worktree_entries_in_the_project_panel"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.entry_spacing"),
@@ -3888,8 +3889,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "File Icons",
-                    description: "Show file icons in the project panel.",
+                    title: i18n::t!("settings.text.file_icons"),
+                    description: i18n::t!("settings.text.show_file_icons_in_the_project_panel"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.file_icons"),
@@ -3907,8 +3908,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Folder Icons",
-                    description: "Whether to show folder icons or chevrons for directories in the project panel.",
+                    title: i18n::t!("settings.text.folder_icons"),
+                    description: i18n::t!("settings.text.whether_to_show_folder_icons_or_chevrons_for_directories_333b3eae"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.folder_icons"),
@@ -3930,8 +3931,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Git Status",
-                    description: "Show the Git status in the project panel.",
+                    title: i18n::t!("settings.text.git_status"),
+                    description: i18n::t!("settings.text.show_the_git_status_in_the_project_panel"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.git_status"),
@@ -3949,8 +3950,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Indent Size",
-                    description: "Amount of indentation for nested items.",
+                    title: i18n::t!("settings.text.indent_size"),
+                    description: i18n::t!("settings.text.amount_of_indentation_for_nested_items"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.indent_size"),
@@ -3972,8 +3973,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Auto Reveal Entries",
-                    description: "Whether to reveal entries in the project panel automatically when a corresponding project entry becomes active.",
+                    title: i18n::t!("settings.text.auto_reveal_entries"),
+                    description: i18n::t!("settings.text.whether_to_reveal_entries_in_the_project_panel_automatic_ac333be6"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.auto_reveal_entries"),
@@ -3995,8 +3996,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Starts Open",
-                    description: "Whether the project panel should open on startup.",
+                    title: i18n::t!("settings.text.starts_open"),
+                    description: i18n::t!("settings.text.whether_the_project_panel_should_open_on_startup"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.starts_open"),
@@ -4018,8 +4019,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Auto Fold Directories",
-                    description: "Whether to fold directories automatically and show compact folders when a directory has only one subdirectory inside.",
+                    title: i18n::t!("settings.text.auto_fold_directories"),
+                    description: i18n::t!("settings.text.whether_to_fold_directories_automatically_and_show_compa_a88d2f12"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.auto_fold_dirs"),
@@ -4041,8 +4042,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show Scrollbar",
-                    description: "Show the scrollbar in the project panel.",
+                    title: i18n::t!("settings.text.show_scrollbar"),
+                    description: i18n::t!("settings.text.show_the_scrollbar_in_the_project_panel"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.scrollbar.show"),
@@ -4070,8 +4071,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show Diagnostics",
-                    description: "Which files containing diagnostic errors/warnings to mark in the project panel.",
+                    title: i18n::t!("settings.text.show_diagnostics"),
+                    description: i18n::t!("settings.text.which_files_containing_diagnostic_errors_warnings_to_mar_57a8cfdd"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.show_diagnostics"),
@@ -4093,8 +4094,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Sticky Scroll",
-                    description: "Whether to stick parent directories at top of the project panel.",
+                    title: i18n::t!("settings.text.sticky_scroll"),
+                    description: i18n::t!("settings.text.whether_to_stick_parent_directories_at_top_of_the_project_panel"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.sticky_scroll"),
@@ -4117,8 +4118,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
                     files: USER,
-                    title: "Show Indent Guides",
-                    description: "Show indent guides in the project panel.",
+                    title: i18n::t!("settings.text.show_indent_guides"),
+                    description: i18n::t!("settings.text.show_indent_guides_in_the_project_panel"),
                     aliases: None,
                     field: Box::new(
                         SettingField {
@@ -4145,8 +4146,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Drag and Drop",
-                    description: "Whether to enable drag-and-drop operations in the project panel.",
+                    title: i18n::t!("settings.text.drag_and_drop"),
+                    description: i18n::t!("settings.text.whether_to_enable_drag_and_drop_operations_in_the_project_panel"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.drag_and_drop"),
@@ -4168,8 +4169,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Hide Root",
-                    description: "Whether to hide the root entry when only one folder is open in the window.",
+                    title: i18n::t!("settings.text.hide_root"),
+                    description: i18n::t!("settings.text.whether_to_hide_the_root_entry_when_only_one_folder_is_o_e8fc576f"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.drag_and_drop"),
@@ -4187,8 +4188,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Hide Hidden",
-                    description: "Whether to hide the hidden entries in the project panel.",
+                    title: i18n::t!("settings.text.hide_hidden"),
+                    description: i18n::t!("settings.text.whether_to_hide_the_hidden_entries_in_the_project_panel"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.hide_hidden"),
@@ -4210,8 +4211,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Hidden Files",
-                    description: "Globs to match files that will be considered \"hidden\" and can be hidden from the project panel.",
+                    title: i18n::t!("settings.text.hidden_files"),
+                    description: i18n::t!("settings.text.globs_to_match_files_that_will_be_considered_hidden_and__d813cbb0"),
                     aliases: None,
                     field: Box::new(
                         SettingField {
@@ -4228,10 +4229,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Auto Open Files"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.auto_open_files")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "On Create",
-                    description: "Whether to automatically open newly created files in the editor.",
+                    title: i18n::t!("settings.text.on_create"),
+                    description: i18n::t!("settings.text.whether_to_automatically_open_newly_created_files_in_the_editor"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.auto_open.on_create"),
@@ -4246,8 +4247,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "On Paste",
-                    description: "Whether to automatically open files after pasting or duplicating them.",
+                    title: i18n::t!("settings.text.on_paste"),
+                    description: i18n::t!("settings.text.whether_to_automatically_open_files_after_pasting_or_dup_793f745f"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.auto_open.on_paste"),
@@ -4262,8 +4263,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "On Drop",
-                    description: "Whether to automatically open files dropped from external sources.",
+                    title: i18n::t!("settings.text.on_drop"),
+                    description: i18n::t!("settings.text.whether_to_automatically_open_files_dropped_from_external_sources"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.auto_open.on_drop"),
@@ -4278,8 +4279,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Should Focus",
-                    description: "Whether to focus on files automatically opened.",
+                    title: i18n::t!("settings.text.should_focus"),
+                    description: i18n::t!("settings.text.whether_to_focus_on_files_automatically_opened"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("project_panel.auto_open.should_focus"),
@@ -4294,8 +4295,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Sort Mode",
-                    description: "Sort order for entries in the project panel.",
+                    title: i18n::t!("settings.text.sort_mode"),
+                    description: i18n::t!("settings.text.sort_order_for_entries_in_the_project_panel"),
                     aliases: None,
                     field: Box::new(SettingField {
                         pick: |settings_content| {
@@ -4315,10 +4316,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     })),
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Terminal Panel"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.terminal_panel")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Terminal Dock",
-                    description: "Where to dock the terminal panel.",
+                    title: i18n::t!("settings.text.terminal_dock"),
+                    description: i18n::t!("settings.text.where_to_dock_the_terminal_panel"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("terminal.dock"),
@@ -4330,10 +4331,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Outline Panel"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.outline_panel")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Outline Panel Button",
-                    description: "Show the outline panel button in the status bar.",
+                    title: i18n::t!("settings.text.outline_panel_button"),
+                    description: i18n::t!("settings.text.show_the_outline_panel_button_in_the_status_bar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("outline_panel.button"),
@@ -4351,8 +4352,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Outline Panel Dock",
-                    description: "Where to dock the outline panel.",
+                    title: i18n::t!("settings.text.outline_panel_dock"),
+                    description: i18n::t!("settings.text.where_to_dock_the_outline_panel"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("outline_panel.dock"),
@@ -4367,8 +4368,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Outline Panel Default Width",
-                    description: "Default width of the outline panel in pixels.",
+                    title: i18n::t!("settings.text.outline_panel_default_width"),
+                    description: i18n::t!("settings.text.default_width_of_the_outline_panel_in_pixels"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("outline_panel.default_width"),
@@ -4390,8 +4391,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "File Icons",
-                    description: "Show file icons in the outline panel.",
+                    title: i18n::t!("settings.text.file_icons"),
+                    description: i18n::t!("settings.text.show_file_icons_in_the_outline_panel"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("outline_panel.file_icons"),
@@ -4409,8 +4410,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Folder Icons",
-                    description: "Whether to show folder icons or chevrons for directories in the outline panel.",
+                    title: i18n::t!("settings.text.folder_icons"),
+                    description: i18n::t!("settings.text.whether_to_show_folder_icons_or_chevrons_for_directories_99a0813c"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("outline_panel.folder_icons"),
@@ -4432,8 +4433,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Git Status",
-                    description: "Show the Git status in the outline panel.",
+                    title: i18n::t!("settings.text.git_status"),
+                    description: i18n::t!("settings.text.show_the_git_status_in_the_outline_panel"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("outline_panel.git_status"),
@@ -4451,8 +4452,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Indent Size",
-                    description: "Amount of indentation for nested items.",
+                    title: i18n::t!("settings.text.indent_size"),
+                    description: i18n::t!("settings.text.amount_of_indentation_for_nested_items"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("outline_panel.indent_size"),
@@ -4474,8 +4475,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Auto Reveal Entries",
-                    description: "Whether to reveal when a corresponding outline entry becomes active.",
+                    title: i18n::t!("settings.text.auto_reveal_entries"),
+                    description: i18n::t!("settings.text.whether_to_reveal_when_a_corresponding_outline_entry_becomes_active"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("outline_panel.auto_reveal_entries"),
@@ -4497,8 +4498,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Auto Fold Directories",
-                    description: "Whether to fold directories automatically when a directory contains only one subdirectory.",
+                    title: i18n::t!("settings.text.auto_fold_directories"),
+                    description: i18n::t!("settings.text.whether_to_fold_directories_automatically_when_a_directo_e67c6381"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("outline_panel.auto_fold_dirs"),
@@ -4521,8 +4522,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
                     files: USER,
-                    title: "Show Indent Guides",
-                    description: "When to show indent guides in the outline panel.",
+                    title: i18n::t!("settings.text.show_indent_guides"),
+                    description: i18n::t!("settings.text.when_to_show_indent_guides_in_the_outline_panel"),
                     aliases: None,
                     field: Box::new(
                         SettingField {
@@ -4548,10 +4549,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     ),
                     metadata: None,
                 }),
-                SettingsPageItem::SectionHeader("Git Panel"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.git_panel")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Git Panel Button",
-                    description: "Show the Git panel button in the status bar.",
+                    title: i18n::t!("settings.text.git_panel_button"),
+                    description: i18n::t!("settings.text.show_the_git_panel_button_in_the_status_bar"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git_panel.button"),
@@ -4566,8 +4567,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Git Panel Dock",
-                    description: "Where to dock the Git panel.",
+                    title: i18n::t!("settings.text.git_panel_dock"),
+                    description: i18n::t!("settings.text.where_to_dock_the_git_panel"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git_panel.dock"),
@@ -4580,8 +4581,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Git Panel Default Width",
-                    description: "Default width of the Git panel in pixels.",
+                    title: i18n::t!("settings.text.git_panel_default_width"),
+                    description: i18n::t!("settings.text.default_width_of_the_git_panel_in_pixels"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git_panel.default_width"),
@@ -4599,8 +4600,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Git Panel Status Style",
-                    description: "How entry statuses are displayed.",
+                    title: i18n::t!("settings.text.git_panel_status_style"),
+                    description: i18n::t!("settings.text.how_entry_statuses_are_displayed"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git_panel.status_style"),
@@ -4618,8 +4619,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Fallback Branch Name",
-                    description: "Default branch name will be when init.defaultbranch is not set in Git.",
+                    title: i18n::t!("settings.text.fallback_branch_name"),
+                    description: i18n::t!("settings.text.default_branch_name_will_be_when_init_defaultbranch_is_n_ba994ccb"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git_panel.fallback_branch_name"),
@@ -4641,8 +4642,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Sort By Path",
-                    description: "Enable to sort entries in the panel by path, disable to sort by status.",
+                    title: i18n::t!("settings.text.sort_by_path"),
+                    description: i18n::t!("settings.text.enable_to_sort_entries_in_the_panel_by_path_disable_to_s_aba4a4f7"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git_panel.sort_by_path"),
@@ -4660,8 +4661,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Diff Stats",
-                    description: "Whether to show added and deleted line counts for each entry.",
+                    title: i18n::t!("settings.text.diff_stats"),
+                    description: i18n::t!("settings.text.whether_to_show_added_and_deleted_line_counts_for_each_entry"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git_panel.diff_stats"),
@@ -4674,8 +4675,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Collapse Untracked Diff",
-                    description: "Whether to collapse untracked files in the diff panel.",
+                    title: i18n::t!("settings.text.collapse_untracked_diff"),
+                    description: i18n::t!("settings.text.whether_to_collapse_untracked_files_in_the_diff_panel"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git_panel.collapse_untracked_diff"),
@@ -4697,8 +4698,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Tree View",
-                    description: "Enable to show entries in tree view list, disable to show in flat view list.",
+                    title: i18n::t!("settings.text.tree_view"),
+                    description: i18n::t!("settings.text.enable_to_show_entries_in_tree_view_list_disable_to_show_0b40b610"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git_panel.tree_view"),
@@ -4716,8 +4717,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Scroll Bar",
-                    description: "How and when the scrollbar should be displayed.",
+                    title: i18n::t!("settings.text.scroll_bar"),
+                    description: i18n::t!("settings.text.how_and_when_the_scrollbar_should_be_displayed"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git_panel.scrollbar.show"),
@@ -4744,10 +4745,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Debugger Panel"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.debugger_panel")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Debugger Panel Dock",
-                    description: "The dock position of the debug panel.",
+                    title: i18n::t!("settings.text.debugger_panel_dock"),
+                    description: i18n::t!("settings.text.the_dock_position_of_the_debug_panel"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("debugger.dock"),
@@ -4762,12 +4763,12 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
             ],
         },
         SettingsPage {
-            title: "Debugger",
+            title: i18n::t!("settings.text.debugger"),
             items: vec![
-                SettingsPageItem::SectionHeader("General"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.general")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Stepping Granularity",
-                    description: "Determines the stepping granularity for debug operations.",
+                    title: i18n::t!("settings.text.stepping_granularity"),
+                    description: i18n::t!("settings.text.determines_the_stepping_granularity_for_debug_operations"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("debugger.stepping_granularity"),
@@ -4789,8 +4790,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Save Breakpoints",
-                    description: "Whether breakpoints should be reused across Don Editor sessions.",
+                    title: i18n::t!("settings.text.save_breakpoints"),
+                    description: i18n::t!("settings.text.whether_breakpoints_should_be_reused_across_don_editor_sessions"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("debugger.save_breakpoints"),
@@ -4812,8 +4813,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Timeout",
-                    description: "Time in milliseconds until timeout error when connecting to a TCP debug adapter.",
+                    title: i18n::t!("settings.text.timeout"),
+                    description: i18n::t!("settings.text.time_in_milliseconds_until_timeout_error_when_connecting_709d705d"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("debugger.timeout"),
@@ -4828,8 +4829,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Log DAP Communications",
-                    description: "Whether to log messages between active debug adapters and Gram.",
+                    title: i18n::t!("settings.text.log_dap_communications"),
+                    description: i18n::t!("settings.text.whether_to_log_messages_between_active_debug_adapters_and_gram"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("debugger.log_dap_communications"),
@@ -4851,8 +4852,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Format DAP Log Messages",
-                    description: "Whether to format DAP messages when adding them to debug adapter logger.",
+                    title: i18n::t!("settings.text.format_dap_log_messages"),
+                    description: i18n::t!("settings.text.whether_to_format_dap_messages_when_adding_them_to_debug_07d18b09"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("debugger.format_dap_log_messages"),
@@ -4876,14 +4877,14 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
             ],
         },
         SettingsPage {
-            title: "Terminal",
+            title: i18n::t!("settings.text.terminal"),
             items: vec![
-                SettingsPageItem::SectionHeader("Environment"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.environment")),
                 SettingsPageItem::DynamicItem(DynamicItem {
                     discriminant: SettingItem {
                         files: USER | PROJECT,
-                        title: "Shell",
-                        description: "What shell to use when opening a terminal.",
+                        title: i18n::t!("settings.text.shell"),
+                        description: i18n::t!("settings.text.what_shell_to_use_when_opening_a_terminal"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("terminal.shell$"),
@@ -4955,8 +4956,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                             settings::ShellDiscriminants::Program => vec![
                                 SettingItem {
                                     files: USER | PROJECT,
-                                    title: "Program",
-                                    description: "The shell program to use.",
+                                    title: i18n::t!("settings.text.program"),
+                                    description: i18n::t!("settings.text.the_shell_program_to_use"),
                                     aliases: None,
                                     field: Box::new(SettingField {
                                         json_path: Some("terminal.shell"),
@@ -4983,8 +4984,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                             settings::ShellDiscriminants::WithArguments => vec![
                                 SettingItem {
                                     files: USER | PROJECT,
-                                    title: "Program",
-                                    description: "The shell program to run.",
+                                    title: i18n::t!("settings.text.program"),
+                                    description: i18n::t!("settings.text.the_shell_program_to_run"),
                                     aliases: None,
                                     field: Box::new(SettingField {
                                         json_path: Some("terminal.shell.program"),
@@ -5009,8 +5010,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                                 },
                                 SettingItem {
                                     files: USER | PROJECT,
-                                    title: "Arguments",
-                                    description: "The arguments to pass to the shell program.",
+                                    title: i18n::t!("settings.text.arguments"),
+                                    description: i18n::t!("settings.text.the_arguments_to_pass_to_the_shell_program"),
                                     aliases: None,
                                     field: Box::new(
                                         SettingField {
@@ -5038,8 +5039,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                                 },
                                 SettingItem {
                                     files: USER | PROJECT,
-                                    title: "Title Override",
-                                    description: "An optional string to override the title of the terminal tab.",
+                                    title: i18n::t!("settings.text.title_override"),
+                                    description: i18n::t!("settings.text.an_optional_string_to_override_the_title_of_the_terminal_tab"),
                                     aliases: None,
                                     field: Box::new(SettingField {
                                         json_path: Some("terminal.shell.title_override"),
@@ -5066,8 +5067,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                 SettingsPageItem::DynamicItem(DynamicItem {
                     discriminant: SettingItem {
                         files: USER | PROJECT,
-                        title: "Working Directory",
-                        description: "What working directory to use when launching the terminal.",
+                        title: i18n::t!("settings.text.working_directory"),
+                        description: i18n::t!("settings.text.what_working_directory_to_use_when_launching_the_terminal"),
                         aliases: None,
                         field: Box::new(SettingField {
                             json_path: Some("terminal.working_directory$"),
@@ -5127,8 +5128,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                             settings::WorkingDirectoryDiscriminants::Always => vec![
                                 SettingItem {
                                     files: USER | PROJECT,
-                                    title: "Directory",
-                                    description: "The directory path to use (will be shell expanded).",
+                                    title: i18n::t!("settings.text.directory"),
+                                    description: i18n::t!("settings.text.the_directory_path_to_use_will_be_shell_expanded"),
                                     aliases: None,
                                     field: Box::new(SettingField {
                                         json_path: Some("terminal.working_directory.always"),
@@ -5154,8 +5155,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     }).collect(),
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Environment Variables",
-                    description: "Key-value pairs to add to the terminal's environment.",
+                    title: i18n::t!("settings.text.environment_variables"),
+                    description: i18n::t!("settings.text.key_value_pairs_to_add_to_the_terminal_s_environment"),
                     aliases: None,
                     field: Box::new(
                         SettingField {
@@ -5177,8 +5178,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER | PROJECT,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Detect Virtual Environment",
-                    description: "Activates the Python virtual environment, if one is found, in the terminal's working directory.",
+                    title: i18n::t!("settings.text.detect_virtual_environment"),
+                    description: i18n::t!("settings.text.activates_the_python_virtual_environment_if_one_is_found_77c4db73"),
                     aliases: None,
                     field: Box::new(
                         SettingField {
@@ -5204,10 +5205,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER | PROJECT,
                 }),
-                SettingsPageItem::SectionHeader("Font"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.font")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Font Size",
-                    description: "Font size for terminal text. If not set, defaults to buffer font size.",
+                    title: i18n::t!("settings.text.font_size"),
+                    description: i18n::t!("settings.text.font_size_for_terminal_text_if_not_set_defaults_to_buffer_font_size"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("terminal.font_size"),
@@ -5226,8 +5227,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Font Family",
-                    description: "Font family for terminal text. If not set, defaults to buffer font family.",
+                    title: i18n::t!("settings.text.font_family"),
+                    description: i18n::t!("settings.text.font_family_for_terminal_text_if_not_set_defaults_to_buf_06c26273"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("terminal.font_family"),
@@ -5249,8 +5250,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Font Fallbacks",
-                    description: "Font fallbacks for terminal text. If not set, defaults to buffer font fallbacks.",
+                    title: i18n::t!("settings.text.font_fallbacks"),
+                    description: i18n::t!("settings.text.font_fallbacks_for_terminal_text_if_not_set_defaults_to__72993a8f"),
                     aliases: None,
                     field: Box::new(
                         SettingField {
@@ -5275,8 +5276,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Font Weight",
-                    description: "Font weight for terminal text in CSS weight units (100-900).",
+                    title: i18n::t!("settings.text.font_weight"),
+                    description: i18n::t!("settings.text.font_weight_for_terminal_text_in_css_weight_units_100_900"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("terminal.font_weight"),
@@ -5294,8 +5295,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Font Features",
-                    description: "Font features for terminal text.",
+                    title: i18n::t!("settings.text.font_features"),
+                    description: i18n::t!("settings.text.font_features_for_terminal_text"),
                     aliases: None,
                     field: Box::new(
                         SettingField {
@@ -5319,10 +5320,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Display Settings"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.display_settings")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Line Height",
-                    description: "Line height for terminal text.",
+                    title: i18n::t!("settings.text.line_height"),
+                    description: i18n::t!("settings.text.line_height_for_terminal_text"),
                     aliases: None,
                     field: Box::new(
                         SettingField {
@@ -5343,8 +5344,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Cursor Shape",
-                    description: "Default cursor shape for the terminal (bar, block, underline, or hollow).",
+                    title: i18n::t!("settings.text.cursor_shape"),
+                    description: i18n::t!("settings.text.default_cursor_shape_for_the_terminal_bar_block_underline_or_hollow"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("terminal.cursor_shape"),
@@ -5362,8 +5363,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Cursor Blinking",
-                    description: "Sets the cursor blinking behavior in the terminal.",
+                    title: i18n::t!("settings.text.cursor_blinking"),
+                    description: i18n::t!("settings.text.sets_the_cursor_blinking_behavior_in_the_terminal"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("terminal.blinking"),
@@ -5378,8 +5379,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Alternate Scroll",
-                    description: "Whether alternate scroll mode is active by default (converts mouse scroll to arrow keys in apps like Vim).",
+                    title: i18n::t!("settings.text.alternate_scroll"),
+                    description: i18n::t!("settings.text.whether_alternate_scroll_mode_is_active_by_default_conve_0ff6e646"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("terminal.alternate_scroll"),
@@ -5401,8 +5402,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Minimum Contrast",
-                    description: "The minimum APCA perceptual contrast between foreground and background colors (0-106).",
+                    title: i18n::t!("settings.text.minimum_contrast"),
+                    description: i18n::t!("settings.text.the_minimum_apca_perceptual_contrast_between_foreground__45619a8c"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("terminal.minimum_contrast"),
@@ -5423,10 +5424,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Behavior Settings"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.behavior_settings")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Option As Meta",
-                    description: "Whether the option key behaves as the meta key.",
+                    title: i18n::t!("settings.text.option_as_meta"),
+                    description: i18n::t!("settings.text.whether_the_option_key_behaves_as_the_meta_key"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("terminal.option_as_meta"),
@@ -5444,8 +5445,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Copy On Select",
-                    description: "Whether selecting text in the terminal automatically copies to the system clipboard.",
+                    title: i18n::t!("settings.text.copy_on_select"),
+                    description: i18n::t!("settings.text.whether_selecting_text_in_the_terminal_automatically_cop_2086c920"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("terminal.copy_on_select"),
@@ -5463,8 +5464,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Keep Selection On Copy",
-                    description: "Whether to keep the text selection after copying it to the clipboard.",
+                    title: i18n::t!("settings.text.keep_selection_on_copy"),
+                    description: i18n::t!("settings.text.whether_to_keep_the_text_selection_after_copying_it_to_the_clipboard"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("terminal.keep_selection_on_copy"),
@@ -5485,10 +5486,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Layout Settings"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.layout_settings")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Default Width",
-                    description: "Default width when the terminal is docked to the left or right (in pixels).",
+                    title: i18n::t!("settings.text.default_width"),
+                    description: i18n::t!("settings.text.default_width_when_the_terminal_is_docked_to_the_left_or_663280a8"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("terminal.default_width"),
@@ -5506,8 +5507,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Default Height",
-                    description: "Default height when the terminal is docked to the bottom (in pixels).",
+                    title: i18n::t!("settings.text.default_height"),
+                    description: i18n::t!("settings.text.default_height_when_the_terminal_is_docked_to_the_bottom_in_pixels"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("terminal.default_height"),
@@ -5524,10 +5525,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Advanced Settings"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.advanced_settings")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Max Scroll History Lines",
-                    description: "Maximum number of lines to keep in scrollback history (max: 100,000; 0 disables scrolling).",
+                    title: i18n::t!("settings.text.max_scroll_history_lines"),
+                    description: i18n::t!("settings.text.maximum_number_of_lines_to_keep_in_scrollback_history_ma_4c17a206"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("terminal.max_scroll_history_lines"),
@@ -5549,8 +5550,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Scroll Multiplier",
-                    description: "The multiplier for scrolling in the terminal with the mouse wheel",
+                    title: i18n::t!("settings.text.scroll_multiplier"),
+                    description: i18n::t!("settings.text.the_multiplier_for_scrolling_in_the_terminal_with_the_mouse_wheel"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("terminal.scroll_multiplier"),
@@ -5567,10 +5568,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Toolbar"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.toolbar")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Breadcrumbs",
-                    description: "Display the terminal title in breadcrumbs inside the terminal pane.",
+                    title: i18n::t!("settings.text.breadcrumbs"),
+                    description: i18n::t!("settings.text.display_the_terminal_title_in_breadcrumbs_inside_the_terminal_pane"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("terminal.toolbar.breadcrumbs"),
@@ -5595,10 +5596,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Scrollbar"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.scrollbar")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show Scrollbar",
-                    description: "When to show the scrollbar in the terminal.",
+                    title: i18n::t!("settings.text.show_scrollbar"),
+                    description: i18n::t!("settings.text.when_to_show_the_scrollbar_in_the_terminal"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("terminal.scrollbar.show"),
@@ -5628,12 +5629,12 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
             ],
         },
         SettingsPage {
-            title: "Version Control",
+            title: i18n::t!("settings.text.version_control"),
             items: vec![
-                SettingsPageItem::SectionHeader("Diffs"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.diffs")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Side By Side Diff",
-                    description: "Open repository diffs, commits and file comparisons in two panels.",
+                    title: i18n::t!("settings.text.side_by_side_diff"),
+                    description: i18n::t!("settings.text.open_repository_diffs_commits_and_file_comparisons_in_two_panels"),
                     aliases: Some(&["Split Diff"]),
                     field: Box::new(SettingField {
                         json_path: Some("git.split_diff"),
@@ -5643,10 +5644,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Git Gutter"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.git_gutter")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Visibility",
-                    description: "Control whether Git status is shown in the editor's gutter.",
+                    title: i18n::t!("settings.text.visibility"),
+                    description: i18n::t!("settings.text.control_whether_git_status_is_shown_in_the_editor_s_gutter"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git.git_gutter"),
@@ -5660,8 +5661,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                 }),
                 // todo(settings_ui): Figure out the right default for this value in default.jsonc
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Debounce",
-                    description: "Debounce threshold in milliseconds after which changes are reflected in the Git gutter.",
+                    title: i18n::t!("settings.text.debounce"),
+                    description: i18n::t!("settings.text.debounce_threshold_in_milliseconds_after_which_changes_a_1650b653"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git.gutter_debounce"),
@@ -5675,10 +5676,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Inline Git Blame"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.inline_git_blame")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Enabled",
-                    description: "Whether or not to show Git blame data inline in the currently focused line.",
+                    title: i18n::t!("settings.text.enabled"),
+                    description: i18n::t!("settings.text.whether_or_not_to_show_git_blame_data_inline_in_the_curr_d426efcf"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git.inline_blame.enabled"),
@@ -5704,8 +5705,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Delay",
-                    description: "The delay after which the inline blame information is shown.",
+                    title: i18n::t!("settings.text.delay"),
+                    description: i18n::t!("settings.text.the_delay_after_which_the_inline_blame_information_is_shown"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git.inline_blame.delay_ms"),
@@ -5731,8 +5732,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Padding",
-                    description: "Padding between the end of the source line and the start of the inline blame in columns.",
+                    title: i18n::t!("settings.text.padding"),
+                    description: i18n::t!("settings.text.padding_between_the_end_of_the_source_line_and_the_start_bc3d22e3"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git.inline_blame.padding"),
@@ -5758,8 +5759,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Minimum Column",
-                    description: "The minimum column number at which to show the inline blame information.",
+                    title: i18n::t!("settings.text.minimum_column"),
+                    description: i18n::t!("settings.text.the_minimum_column_number_at_which_to_show_the_inline_bl_5eba52b9"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git.inline_blame.min_column"),
@@ -5785,8 +5786,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show Commit Summary",
-                    description: "Show commit summary as part of the inline blame.",
+                    title: i18n::t!("settings.text.show_commit_summary"),
+                    description: i18n::t!("settings.text.show_commit_summary_as_part_of_the_inline_blame"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git.inline_blame.show_commit_summary"),
@@ -5811,10 +5812,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Git Blame View"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.git_blame_view")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show Avatar",
-                    description: "Show the avatar of the author of the commit.",
+                    title: i18n::t!("settings.text.show_avatar"),
+                    description: i18n::t!("settings.text.show_the_avatar_of_the_author_of_the_commit"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git.blame.show_avatar"),
@@ -5839,10 +5840,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Branch Picker"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.branch_picker")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Show Author Name",
-                    description: "Show author name as part of the commit information in branch picker.",
+                    title: i18n::t!("settings.text.show_author_name"),
+                    description: i18n::t!("settings.text.show_author_name_as_part_of_the_commit_information_in_branch_picker"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git.branch_picker.show_author_name"),
@@ -5867,10 +5868,10 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     metadata: None,
                     files: USER,
                 }),
-                SettingsPageItem::SectionHeader("Git Hunks"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.git_hunks")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Hunk Style",
-                    description: "How Git hunks are displayed visually in the editor.",
+                    title: i18n::t!("settings.text.hunk_style"),
+                    description: i18n::t!("settings.text.how_git_hunks_are_displayed_visually_in_the_editor"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git.hunk_style"),
@@ -5883,8 +5884,8 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                     files: USER,
                 }),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Path Style",
-                    description: "Should the name or path be displayed first in the git view.",
+                    title: i18n::t!("settings.text.path_style"),
+                    description: i18n::t!("settings.text.should_the_name_or_path_be_displayed_first_in_the_git_view"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("git.path_style"),
@@ -5899,12 +5900,12 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
             ],
         },
         SettingsPage {
-            title: "Network",
+            title: i18n::t!("settings.text.network"),
             items: vec![
-                SettingsPageItem::SectionHeader("Network"),
+                SettingsPageItem::SectionHeader(i18n::t!("settings.text.network")),
                 SettingsPageItem::SettingItem(SettingItem {
-                    title: "Proxy",
-                    description: "The proxy to use for network requests.",
+                    title: i18n::t!("settings.text.proxy"),
+                    description: i18n::t!("settings.text.the_proxy_to_use_for_network_requests"),
                     aliases: None,
                     field: Box::new(SettingField {
                         json_path: Some("proxy"),
@@ -5924,12 +5925,45 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
     ]
 }
 
-const LANGUAGES_SECTION_HEADER: &str = "Languages";
+/// 언어별 설정의 섹션 이름은 현재 표시 언어를 따릅니다.
+fn languages_section_header() -> &'static str {
+    i18n::t!("settings.text.languages")
+}
+
+#[cfg(test)]
+mod localization_tests {
+    use super::*;
+
+    /// 언어를 바꿔도 저장에 사용하는 JSON 경로는 유지하고 제목과 설명만 번역합니다.
+    #[test]
+    fn language_metadata_translates_without_changing_setting_paths() {
+        let english = i18n::with_language(i18n::Language::English, language_settings_data);
+        let korean = i18n::with_language(i18n::Language::Korean, language_settings_data);
+        assert_eq!(english.len(), korean.len());
+        let mut translated = 0;
+        // 같은 순서의 필드를 비교하여 언어별 설정의 저장 대상이 달라지지 않음을 확인합니다.
+        for (english, korean) in english.iter().zip(&korean) {
+            if let (SettingsPageItem::SettingItem(english), SettingsPageItem::SettingItem(korean)) = (english, korean) {
+                assert_eq!(english.field.json_path(), korean.field.json_path());
+                assert!(!korean.title.starts_with("settings.text."));
+                assert_ne!(english.description, korean.description);
+                assert!(
+                    korean
+                        .description
+                        .chars()
+                        .any(|character| ('가'..='힣').contains(&character))
+                );
+                translated += 1;
+            }
+        }
+        assert!(translated > 30, "언어별 설정 메타데이터를 충분히 검사해야 합니다");
+    }
+}
 
 fn current_language() -> Option<SharedString> {
     sub_page_stack()
         .iter()
-        .find_map(|page| (page.section_header == LANGUAGES_SECTION_HEADER).then(|| page.link.title.clone()))
+        .find_map(|page| (page.section_header == languages_section_header()).then(|| page.link.title.clone()))
 }
 
 fn language_settings_field<T>(
@@ -5965,10 +5999,10 @@ fn language_settings_field_mut<T>(
 
 fn language_settings_data() -> Vec<SettingsPageItem> {
     let mut items = vec![
-        SettingsPageItem::SectionHeader("Indentation"),
+        SettingsPageItem::SectionHeader(i18n::t!("settings.text.indentation")),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Tab Size",
-            description: "How many columns a tab should occupy.",
+            title: i18n::t!("settings.text.tab_size"),
+            description: i18n::t!("settings.text.how_many_columns_a_tab_should_occupy"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).tab_size"), // TODO(cameron): not JQ syntax because not URL-safe
@@ -5985,8 +6019,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Hard Tabs",
-            description: "Whether to indent lines using tab characters, as opposed to multiple spaces.",
+            title: i18n::t!("settings.text.hard_tabs"),
+            description: i18n::t!("settings.text.whether_to_indent_lines_using_tab_characters_as_opposed__e158811c"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).hard_tabs"),
@@ -6003,8 +6037,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Auto Indent",
-            description: "Whether indentation should be adjusted based on the context whilst typing.",
+            title: i18n::t!("settings.text.auto_indent"),
+            description: i18n::t!("settings.text.whether_indentation_should_be_adjusted_based_on_the_cont_8a731093"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).auto_indent"),
@@ -6021,8 +6055,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Auto Indent On Paste",
-            description: "Whether indentation of pasted content should be adjusted based on the context.",
+            title: i18n::t!("settings.text.auto_indent_on_paste"),
+            description: i18n::t!("settings.text.whether_indentation_of_pasted_content_should_be_adjusted_6f738340"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).auto_indent_on_paste"),
@@ -6038,10 +6072,10 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             metadata: None,
             files: USER | PROJECT,
         }),
-        SettingsPageItem::SectionHeader("Wrapping"),
+        SettingsPageItem::SectionHeader(i18n::t!("settings.text.wrapping")),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Soft Wrap",
-            description: "How to soft-wrap long lines of text.",
+            title: i18n::t!("settings.text.soft_wrap"),
+            description: i18n::t!("settings.text.how_to_soft_wrap_long_lines_of_text"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).soft_wrap"),
@@ -6058,8 +6092,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Show Wrap Guides",
-            description: "Show wrap guides in the editor.",
+            title: i18n::t!("settings.text.show_wrap_guides"),
+            description: i18n::t!("settings.text.show_wrap_guides_in_the_editor"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).show_wrap_guides"),
@@ -6076,8 +6110,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Preferred Line Length",
-            description: "The column at which to soft-wrap lines, for buffers where soft-wrap is enabled.",
+            title: i18n::t!("settings.text.preferred_line_length"),
+            description: i18n::t!("settings.text.the_column_at_which_to_soft_wrap_lines_for_buffers_where_d87af1db"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).preferred_line_length"),
@@ -6094,8 +6128,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Wrap Guides",
-            description: "Character counts at which to show wrap guides in the editor.",
+            title: i18n::t!("settings.text.wrap_guides"),
+            description: i18n::t!("settings.text.character_counts_at_which_to_show_wrap_guides_in_the_editor"),
             aliases: None,
             field: Box::new(
                 SettingField {
@@ -6115,8 +6149,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Allow Rewrap",
-            description: "Controls where the `editor::rewrap` action is allowed for this language.",
+            title: i18n::t!("settings.text.allow_rewrap"),
+            description: i18n::t!("settings.text.controls_where_the_editor_rewrap_action_is_allowed_for_this_language"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).allow_rewrap"),
@@ -6132,10 +6166,10 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             metadata: None,
             files: USER | PROJECT,
         }),
-        SettingsPageItem::SectionHeader("Indent Guides"),
+        SettingsPageItem::SectionHeader(i18n::t!("settings.text.indent_guides")),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Enabled",
-            description: "Display indent guides in the editor.",
+            title: i18n::t!("settings.text.enabled"),
+            description: i18n::t!("settings.text.display_indent_guides_in_the_editor"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).indent_guides.enabled"),
@@ -6157,8 +6191,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Line Width",
-            description: "The width of the indent guides in pixels, between 1 and 10.",
+            title: i18n::t!("settings.text.line_width"),
+            description: i18n::t!("settings.text.the_width_of_the_indent_guides_in_pixels_between_1_and_10"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).indent_guides.line_width"),
@@ -6180,8 +6214,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Active Line Width",
-            description: "The width of the active indent guide in pixels, between 1 and 10.",
+            title: i18n::t!("settings.text.active_line_width"),
+            description: i18n::t!("settings.text.the_width_of_the_active_indent_guide_in_pixels_between_1_and_10"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).indent_guides.active_line_width"),
@@ -6203,8 +6237,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Coloring",
-            description: "Determines how indent guides are colored.",
+            title: i18n::t!("settings.text.coloring"),
+            description: i18n::t!("settings.text.determines_how_indent_guides_are_colored"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).indent_guides.coloring"),
@@ -6226,8 +6260,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Background Coloring",
-            description: "Determines how indent guide backgrounds are colored.",
+            title: i18n::t!("settings.text.background_coloring"),
+            description: i18n::t!("settings.text.determines_how_indent_guide_backgrounds_are_colored"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).indent_guides.background_coloring"),
@@ -6248,10 +6282,10 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             metadata: None,
             files: USER | PROJECT,
         }),
-        SettingsPageItem::SectionHeader("Formatting"),
+        SettingsPageItem::SectionHeader(i18n::t!("settings.text.formatting")),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Format On Save",
-            description: "Whether or not to perform a buffer format before saving.",
+            title: i18n::t!("settings.text.format_on_save"),
+            description: i18n::t!("settings.text.whether_or_not_to_perform_a_buffer_format_before_saving"),
             aliases: None,
             field: Box::new(
                 // TODO(settings_ui): this setting should just be a bool
@@ -6271,8 +6305,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Remove Trailing Whitespace On Save",
-            description: "Whether or not to remove any trailing whitespace from lines of a buffer before saving it.",
+            title: i18n::t!("settings.text.remove_trailing_whitespace_on_save"),
+            description: i18n::t!("settings.text.whether_or_not_to_remove_any_trailing_whitespace_from_li_aa1716f8"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).remove_trailing_whitespace_on_save"),
@@ -6291,8 +6325,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Ensure Final Newline On Save",
-            description: "Whether or not to ensure there's a single newline at the end of a buffer when saving it.",
+            title: i18n::t!("settings.text.ensure_final_newline_on_save"),
+            description: i18n::t!("settings.text.whether_or_not_to_ensure_there_s_a_single_newline_at_the_2d5785a4"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).ensure_final_newline_on_save"),
@@ -6311,8 +6345,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Formatter",
-            description: "How to perform a buffer format.",
+            title: i18n::t!("settings.text.formatter"),
+            description: i18n::t!("settings.text.how_to_perform_a_buffer_format"),
             aliases: None,
             field: Box::new(
                 SettingField {
@@ -6332,8 +6366,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Use On Type Format",
-            description: "Whether to use additional LSP queries to format (and amend) the code after every \"trigger\" symbol input, defined by LSP server capabilities",
+            title: i18n::t!("settings.text.use_on_type_format"),
+            description: i18n::t!("settings.text.whether_to_use_additional_lsp_queries_to_format_and_amen_ad0bb49f"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).use_on_type_format"),
@@ -6350,8 +6384,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Code Actions On Format",
-            description: "Additional code actions to run when formatting.",
+            title: i18n::t!("settings.text.code_actions_on_format"),
+            description: i18n::t!("settings.text.additional_code_actions_to_run_when_formatting"),
             aliases: None,
             field: Box::new(
                 SettingField {
@@ -6370,10 +6404,10 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             metadata: None,
             files: USER | PROJECT,
         }),
-        SettingsPageItem::SectionHeader("Autoclose"),
+        SettingsPageItem::SectionHeader(i18n::t!("settings.text.autoclose")),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Use Autoclose",
-            description: "Whether to automatically type closing characters for you. For example, when you type '(', Don Editor will automatically add a closing ')' at the correct position.",
+            title: i18n::t!("settings.text.use_autoclose"),
+            description: i18n::t!("settings.text.whether_to_automatically_type_closing_characters_for_you_acc73841"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).use_autoclose"),
@@ -6390,8 +6424,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Use Auto Surround",
-            description: "Whether to automatically surround text with characters for you. For example, when you select text and type '(', Don Editor will automatically surround text with ().",
+            title: i18n::t!("settings.text.use_auto_surround"),
+            description: i18n::t!("settings.text.whether_to_automatically_surround_text_with_characters_f_c5953f9d"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).use_auto_surround"),
@@ -6408,8 +6442,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Always Treat Brackets As Autoclosed",
-            description: "Controls whether the closing characters are always skipped over and auto-removed no matter how they were inserted.",
+            title: i18n::t!("settings.text.always_treat_brackets_as_autoclosed"),
+            description: i18n::t!("settings.text.controls_whether_the_closing_characters_are_always_skipp_978950e0"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).always_treat_brackets_as_autoclosed"),
@@ -6428,8 +6462,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "JSX Tag Auto Close",
-            description: "Whether to automatically close JSX tags.",
+            title: i18n::t!("settings.text.jsx_tag_auto_close"),
+            description: i18n::t!("settings.text.whether_to_automatically_close_jsx_tags"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).jsx_tag_auto_close"),
@@ -6448,10 +6482,10 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             metadata: None,
             files: USER | PROJECT,
         }),
-        SettingsPageItem::SectionHeader("Whitespace"),
+        SettingsPageItem::SectionHeader(i18n::t!("settings.text.whitespace")),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Show Whitespaces",
-            description: "Whether to show tabs and spaces in the editor.",
+            title: i18n::t!("settings.text.show_whitespaces"),
+            description: i18n::t!("settings.text.whether_to_show_tabs_and_spaces_in_the_editor"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).show_whitespaces"),
@@ -6468,8 +6502,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Space Whitespace Indicator",
-            description: "Visible character used to render space characters when show_whitespaces is enabled (default: \"•\")",
+            title: i18n::t!("settings.text.space_whitespace_indicator"),
+            description: i18n::t!("settings.text.visible_character_used_to_render_space_characters_when_s_3efb606e"),
             aliases: None,
             field: Box::new(
                 SettingField {
@@ -6491,8 +6525,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Tab Whitespace Indicator",
-            description: "Visible character used to render tab characters when show_whitespaces is enabled (default: \"→\")",
+            title: i18n::t!("settings.text.tab_whitespace_indicator"),
+            description: i18n::t!("settings.text.visible_character_used_to_render_tab_characters_when_sho_2bd52f1d"),
             aliases: None,
             field: Box::new(
                 SettingField {
@@ -6513,10 +6547,10 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             metadata: None,
             files: USER | PROJECT,
         }),
-        SettingsPageItem::SectionHeader("Completions"),
+        SettingsPageItem::SectionHeader(i18n::t!("settings.text.completions")),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Show Completions On Input",
-            description: "Whether to pop the completions menu while typing in an editor without explicitly requesting it.",
+            title: i18n::t!("settings.text.show_completions_on_input"),
+            description: i18n::t!("settings.text.whether_to_pop_the_completions_menu_while_typing_in_an_e_5480e189"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).show_completions_on_input"),
@@ -6533,8 +6567,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Show Completion Documentation",
-            description: "Whether to display inline and alongside documentation for items in the completions menu.",
+            title: i18n::t!("settings.text.show_completion_documentation"),
+            description: i18n::t!("settings.text.whether_to_display_inline_and_alongside_documentation_fo_5d6dfd94"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).show_completion_documentation"),
@@ -6553,8 +6587,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Words",
-            description: "Controls how words are completed.",
+            title: i18n::t!("settings.text.words"),
+            description: i18n::t!("settings.text.controls_how_words_are_completed"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).completions.words"),
@@ -6573,8 +6607,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Words Min Length",
-            description: "How many characters has to be in the completions query to automatically show the words-based completions.",
+            title: i18n::t!("settings.text.words_min_length"),
+            description: i18n::t!("settings.text.how_many_characters_has_to_be_in_the_completions_query_t_2716f0c8"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).completions.words_min_length"),
@@ -6593,8 +6627,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Completion Menu Scrollbar",
-            description: "When to show the scrollbar in the completion menu.",
+            title: i18n::t!("settings.text.completion_menu_scrollbar"),
+            description: i18n::t!("settings.text.when_to_show_the_scrollbar_in_the_completion_menu"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("editor.completion_menu_scrollbar"),
@@ -6607,8 +6641,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Completion Menu Item Kind",
-            description: "How to display the LSP item kind (function, method, variable, etc.) of each entry in the completions menu.",
+            title: i18n::t!("settings.text.completion_menu_item_kind"),
+            description: i18n::t!("settings.text.how_to_display_the_lsp_item_kind_function_method_variabl_0b8c513b"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("editor.completion_menu_item_kind"),
@@ -6621,8 +6655,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Supertab Mode",
-            description: "What the Supertab action should do when not completing.",
+            title: i18n::t!("settings.text.supertab_mode"),
+            description: i18n::t!("settings.text.what_the_supertab_action_should_do_when_not_completing"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("editor.supertab_fallback"),
@@ -6635,8 +6669,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Sync Kill Ring",
-            description: "Whether to sync the kill ring with clipboard or primary selection.",
+            title: i18n::t!("settings.text.sync_kill_ring"),
+            description: i18n::t!("settings.text.whether_to_sync_the_kill_ring_with_clipboard_or_primary_selection"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("editor.sync_kill_ring"),
@@ -6648,10 +6682,10 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             metadata: None,
             files: USER,
         }),
-        SettingsPageItem::SectionHeader("Inlay Hints"),
+        SettingsPageItem::SectionHeader(i18n::t!("settings.text.inlay_hints")),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Enabled",
-            description: "Global switch to toggle hints on and off.",
+            title: i18n::t!("settings.text.enabled"),
+            description: i18n::t!("settings.text.global_switch_to_toggle_hints_on_and_off"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).inlay_hints.enabled"),
@@ -6670,8 +6704,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Show Value Hints",
-            description: "Global switch to toggle inline values on and off when debugging.",
+            title: i18n::t!("settings.text.show_value_hints"),
+            description: i18n::t!("settings.text.global_switch_to_toggle_inline_values_on_and_off_when_debugging"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).inlay_hints.show_value_hints"),
@@ -6690,8 +6724,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Show Type Hints",
-            description: "Whether type hints should be shown.",
+            title: i18n::t!("settings.text.show_type_hints"),
+            description: i18n::t!("settings.text.whether_type_hints_should_be_shown"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).inlay_hints.show_type_hints"),
@@ -6710,8 +6744,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Show Parameter Hints",
-            description: "Whether parameter hints should be shown.",
+            title: i18n::t!("settings.text.show_parameter_hints"),
+            description: i18n::t!("settings.text.whether_parameter_hints_should_be_shown"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).inlay_hints.show_parameter_hints"),
@@ -6730,8 +6764,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Show Other Hints",
-            description: "Whether other hints should be shown.",
+            title: i18n::t!("settings.text.show_other_hints"),
+            description: i18n::t!("settings.text.whether_other_hints_should_be_shown"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).inlay_hints.show_other_hints"),
@@ -6750,8 +6784,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Show Background",
-            description: "Show a background for inlay hints.",
+            title: i18n::t!("settings.text.show_background"),
+            description: i18n::t!("settings.text.show_a_background_for_inlay_hints"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).inlay_hints.show_background"),
@@ -6770,8 +6804,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Edit Debounce Ms",
-            description: "Whether or not to debounce inlay hints updates after buffer edits (set to 0 to disable debouncing).",
+            title: i18n::t!("settings.text.edit_debounce_ms"),
+            description: i18n::t!("settings.text.whether_or_not_to_debounce_inlay_hints_updates_after_buf_b5dc2324"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).inlay_hints.edit_debounce_ms"),
@@ -6790,8 +6824,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Scroll Debounce Ms",
-            description: "Whether or not to debounce inlay hints updates after buffer scrolls (set to 0 to disable debouncing).",
+            title: i18n::t!("settings.text.scroll_debounce_ms"),
+            description: i18n::t!("settings.text.whether_or_not_to_debounce_inlay_hints_updates_after_buf_fee871a0"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).inlay_hints.scroll_debounce_ms"),
@@ -6810,8 +6844,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Toggle On Modifiers Press",
-            description: "Toggles inlay hints (hides or shows) when the user presses the modifiers specified.",
+            title: i18n::t!("settings.text.toggle_on_modifiers_press"),
+            description: i18n::t!("settings.text.toggles_inlay_hints_hides_or_shows_when_the_user_presses_d65add73"),
             aliases: None,
             field: Box::new(
                 SettingField {
@@ -6835,8 +6869,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
     ];
     if current_language().is_none() {
         items.push(SettingsPageItem::SettingItem(SettingItem {
-            title: "LSP Document Colors",
-            description: "How to render LSP color previews in the editor.",
+            title: i18n::t!("settings.text.lsp_document_colors"),
+            description: i18n::t!("settings.text.how_to_render_lsp_color_previews_in_the_editor"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("lsp_document_colors"),
@@ -6850,22 +6884,19 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
         }))
     }
     items.extend([
-        SettingsPageItem::SectionHeader("Tasks"),
+        SettingsPageItem::SectionHeader(i18n::t!("settings.text.tasks")),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Enabled",
-            description: "Whether tasks are enabled for this language.",
+            title: i18n::t!("settings.text.enabled"),
+            description: i18n::t!("settings.text.whether_tasks_are_enabled_for_this_language"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).tasks.enabled"),
                 pick: |settings_content| {
-                    language_settings_field(settings_content, |language| {
-                        language.tasks.as_ref()?.enabled.as_ref()
-                    })
+                    language_settings_field(settings_content, |language| language.tasks.as_ref()?.enabled.as_ref())
                 },
                 write: |settings_content, value| {
                     language_settings_field_mut(settings_content, value, |language, value| {
                         language.tasks.get_or_insert_default().enabled = value;
-
                     })
                 },
             }),
@@ -6873,8 +6904,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Variables",
-            description: "Extra task variables to set for a particular language.",
+            title: i18n::t!("settings.text.variables"),
+            description: i18n::t!("settings.text.extra_task_variables_to_set_for_a_particular_language"),
             aliases: None,
             field: Box::new(
                 SettingField {
@@ -6887,7 +6918,6 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
                     write: |settings_content, value| {
                         language_settings_field_mut(settings_content, value, |language, value| {
                             language.tasks.get_or_insert_default().variables = value;
-
                         })
                     },
                 }
@@ -6897,8 +6927,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Prefer LSP",
-            description: "Use LSP tasks over Don Editor language extension tasks.",
+            title: i18n::t!("settings.text.prefer_lsp"),
+            description: i18n::t!("settings.text.use_lsp_tasks_over_don_editor_language_extension_tasks"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).tasks.prefer_lsp"),
@@ -6910,24 +6940,21 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
                 write: |settings_content, value| {
                     language_settings_field_mut(settings_content, value, |language, value| {
                         language.tasks.get_or_insert_default().prefer_lsp = value;
-
                     })
                 },
             }),
             metadata: None,
             files: USER | PROJECT,
         }),
-        SettingsPageItem::SectionHeader("Miscellaneous"),
+        SettingsPageItem::SectionHeader(i18n::t!("settings.text.miscellaneous")),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Word Diff Enabled",
-            description: "Whether to enable word diff highlighting in the editor. When enabled, changed words within modified lines are highlighted to show exactly what changed.",
+            title: i18n::t!("settings.text.word_diff_enabled"),
+            description: i18n::t!("settings.text.whether_to_enable_word_diff_highlighting_in_the_editor_w_973023ce"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).word_diff_enabled"),
                 pick: |settings_content| {
-                    language_settings_field(settings_content, |language| {
-                        language.word_diff_enabled.as_ref()
-                    })
+                    language_settings_field(settings_content, |language| language.word_diff_enabled.as_ref())
                 },
                 write: |settings_content, value| {
                     language_settings_field_mut(settings_content, value, |language, value| {
@@ -6939,8 +6966,8 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Debuggers",
-            description: "Preferred debuggers for this language.",
+            title: i18n::t!("settings.text.debuggers"),
+            description: i18n::t!("settings.text.preferred_debuggers_for_this_language"),
             aliases: None,
             field: Box::new(
                 SettingField {
@@ -6951,7 +6978,6 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
                     write: |settings_content, value| {
                         language_settings_field_mut(settings_content, value, |language, value| {
                             language.debuggers = value;
-
                         })
                     },
                 }
@@ -6961,32 +6987,31 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Middle Click Paste",
-            description: "Enable middle-click paste on Linux.",
+            title: i18n::t!("settings.text.middle_click_paste"),
+            description: i18n::t!("settings.text.enable_middle_click_paste_on_linux"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).editor.middle_click_paste"),
                 pick: |settings_content| settings_content.editor.middle_click_paste.as_ref(),
-                write: |settings_content, value| {settings_content.editor.middle_click_paste = value;},
+                write: |settings_content, value| {
+                    settings_content.editor.middle_click_paste = value;
+                },
             }),
             metadata: None,
             files: USER,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Extend Comment On Newline",
-            description: "Whether to start a new line with a comment when a previous line is a comment as well.",
+            title: i18n::t!("settings.text.extend_comment_on_newline"),
+            description: i18n::t!("settings.text.whether_to_start_a_new_line_with_a_comment_when_a_previo_505df2d0"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).extend_comment_on_newline"),
                 pick: |settings_content| {
-                    language_settings_field(settings_content, |language| {
-                        language.extend_comment_on_newline.as_ref()
-                    })
+                    language_settings_field(settings_content, |language| language.extend_comment_on_newline.as_ref())
                 },
                 write: |settings_content, value| {
                     language_settings_field_mut(settings_content, value, |language, value| {
                         language.extend_comment_on_newline = value;
-
                     })
                 },
             }),
@@ -6994,15 +7019,13 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Colorize Brackets",
-            description: "Whether to colorize brackets in the editor.",
+            title: i18n::t!("settings.text.colorize_brackets"),
+            description: i18n::t!("settings.text.whether_to_colorize_brackets_in_the_editor"),
             aliases: Some(&["Rainbow Parentheses", "Rainbow Brackets"]),
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).colorize_brackets"),
                 pick: |settings_content| {
-                    language_settings_field(settings_content, |language| {
-                        language.colorize_brackets.as_ref()
-                    })
+                    language_settings_field(settings_content, |language| language.colorize_brackets.as_ref())
                 },
                 write: |settings_content, value| {
                     language_settings_field_mut(settings_content, value, |language, value| {
@@ -7018,34 +7041,35 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
     if current_language().is_none() {
         items.extend([
             SettingsPageItem::SettingItem(SettingItem {
-                title: "Image Viewer",
-                description: "The unit for image file sizes.",
+                title: i18n::t!("settings.text.image_viewer"),
+                description: i18n::t!("settings.text.the_unit_for_image_file_sizes"),
                 aliases: None,
                 field: Box::new(SettingField {
                     json_path: Some("image_viewer.unit"),
                     pick: |settings_content| {
-                        settings_content.image_viewer.as_ref().and_then(|image_viewer| image_viewer.unit.as_ref())
+                        settings_content
+                            .image_viewer
+                            .as_ref()
+                            .and_then(|image_viewer| image_viewer.unit.as_ref())
                     },
                     write: |settings_content, value| {
                         settings_content.image_viewer.get_or_insert_default().unit = value;
-
                     },
                 }),
                 metadata: None,
                 files: USER,
             }),
             SettingsPageItem::SettingItem(SettingItem {
-                title: "Drop Size Target",
-                description: "Relative size of the drop target in the editor that will open dropped file as a split pane.",
+                title: i18n::t!("settings.text.drop_size_target"),
+                description: i18n::t!(
+                    "settings.text.relative_size_of_the_drop_target_in_the_editor_that_will_dca40e29"
+                ),
                 aliases: None,
                 field: Box::new(SettingField {
                     json_path: Some("drop_target_size"),
-                    pick: |settings_content| {
-                        settings_content.workspace.drop_target_size.as_ref()
-                    },
+                    pick: |settings_content| settings_content.workspace.drop_target_size.as_ref(),
                     write: |settings_content, value| {
                         settings_content.workspace.drop_target_size = value;
-
                     },
                 }),
                 metadata: None,
@@ -7060,10 +7084,10 @@ fn language_settings_data() -> Vec<SettingsPageItem> {
 /// not the "Editor" page
 fn non_editor_language_settings_data() -> Vec<SettingsPageItem> {
     vec![
-        SettingsPageItem::SectionHeader("LSP"),
+        SettingsPageItem::SectionHeader(i18n::t!("settings.text.lsp")),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Enable Language Server",
-            description: "Whether to use language servers to provide code intelligence.",
+            title: i18n::t!("settings.text.enable_language_server"),
+            description: i18n::t!("settings.text.whether_to_use_language_servers_to_provide_code_intelligence"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).enable_language_server"),
@@ -7080,8 +7104,8 @@ fn non_editor_language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Language Servers",
-            description: "The list of language servers to use (or disable) for this language.",
+            title: i18n::t!("settings.text.language_servers"),
+            description: i18n::t!("settings.text.the_list_of_language_servers_to_use_or_disable_for_this_language"),
             aliases: None,
             field: Box::new(
                 SettingField {
@@ -7101,8 +7125,8 @@ fn non_editor_language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Linked Edits",
-            description: "Whether to perform linked edits of associated ranges, if the LS supports it. For example, when editing opening <html> tag, the contents of the closing </html> tag will be edited as well.",
+            title: i18n::t!("settings.text.linked_edits"),
+            description: i18n::t!("settings.text.whether_to_perform_linked_edits_of_associated_ranges_if__d741364a"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).linked_edits"),
@@ -7119,8 +7143,8 @@ fn non_editor_language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Go To Definition Fallback",
-            description: "Whether to follow-up empty Go to definition responses from the language server.",
+            title: i18n::t!("settings.text.go_to_definition_fallback"),
+            description: i18n::t!("settings.text.whether_to_follow_up_empty_go_to_definition_responses_fr_ef20e5ff"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("go_to_definition_fallback"),
@@ -7132,10 +7156,10 @@ fn non_editor_language_settings_data() -> Vec<SettingsPageItem> {
             metadata: None,
             files: USER,
         }),
-        SettingsPageItem::SectionHeader("LSP Completions"),
+        SettingsPageItem::SectionHeader(i18n::t!("settings.text.lsp_completions")),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Enabled",
-            description: "Whether to fetch LSP completions or not.",
+            title: i18n::t!("settings.text.enabled"),
+            description: i18n::t!("settings.text.whether_to_fetch_lsp_completions_or_not"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).completions.lsp"),
@@ -7152,8 +7176,8 @@ fn non_editor_language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Fetch Timeout (milliseconds)",
-            description: "When fetching LSP completions, determines how long to wait for a response of a particular server (set to 0 to wait indefinitely).",
+            title: i18n::t!("settings.text.fetch_timeout_milliseconds"),
+            description: i18n::t!("settings.text.when_fetching_lsp_completions_determines_how_long_to_wai_231296e2"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).completions.lsp_fetch_timeout_ms"),
@@ -7172,8 +7196,8 @@ fn non_editor_language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Insert Mode",
-            description: "Controls how LSP completions are inserted.",
+            title: i18n::t!("settings.text.insert_mode"),
+            description: i18n::t!("settings.text.controls_how_lsp_completions_are_inserted"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).completions.lsp_insert_mode"),
@@ -7191,10 +7215,10 @@ fn non_editor_language_settings_data() -> Vec<SettingsPageItem> {
             metadata: None,
             files: USER | PROJECT,
         }),
-        SettingsPageItem::SectionHeader("Debuggers"),
+        SettingsPageItem::SectionHeader(i18n::t!("settings.text.debuggers")),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Debuggers",
-            description: "Preferred debuggers for this language.",
+            title: i18n::t!("settings.text.debuggers"),
+            description: i18n::t!("settings.text.preferred_debuggers_for_this_language"),
             aliases: None,
             field: Box::new(
                 SettingField {
@@ -7213,10 +7237,10 @@ fn non_editor_language_settings_data() -> Vec<SettingsPageItem> {
             metadata: None,
             files: USER | PROJECT,
         }),
-        SettingsPageItem::SectionHeader("Prettier"),
+        SettingsPageItem::SectionHeader(i18n::t!("settings.text.prettier")),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Allowed",
-            description: "Enables or disables formatting with Prettier for a given language.",
+            title: i18n::t!("settings.text.allowed"),
+            description: i18n::t!("settings.text.enables_or_disables_formatting_with_prettier_for_a_given_language"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).prettier.allowed"),
@@ -7235,8 +7259,8 @@ fn non_editor_language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Parser",
-            description: "Forces Prettier integration to use a specific parser name when formatting files with the language.",
+            title: i18n::t!("settings.text.parser"),
+            description: i18n::t!("settings.text.forces_prettier_integration_to_use_a_specific_parser_nam_7e722ad6"),
             aliases: None,
             field: Box::new(SettingField {
                 json_path: Some("languages.$(language).prettier.parser"),
@@ -7253,8 +7277,8 @@ fn non_editor_language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Plugins",
-            description: "Forces Prettier integration to use specific plugins when formatting files with the language.",
+            title: i18n::t!("settings.text.plugins"),
+            description: i18n::t!("settings.text.forces_prettier_integration_to_use_specific_plugins_when_1eb1bcd8"),
             aliases: None,
             field: Box::new(
                 SettingField {
@@ -7276,8 +7300,8 @@ fn non_editor_language_settings_data() -> Vec<SettingsPageItem> {
             files: USER | PROJECT,
         }),
         SettingsPageItem::SettingItem(SettingItem {
-            title: "Options",
-            description: "Default Prettier options, in the format as in package.json section for Prettier.",
+            title: i18n::t!("settings.text.options"),
+            description: i18n::t!("settings.text.default_prettier_options_in_the_format_as_in_package_jso_18285809"),
             aliases: None,
             field: Box::new(
                 SettingField {

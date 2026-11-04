@@ -155,20 +155,24 @@ impl AddToolchainState {
                                 .p_1()
                                 .justify_between()
                                 .gap_2()
-                                .child(Label::new("Select Toolchain Path").color(Color::Muted).map(|this| {
-                                    if is_loading {
-                                        this.with_animation(
-                                            "select-toolchain-label",
-                                            Animation::new(Duration::from_secs(2))
-                                                .repeat()
-                                                .with_easing(pulsating_between(0.4, 0.8)),
-                                            |label, delta| label.alpha(delta),
-                                        )
-                                        .into_any()
-                                    } else {
-                                        this.into_any_element()
-                                    }
-                                }))
+                                .child(
+                                    Label::new(i18n::t!("ui.text.select_toolchain_path"))
+                                        .color(Color::Muted)
+                                        .map(|this| {
+                                            if is_loading {
+                                                this.with_animation(
+                                                    "select-toolchain-label",
+                                                    Animation::new(Duration::from_secs(2))
+                                                        .repeat()
+                                                        .with_easing(pulsating_between(0.4, 0.8)),
+                                                    |label, delta| label.alpha(delta),
+                                                )
+                                                .into_any()
+                                            } else {
+                                                this.into_any_element()
+                                            }
+                                        }),
+                                )
                                 .when_some(error, |this, error| this.child(Label::new(error).color(Color::Error))),
                         )
                         .into_any(),
@@ -386,7 +390,7 @@ impl Render for AddToolchainState {
                             .child(
                                 v_flex()
                                     .child(
-                                        Label::new("Scope")
+                                        Label::new(i18n::t!("ui.text.scope"))
                                             .size(LabelSize::Small)
                                             .color(Color::Muted)
                                             .mt_1()
@@ -720,7 +724,7 @@ impl ToolchainSelectorDelegate {
                     .await?;
                 let pretty_path = {
                     if relative_path.is_empty() {
-                        Cow::Borrowed("worktree root")
+                        Cow::Borrowed(i18n::t!("ui.text.worktree_root"))
                     } else {
                         Cow::Owned(format!("`{}`", relative_path.display(path_style)))
                     }
@@ -777,7 +781,7 @@ impl ToolchainSelectorDelegate {
             _fetch_candidates_task,
             project,
             focus_handle: cx.focus_handle(),
-            add_toolchain_text: Arc::from("Add Toolchain"),
+            add_toolchain_text: Arc::from(i18n::t!("ui.text.add_toolchain")),
         }
     }
     fn relativize_path(path: SharedString, worktree_root: &Path, path_style: PathStyle) -> SharedString {
@@ -981,7 +985,7 @@ impl PickerDelegate for ToolchainSelectorDelegate {
                                 .on_click(|_, window, cx| window.dispatch_action(Box::new(AddToolchain), cx)),
                         )
                         .child(
-                            Button::new("select", "Select")
+                            Button::new("select", i18n::t!("ui.text.select"))
                                 .key_binding(KeyBinding::for_action_in(&menu::Confirm, &self.focus_handle, cx))
                                 .on_click(|_, window, cx| window.dispatch_action(menu::Confirm.boxed_clone(), cx)),
                         ),

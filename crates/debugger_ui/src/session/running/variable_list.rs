@@ -641,15 +641,15 @@ impl VariableList {
             cx.update(|window, cx| {
                 let context_menu = ContextMenu::build(window, cx, |menu, _, _| {
                     menu.when_some(entry.as_variable(), |menu, _| {
-                        menu.action("Copy Name", CopyVariableName.boxed_clone())
-                            .action("Copy Value", CopyVariableValue.boxed_clone())
+                        menu.action(i18n::t!("ui.text.copy_name"), CopyVariableName.boxed_clone())
+                            .action(i18n::t!("ui.text.copy_value"), CopyVariableValue.boxed_clone())
                             .when(supports_set_variable, |menu| {
-                                menu.action("Edit Value", EditVariable.boxed_clone())
+                                menu.action(i18n::t!("ui.text.edit_value"), EditVariable.boxed_clone())
                             })
                             .when(supports_go_to_memory, |menu| {
-                                menu.action("Go To Memory", GoToMemory.boxed_clone())
+                                menu.action(i18n::t!("ui.text.go_to_memory"), GoToMemory.boxed_clone())
                             })
-                            .action("Watch Variable", AddWatch.boxed_clone())
+                            .action(i18n::t!("ui.text.watch_variable"), AddWatch.boxed_clone())
                             .when_some(can_toggle_data_breakpoint, |mut menu, data_info| {
                                 menu = menu.separator();
                                 if let Some(access_types) = data_info.access_types {
@@ -673,19 +673,19 @@ impl VariableList {
                                     menu
                                 } else {
                                     menu.action(
-                                        "Toggle Data Breakpoint",
+                                        i18n::t!("ui.text.toggle_data_breakpoint"),
                                         crate::ToggleDataBreakpoint { access_type: None }.boxed_clone(),
                                     )
                                 }
                             })
                     })
                     .when(entry.as_watcher().is_some(), |menu| {
-                        menu.action("Copy Name", CopyVariableName.boxed_clone())
-                            .action("Copy Value", CopyVariableValue.boxed_clone())
+                        menu.action(i18n::t!("ui.text.copy_name"), CopyVariableName.boxed_clone())
+                            .action(i18n::t!("ui.text.copy_value"), CopyVariableValue.boxed_clone())
                             .when(supports_set_variable, |menu| {
-                                menu.action("Edit Value", EditVariable.boxed_clone())
+                                menu.action(i18n::t!("ui.text.edit_value"), EditVariable.boxed_clone())
                             })
-                            .action("Remove Watch", RemoveWatch.boxed_clone())
+                            .action(i18n::t!("ui.text.remove_watch"), RemoveWatch.boxed_clone())
                     })
                     .context(focus_handle.clone())
                 });

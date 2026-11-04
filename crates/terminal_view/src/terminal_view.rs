@@ -448,7 +448,7 @@ impl TerminalView {
             menu.context(self.focus_handle.clone())
                 .action(i18n::t!("pane.new.terminal"), Box::new(NewTerminal))
                 .separator()
-                .action("Copy", Box::new(Copy))
+                .action(i18n::t!("menu.edit.copy"), Box::new(Copy))
                 .action(i18n::t!("menu.edit.paste"), Box::new(Paste))
                 .action(i18n::t!("menu.selection.select_all"), Box::new(SelectAll))
                 .action(i18n::t!("terminal.clear"), Box::new(Clear))
@@ -1141,7 +1141,7 @@ impl Item for TerminalView {
                     .child(Label::new(title.clone()))
                     .child(h_flex().flex_grow().child(Divider::horizontal()))
                     .child(
-                        Label::new(format!("Process ID (PID): {}", pid))
+                        Label::new(i18n::t!("ui.text.process_id_pid", value0 = pid))
                             .color(Color::Muted)
                             .size(LabelSize::Small),
                     )

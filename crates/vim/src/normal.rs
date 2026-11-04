@@ -783,7 +783,7 @@ impl Vim {
                     file.path().display(file.path_style(cx)).into_owned()
                 }
             } else {
-                "[No Name]".into()
+                i18n::t!("ui.text.no_name_f0c2bd3b").into()
             };
             let buffer = buffer.read(cx);
             let lines = buffer.max_point().row + 1;

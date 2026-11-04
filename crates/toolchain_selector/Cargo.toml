@@ -12,6 +12,7 @@ path = "src/toolchain_selector.rs"
 test = false
 
 [dependencies]
+i18n.workspace = true
 anyhow.workspace = true
 convert_case.workspace = true
 editor.workspace = true

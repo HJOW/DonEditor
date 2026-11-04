@@ -170,7 +170,7 @@ pub fn init(cx: &mut App) {
                             None => {
                                 workspace.show_error_with_link(
                                     "Invalid Git URL format: Could not split on /",
-                                    "Learn more",
+                                    i18n::t!("ui.text.learn_more"),
                                     "gram://docs/extensions/installing-extensions",
                                     cx,
                                 );
@@ -182,7 +182,7 @@ pub fn init(cx: &mut App) {
                             Err(err) => {
                                 workspace.show_error_with_link(
                                     SharedString::from(format!("Failed to create temporary directory:\n{err:#}")),
-                                    "Learn more".into(),
+                                    i18n::t!("ui.text.learn_more").into(),
                                     "gram://docs/extensions/installing-extensions".into(),
                                     cx,
                                 );
@@ -209,7 +209,7 @@ pub fn init(cx: &mut App) {
                                     return workspace.update(cx, |workspace, cx| {
                                         workspace.show_error_with_link(
                                             SharedString::from(format!("Failed to clone Git repository:\n{err:#}")),
-                                            "Learn more".into(),
+                                            i18n::t!("ui.text.learn_more").into(),
                                             "gram://docs/extensions/installing-extensions".into(),
                                             cx,
                                         );
@@ -222,7 +222,7 @@ pub fn init(cx: &mut App) {
                                     return workspace.update(cx, |workspace, cx| {
                                         workspace.show_error_with_link(
                                             "Failed to clone Git repository: No workdir found",
-                                            "Learn more",
+                                            i18n::t!("ui.text.learn_more"),
                                             "gram://docs/extensions/installing-extensions",
                                             cx,
                                         );
@@ -260,7 +260,7 @@ pub fn init(cx: &mut App) {
                                     .update(cx, |workspace, cx| {
                                         workspace.show_error_with_link(
                                             SharedString::from(format!("Failed to install extension:\n{err:#}")),
-                                            "Learn more".into(),
+                                            i18n::t!("ui.text.learn_more").into(),
                                             "gram://docs/extensions/installing-extensions".into(),
                                             cx,
                                         );
@@ -286,14 +286,14 @@ pub fn init(cx: &mut App) {
 
 fn extension_provides_label(provides: &ExtensionProvides) -> &'static str {
     match provides {
-        ExtensionProvides::Themes => "Themes",
-        ExtensionProvides::IconThemes => "Icon Themes",
+        ExtensionProvides::Themes => i18n::t!("ui.text.themes"),
+        ExtensionProvides::IconThemes => i18n::t!("ui.text.icon_themes"),
         ExtensionProvides::Languages => "Languages",
-        ExtensionProvides::Grammars => "Grammars",
-        ExtensionProvides::LanguageServers => "Language Servers",
-        ExtensionProvides::IndexedDocsProviders => "Indexed Docs Providers",
-        ExtensionProvides::Snippets => "Snippets",
-        ExtensionProvides::DebugAdapters => "Debug Adapters",
+        ExtensionProvides::Grammars => i18n::t!("ui.text.grammars"),
+        ExtensionProvides::LanguageServers => i18n::t!("settings.text.language_servers"),
+        ExtensionProvides::IndexedDocsProviders => i18n::t!("ui.text.indexed_docs_providers"),
+        ExtensionProvides::Snippets => i18n::t!("ui.text.snippets"),
+        ExtensionProvides::DebugAdapters => i18n::t!("ui.text.debug_adapters"),
     }
 }
 
@@ -399,7 +399,7 @@ impl ExtensionsPage {
 
             let query_editor = cx.new(|cx| {
                 let mut input = Editor::single_line(window, cx);
-                input.set_placeholder_text("Search extensions...", window, cx);
+                input.set_placeholder_text(i18n::t!("ui.text.search_extensions"), window, cx);
                 if let Some(id) = focus_extension_id {
                     input.set_text(format!("id:{id}"), window, cx);
                 }
@@ -619,30 +619,33 @@ impl ExtensionsPage {
                             .gap_1()
                             .justify_between()
                             .child(
-                                Button::new(SharedString::from(format!("rebuild-{}", extension.id)), "Rebuild")
-                                    .color(Color::Accent)
-                                    .disabled(matches!(status, ExtensionStatus::Upgrading))
-                                    .on_click({
-                                        let weak_workspace = self.workspace.clone();
-                                        let extension_id = extension.id.clone();
-                                        move |_, _, cx| {
-                                            ExtensionStore::global(cx).update(cx, |store, cx| {
-                                                match store.rebuild_user_extension(extension_id.clone(), cx) {
-                                                    Ok(_) => (),
-                                                    Err(err) => {
-                                                        if let Some(workspace) = weak_workspace.upgrade() {
-                                                            workspace.update(cx, |workspace, cx| {
-                                                                workspace.show_error(&err.to_string(), cx);
-                                                            });
-                                                        }
+                                Button::new(
+                                    SharedString::from(format!("rebuild-{}", extension.id)),
+                                    i18n::t!("ui.text.rebuild"),
+                                )
+                                .color(Color::Accent)
+                                .disabled(matches!(status, ExtensionStatus::Upgrading))
+                                .on_click({
+                                    let weak_workspace = self.workspace.clone();
+                                    let extension_id = extension.id.clone();
+                                    move |_, _, cx| {
+                                        ExtensionStore::global(cx).update(cx, |store, cx| {
+                                            match store.rebuild_user_extension(extension_id.clone(), cx) {
+                                                Ok(_) => (),
+                                                Err(err) => {
+                                                    if let Some(workspace) = weak_workspace.upgrade() {
+                                                        workspace.update(cx, |workspace, cx| {
+                                                            workspace.show_error(&err.to_string(), cx);
+                                                        });
                                                     }
                                                 }
-                                            });
-                                        }
-                                    }),
+                                            }
+                                        });
+                                    }
+                                }),
                             )
                             .child(
-                                Button::new(SharedString::from(extension.id.clone()), "Uninstall")
+                                Button::new(SharedString::from(extension.id.clone()), i18n::t!("ui.text.uninstall"))
                                     .color(Color::Accent)
                                     .disabled(!matches!(status, ExtensionStatus::Installed(..)))
                                     .on_click({
@@ -674,9 +677,9 @@ impl ExtensionsPage {
                         Label::new(format!(
                             "{}: {}",
                             if extension.authors.len() > 1 {
-                                "Authors"
+                                i18n::t!("ui.text.authors")
                             } else {
-                                "Author"
+                                i18n::t!("ui.text.author")
                             },
                             extension.authors.join(", ")
                         ))
@@ -808,13 +811,13 @@ impl ExtensionsPage {
         let has_search = self.search_query(cx).is_some();
 
         let message = if self.is_fetching_extensions {
-            "Loading extensions…"
+            i18n::t!("ui.text.loading_extensions")
         } else if self.fetch_failed {
-            "Failed to load extensions. Please check your connection and try again."
+            i18n::t!("ui.text.failed_to_load_extensions_please_check_your_connection_and_try_again")
         } else if has_search {
-            "No installed extensions that match your search."
+            i18n::t!("ui.text.no_installed_extensions_that_match_your_search")
         } else {
-            "No installed extensions."
+            i18n::t!("ui.text.no_installed_extensions")
         };
 
         h_flex()
@@ -894,7 +897,7 @@ impl ExtensionsPage {
         vim: bool,
         cx: &mut Context<Self>,
     ) -> impl IntoElement {
-        let docs_url_button = Button::new("open_docs", "View Documentation")
+        let docs_url_button = Button::new("open_docs", i18n::t!("ui.text.view_documentation"))
             .icon(IconName::ArrowUpRight)
             .icon_size(IconSize::Small)
             .icon_position(IconPosition::End)
@@ -915,23 +918,27 @@ impl ExtensionsPage {
                                     .child(docs_url_button)
                                     .child(Divider::vertical().color(ui::DividerColor::Border))
                                     .child(
-                                        h_flex().pl_1().gap_1().child(Label::new("Enable Vim mode")).child(
-                                            Switch::new(
-                                                "enable-vim",
-                                                if VimModeSetting::get_global(cx).0 {
-                                                    ui::ToggleState::Selected
-                                                } else {
-                                                    ui::ToggleState::Unselected
-                                                },
-                                            )
-                                            .on_click(cx.listener(
-                                                move |this, selection, _, cx| {
-                                                    this.update_settings(selection, cx, |setting, value| {
-                                                        setting.vim_mode = Some(value)
-                                                    });
-                                                },
-                                            )),
-                                        ),
+                                        h_flex()
+                                            .pl_1()
+                                            .gap_1()
+                                            .child(Label::new(i18n::t!("ui.text.enable_vim_mode")))
+                                            .child(
+                                                Switch::new(
+                                                    "enable-vim",
+                                                    if VimModeSetting::get_global(cx).0 {
+                                                        ui::ToggleState::Selected
+                                                    } else {
+                                                        ui::ToggleState::Unselected
+                                                    },
+                                                )
+                                                .on_click(cx.listener(
+                                                    move |this, selection, _, cx| {
+                                                        this.update_settings(selection, cx, |setting, value| {
+                                                            setting.vim_mode = Some(value)
+                                                        });
+                                                    },
+                                                )),
+                                            ),
                                     ),
                             )
                         } else {
@@ -948,91 +955,91 @@ impl ExtensionsPage {
         for feature in &self.upsells {
             let banner = match feature {
                 Feature::ExtensionBasedpyright => self.render_feature_upsell_banner(
-                    "Basedpyright (Python language server) support is built-in!".into(),
+                    i18n::t!("ui.text.basedpyright_python_language_server_support_is_built_in").into(),
                     "gram://docs/languages/python#basedpyright".into(),
                     false,
                     cx,
                 ),
                 Feature::ExtensionRuff => self.render_feature_upsell_banner(
-                    "Ruff (linter for Python) support is built-in!".into(),
+                    i18n::t!("ui.text.ruff_linter_for_python_support_is_built_in").into(),
                     "gram://docs/languages/python#code-formatting--linting".into(),
                     false,
                     cx,
                 ),
                 Feature::ExtensionTailwind => self.render_feature_upsell_banner(
-                    "Tailwind CSS support is built-in!".into(),
+                    i18n::t!("ui.text.tailwind_css_support_is_built_in").into(),
                     "gram://docs/languages/tailwindcss".into(),
                     false,
                     cx,
                 ),
                 Feature::ExtensionTy => self.render_feature_upsell_banner(
-                    "Ty (Python language server) support is built-in!".into(),
+                    i18n::t!("ui.text.ty_python_language_server_support_is_built_in").into(),
                     "https://zed.dev/docs/languages/python".into(),
                     false,
                     cx,
                 ),
                 Feature::Git => self.render_feature_upsell_banner(
-                    "Don Editor comes with basic Git support—more features are coming in the future.".into(),
+                    i18n::t!("ui.text.don_editor_comes_with_basic_git_support_more_features_ar_544c7c54").into(),
                     "gram://docs/git".into(),
                     false,
                     cx,
                 ),
                 Feature::LanguageBash => self.render_feature_upsell_banner(
-                    "Shell support is built-in!".into(),
+                    i18n::t!("ui.text.shell_support_is_built_in").into(),
                     "gram://docs/languages/bash".into(),
                     false,
                     cx,
                 ),
                 Feature::LanguageC => self.render_feature_upsell_banner(
-                    "C support is built-in!".into(),
+                    i18n::t!("ui.text.c_support_is_built_in").into(),
                     "gram://docs/languages/c".into(),
                     false,
                     cx,
                 ),
                 Feature::LanguageCpp => self.render_feature_upsell_banner(
-                    "C++ support is built-in!".into(),
+                    i18n::t!("ui.text.c_support_is_built_in_636c0d32").into(),
                     "gram://docs/languages/cpp".into(),
                     false,
                     cx,
                 ),
                 Feature::LanguageGo => self.render_feature_upsell_banner(
-                    "Go support is built-in!".into(),
+                    i18n::t!("ui.text.go_support_is_built_in").into(),
                     "gram://docs/languages/go".into(),
                     false,
                     cx,
                 ),
                 Feature::LanguagePython => self.render_feature_upsell_banner(
-                    "Python support is built-in!".into(),
+                    i18n::t!("ui.text.python_support_is_built_in").into(),
                     "gram://docs/languages/python".into(),
                     false,
                     cx,
                 ),
                 Feature::LanguageReact => self.render_feature_upsell_banner(
-                    "React support is built-in!".into(),
+                    i18n::t!("ui.text.react_support_is_built_in").into(),
                     "gram://docs/languages/typescript".into(),
                     false,
                     cx,
                 ),
                 Feature::LanguageRust => self.render_feature_upsell_banner(
-                    "Rust support is built-in!".into(),
+                    i18n::t!("ui.text.rust_support_is_built_in").into(),
                     "gram://docs/languages/rust".into(),
                     false,
                     cx,
                 ),
                 Feature::LanguageTypescript => self.render_feature_upsell_banner(
-                    "Typescript support is built-in!".into(),
+                    i18n::t!("ui.text.typescript_support_is_built_in").into(),
                     "gram://docs/languages/typescript".into(),
                     false,
                     cx,
                 ),
                 Feature::OpenIn => self.render_feature_upsell_banner(
-                    "Don Editor supports linking to a source line on GitHub and others.".into(),
+                    i18n::t!("ui.text.don_editor_supports_linking_to_a_source_line_on_github_and_others").into(),
                     "gram://docs/git#git-integrations".into(),
                     false,
                     cx,
                 ),
                 Feature::Vim => self.render_feature_upsell_banner(
-                    "Vim support is built-in!".into(),
+                    i18n::t!("ui.text.vim_support_is_built_in").into(),
                     "gram://docs/vim".into(),
                     true,
                     cx,
@@ -1061,12 +1068,12 @@ impl Render for ExtensionsPage {
                             .w_full()
                             .gap_1p5()
                             .justify_between()
-                            .child(Headline::new("Extensions").size(HeadlineSize::XLarge))
+                            .child(Headline::new(i18n::t!("menu.app.extensions")).size(HeadlineSize::XLarge))
                             .child(
                                 h_flex()
                                     .gap_1p5()
                                     .child(
-                                        Button::new("install-extension-from-url", "Install From URL")
+                                        Button::new("install-extension-from-url", i18n::t!("ui.text.install_from_url"))
                                             .style(ButtonStyle::Outlined)
                                             .size(ButtonSize::Medium)
                                             .on_click(|_event, window, cx| {
@@ -1074,7 +1081,7 @@ impl Render for ExtensionsPage {
                                             }),
                                     )
                                     .child(
-                                        Button::new("install-local-extension", "Install Local")
+                                        Button::new("install-local-extension", i18n::t!("ui.text.install_local"))
                                             .style(ButtonStyle::Outlined)
                                             .size(ButtonSize::Medium)
                                             .on_click(|_event, window, cx| {
@@ -1095,7 +1102,7 @@ impl Render for ExtensionsPage {
                     .border_color(cx.theme().colors().border_variant)
                     .overflow_x_scroll()
                     .child(
-                        Button::new("filter-all-categories", "All")
+                        Button::new("filter-all-categories", i18n::t!("ui.text.all"))
                             .when(self.provides_filter.is_none(), |button| {
                                 button.style(ButtonStyle::Filled)
                             })
@@ -1164,7 +1171,7 @@ impl Item for ExtensionsPage {
     type Event = ItemEvent;
 
     fn tab_content_text(&self, _detail: usize, _cx: &App) -> SharedString {
-        "Extensions".into()
+        i18n::t!("menu.app.extensions").into()
     }
 
     fn show_toolbar(&self) -> bool {
@@ -1185,7 +1192,7 @@ impl GitCloneModal {
     pub fn show(window: &mut Window, cx: &mut Context<Self>) -> Self {
         let repo_input = cx.new(|cx| {
             let mut editor = Editor::single_line(window, cx);
-            editor.set_placeholder_text("Enter repository URL…", window, cx);
+            editor.set_placeholder_text(i18n::t!("ui.text.enter_repository_url"), window, cx);
             editor
         });
         let focus_handle = repo_input.focus_handle(cx);
@@ -1224,7 +1231,7 @@ impl Render for GitCloneModal {
                                 .gap_0p5()
                                 .border_b_1()
                                 .border_color(theme.border_variant)
-                                .child(Label::new("Install Extension From Git Repository")),
+                                .child(Label::new(i18n::t!("ui.text.install_extension_from_git_repository"))),
                         ),
                     )
                     .section(
@@ -1241,14 +1248,14 @@ impl Render for GitCloneModal {
                                     .gap_0p5()
                                     .rounded_b_sm()
                                     .child(
-                                        Label::new(
-                                            "Clone a repository from a Git forge (like Codeberg, etc.).\nInstallation from source URL requires rustup to be installed.\nUse a public HTTP(S) URL. Git over SSH will not work.",
-                                        )
+                                        Label::new(i18n::t!(
+                                            "ui.text.clone_a_repository_from_a_git_forge_like_codeberg_etc_in_fe4b8701"
+                                        ))
                                         .color(Color::Muted)
                                         .size(LabelSize::Small),
                                     )
                                     .child(
-                                        Button::new("learn-more", "Learn More")
+                                        Button::new("learn-more", i18n::t!("common.learn_more"))
                                             .label_size(LabelSize::Small)
                                             .icon(IconName::ArrowUpRight)
                                             .icon_size(IconSize::XSmall)
@@ -1266,10 +1273,7 @@ impl Render for GitCloneModal {
             }))
             .on_action(cx.listener(|this, _: &menu::Confirm, window, cx| {
                 let url = this.repo_input.read(cx).text(cx);
-                window.dispatch_action(
-                    Box::new(InstallExtensionFromGit { url }),
-                    cx,
-                );
+                window.dispatch_action(Box::new(InstallExtensionFromGit { url }), cx);
                 cx.emit(DismissEvent);
             }))
     }

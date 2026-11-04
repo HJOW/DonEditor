@@ -277,7 +277,7 @@ impl CommitModal {
                             })
                             .when(has_previous_commit, |this| {
                                 this.toggleable_entry(
-                                    "Amend",
+                                    i18n::t!("ui.text.amend"),
                                     amend_enabled,
                                     IconPosition::Start,
                                     Some(Box::new(Amend)),
@@ -294,7 +294,7 @@ impl CommitModal {
                                 )
                             })
                             .toggleable_entry(
-                                "Signoff",
+                                i18n::t!("ui.text.signoff"),
                                 signoff_enabled,
                                 IconPosition::Start,
                                 Some(Box::new(Signoff)),
@@ -308,7 +308,7 @@ impl CommitModal {
                                 },
                             )
                             .toggleable_entry(
-                                "Enable Git Hooks",
+                                i18n::t!("ui.text.enable_git_hooks"),
                                 verify_enabled,
                                 IconPosition::Start,
                                 Some(Box::new(Verify)),
@@ -361,7 +361,7 @@ impl CommitModal {
             .as_ref()
             .and_then(|repo| repo.read(cx).branch.as_ref())
             .map(|b| b.name().to_owned())
-            .unwrap_or_else(|| "<no branch>".to_owned());
+            .unwrap_or_else(|| i18n::t!("ui.text.no_branch").to_owned());
 
         let branch_picker_button = panel_button(branch)
             .icon(IconName::GitBranch)
@@ -386,7 +386,7 @@ impl CommitModal {
             .with_handle(self.branch_list_handle.clone())
             .trigger_with_tooltip(
                 branch_picker_button,
-                Tooltip::for_action_title("Switch Branch", &app_actions::git::Branch),
+                Tooltip::for_action_title(i18n::t!("ui.text.switch_branch"), &app_actions::git::Branch),
             )
             .anchor(Corner::BottomLeft)
             .offset(gpui::Point {
@@ -395,8 +395,9 @@ impl CommitModal {
             });
         let focus_handle = self.focus_handle(cx);
 
-        let close_kb_hint = ui::KeyBinding::for_action(&menu::Cancel, cx)
-            .map(|close_kb| KeybindingHint::new(close_kb, cx.theme().colors().editor_background).suffix("Cancel"));
+        let close_kb_hint = ui::KeyBinding::for_action(&menu::Cancel, cx).map(|close_kb| {
+            KeybindingHint::new(close_kb, cx.theme().colors().editor_background).suffix(i18n::t!("common.cancel"))
+        });
 
         h_flex()
             .group("commit_editor_footer")

@@ -226,7 +226,7 @@ impl CommitView {
             multibuffer.set_excerpt_ranges_for_path(
                 PathKey::with_sort_prefix(
                     COMMIT_MESSAGE_SORT_PREFIX,
-                    RelPath::unix("commit message").unwrap().into(),
+                    RelPath::unix(i18n::t!("ui.text.commit_message")).unwrap().into(),
                 ),
                 message_buffer.clone(),
                 &snapshot,
@@ -300,7 +300,7 @@ impl CommitView {
                         .is_some_and(|text| is_binary_content(text.as_bytes()));
 
                 let new_text = if is_binary {
-                    "(binary file not shown)".to_string()
+                    i18n::t!("ui.text.binary_file_not_shown").to_string()
                 } else {
                     raw_new_text
                 };
@@ -610,7 +610,12 @@ impl CommitView {
                                             .tooltip({
                                                 let commit_sha = commit_sha.clone();
                                                 move |_, cx| {
-                                                    Tooltip::with_meta("Copy Commit SHA", None, commit_sha.clone(), cx)
+                                                    Tooltip::with_meta(
+                                                        i18n::t!("ui.text.copy_commit_sha_15a8d90b"),
+                                                        None,
+                                                        commit_sha.clone(),
+                                                        cx,
+                                                    )
                                                 }
                                             })
                                             .on_click(move |_, _, cx| {
@@ -647,7 +652,7 @@ impl CommitView {
                             .justify_end()
                             .children(remote_info.map(|(provider_name, url)| {
                                 let url = SharedString::from(url);
-                                Button::new("view_on_provider", format!("View on {}", provider_name))
+                                Button::new("view_on_provider", i18n::t!("ui.text.view_on", value0 = provider_name))
                                     .icon(IconName::Forge)
                                     .icon_color(Color::Muted)
                                     .icon_size(IconSize::Small)
@@ -656,12 +661,12 @@ impl CommitView {
                                     .on_click(move |_, _, cx| cx.open_url(&url))
                             }))
                             .child(
-                                Button::new("toggle_split_diff", "Toggle split")
+                                Button::new("toggle_split_diff", i18n::t!("ui.text.toggle_split"))
                                     .icon(IconName::Split)
                                     .icon_color(Color::Muted)
                                     .icon_size(IconSize::Small)
                                     .icon_position(IconPosition::Start)
-                                    .tooltip(Tooltip::text("Toggle side-by-side diff view"))
+                                    .tooltip(Tooltip::text(i18n::t!("ui.text.toggle_side_by_side_diff_view")))
                                     .on_click(|_, window, cx| window.dispatch_action(Box::new(ToggleSplitDiff), cx)),
                             ),
                     ),
@@ -671,13 +676,13 @@ impl CommitView {
     fn apply_stash(workspace: &mut Workspace, window: &mut Window, cx: &mut App) {
         Self::stash_action(
             workspace,
-            "Apply",
+            i18n::t!("ui.text.apply"),
             window,
             cx,
             async move |repository, sha, stash, commit_view, workspace, cx| {
                 let result = repository.update(cx, |repo, cx| {
                     if !stash_matches_index(sha, stash, repo) {
-                        return Err(anyhow::anyhow!("Stash has changed, not applying"));
+                        return Err(anyhow::anyhow!(i18n::t!("ui.text.stash_has_changed_not_applying")));
                     }
                     Ok(repo.stash_apply(Some(stash), cx))
                 })?;
@@ -698,13 +703,13 @@ impl CommitView {
     fn pop_stash(workspace: &mut Workspace, window: &mut Window, cx: &mut App) {
         Self::stash_action(
             workspace,
-            "Pop",
+            i18n::t!("ui.text.pop"),
             window,
             cx,
             async move |repository, sha, stash, commit_view, workspace, cx| {
                 let result = repository.update(cx, |repo, cx| {
                     if !stash_matches_index(sha, stash, repo) {
-                        return Err(anyhow::anyhow!("Stash has changed, pop aborted"));
+                        return Err(anyhow::anyhow!(i18n::t!("ui.text.stash_has_changed_pop_aborted")));
                     }
                     Ok(repo.stash_pop(Some(stash), cx))
                 })?;
@@ -725,13 +730,13 @@ impl CommitView {
     fn remove_stash(workspace: &mut Workspace, window: &mut Window, cx: &mut App) {
         Self::stash_action(
             workspace,
-            "Drop",
+            i18n::t!("ui.text.drop"),
             window,
             cx,
             async move |repository, sha, stash, commit_view, workspace, cx| {
                 let result = repository.update(cx, |repo, cx| {
                     if !stash_matches_index(sha, stash, repo) {
-                        return Err(anyhow::anyhow!("Stash has changed, drop aborted"));
+                        return Err(anyhow::anyhow!(i18n::t!("ui.text.stash_has_changed_drop_aborted")));
                     }
                     Ok(repo.stash_drop(Some(stash), cx))
                 })?;
@@ -777,7 +782,7 @@ impl CommitView {
             PromptLevel::Info,
             &format!("{} stash@{{{}}}?", str_action, stash),
             None,
-            &[str_action, "Cancel"],
+            &[str_action, i18n::t!("common.cancel")],
             cx,
         );
 

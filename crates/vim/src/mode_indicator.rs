@@ -136,7 +136,7 @@ impl Render for ModeIndicator {
                             bg_color != system_transparent && vim_mode_text != system_transparent,
                             |el| el.color(Color::Custom(vim_mode_text)),
                         )
-                        .tooltip(Tooltip::text(format!("Active mode: {}", mode))),
+                        .tooltip(Tooltip::text(i18n::t!("ui.text.active_mode", value0 = mode))),
                 )
             })
             .into_any()

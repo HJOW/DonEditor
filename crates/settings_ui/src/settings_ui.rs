@@ -398,12 +398,12 @@ fn init_renderers(cx: &mut App) {
                     settings_window,
                     item,
                     settings_file,
-                    Button::new("open-in-settings-file", "Edit in settings.jsonc")
+                    Button::new("open-in-settings-file", i18n::t!("ui.text.edit_in_settings_jsonc"))
                         .style(ButtonStyle::Outlined)
                         .size(ButtonSize::Medium)
                         .tab_index(0_isize)
                         .tooltip(Tooltip::for_action_title_in(
-                            "Edit in settings.jsonc",
+                            i18n::t!("ui.text.edit_in_settings_jsonc"),
                             &OpenCurrentFile,
                             &settings_window.focus_handle,
                         ))
@@ -856,35 +856,38 @@ impl SettingsPageItem {
                                 }),
                         )
                         .child(
-                            Button::new(("sub-page".into(), sub_page_link.title.clone()), "Configure")
-                                .icon(IconName::ChevronRight)
-                                .tab_index(0_isize)
-                                .icon_position(IconPosition::End)
-                                .icon_color(Color::Muted)
-                                .icon_size(IconSize::Small)
-                                .style(ButtonStyle::OutlinedGhost)
-                                .size(ButtonSize::Medium)
-                                .on_click({
-                                    let sub_page_link = sub_page_link.clone();
-                                    cx.listener(move |this, _, window, cx| {
-                                        let mut section_index = item_index;
-                                        let current_page = this.current_page();
+                            Button::new(
+                                ("sub-page".into(), sub_page_link.title.clone()),
+                                i18n::t!("welcome.configure"),
+                            )
+                            .icon(IconName::ChevronRight)
+                            .tab_index(0_isize)
+                            .icon_position(IconPosition::End)
+                            .icon_color(Color::Muted)
+                            .icon_size(IconSize::Small)
+                            .style(ButtonStyle::OutlinedGhost)
+                            .size(ButtonSize::Medium)
+                            .on_click({
+                                let sub_page_link = sub_page_link.clone();
+                                cx.listener(move |this, _, window, cx| {
+                                    let mut section_index = item_index;
+                                    let current_page = this.current_page();
 
-                                        while !matches!(
-                                            current_page.items[section_index],
-                                            SettingsPageItem::SectionHeader(_)
-                                        ) {
-                                            section_index -= 1;
-                                        }
+                                    while !matches!(
+                                        current_page.items[section_index],
+                                        SettingsPageItem::SectionHeader(_)
+                                    ) {
+                                        section_index -= 1;
+                                    }
 
-                                        let SettingsPageItem::SectionHeader(header) = current_page.items[section_index]
-                                        else {
-                                            unreachable!("All items always have a section header above them")
-                                        };
+                                    let SettingsPageItem::SectionHeader(header) = current_page.items[section_index]
+                                    else {
+                                        unreachable!("All items always have a section header above them")
+                                    };
 
-                                        this.push_sub_page(sub_page_link.clone(), header, window, cx)
-                                    })
-                                }),
+                                    this.push_sub_page(sub_page_link.clone(), header, window, cx)
+                                })
+                            }),
                         )
                         .child(render_settings_item_link(
                             sub_page_link.title.clone(),
@@ -1031,7 +1034,7 @@ fn render_settings_item(
                                     IconButton::new("reset-to-default-btn", IconName::Undo)
                                         .icon_color(Color::Muted)
                                         .icon_size(IconSize::Small)
-                                        .tooltip(Tooltip::text("Reset to Default"))
+                                        .tooltip(Tooltip::text(i18n::t!("ui.text.reset_to_default")))
                                         .on_click({
                                             move |_, _, cx| {
                                                 reset_to_default(cx);
@@ -1044,9 +1047,9 @@ fn render_settings_item(
                             file_set_in.filter(|file_set_in| file_set_in != &file),
                             |this, file_set_in| {
                                 this.child(
-                                    Label::new(format!(
-                                        "—  Modified in {}",
-                                        settings_window
+                                    Label::new(i18n::t!(
+                                        "settings.modified_in",
+                                        name = settings_window
                                             .display_name(&file_set_in)
                                             .expect("File name should exist")
                                     ))
@@ -1105,7 +1108,7 @@ fn render_settings_item_link(
                 .icon_color(link_icon_color)
                 .icon_size(IconSize::Small)
                 .shape(IconButtonShape::Square)
-                .tooltip(Tooltip::text("Copy Link"))
+                .tooltip(Tooltip::text(i18n::t!("ui.text.copy_link")))
                 .when_some(json_path, |this, path| {
                     this.on_click(cx.listener(move |_, _, _, cx| {
                         let link = format!("gram://settings/{}", path);
@@ -1307,7 +1310,7 @@ impl SettingsWindow {
         let current_file = SettingsUiFile::User;
         let search_bar = cx.new(|cx| {
             let mut editor = Editor::single_line(window, cx);
-            editor.set_placeholder_text("Search settings…", window, cx);
+            editor.set_placeholder_text(i18n::t!("ui.text.search_settings"), window, cx);
             editor
         });
 
@@ -1321,8 +1324,28 @@ impl SettingsWindow {
         .detach();
 
         let mut ui_font_size = ThemeSettings::get_global(cx).ui_font_size(cx);
+        // [DonEditor] 언어를 바꾸면 정적 메타데이터와 한국어 검색 인덱스도 함께 다시 만듭니다.
+        let mut ui_language = i18n::UiLanguageSetting::get_global(cx).resolve();
         cx.observe_global_in::<SettingsStore>(window, move |this, window, cx| {
             this.fetch_files(window, cx);
+
+            let next_language = i18n::UiLanguageSetting::get_global(cx).resolve();
+            if next_language != ui_language {
+                ui_language = next_language;
+                // 전역 i18n 설정 적용을 마친 뒤 페이지와 검색 결과를 갱신합니다.
+                cx.defer_in(window, |this, window, cx| {
+                    this.pages.clear();
+                    this.search_index = None;
+                    this.build_ui(window, cx);
+                    this.build_search_index();
+                    this.update_matches(cx);
+                    this.search_bar.update(cx, |editor, cx| {
+                        editor.set_placeholder_text(i18n::t!("ui.text.search_settings"), window, cx);
+                    });
+                    this.list_state.remeasure();
+                    cx.notify();
+                });
+            }
 
             // Whenever settings are changed, it's possible that the changed
             // settings affects the rendering of the `SettingsWindow`, like is
@@ -1796,11 +1819,18 @@ impl SettingsWindow {
 
                         let aliases = item.aliases.unwrap_or(&[]);
 
-                        let contents = [page.title, header_str, item.title, item.description]
-                            .into_iter()
-                            .chain(aliases.iter().copied())
-                            .collect::<Vec<_>>()
-                            .join("\n");
+                        // [DonEditor] 표시 언어와 관계없이 JSON 설정 이름으로도 검색할 수 있습니다.
+                        let contents = [
+                            page.title,
+                            header_str,
+                            item.title,
+                            item.description,
+                            json_path.unwrap_or_default(),
+                        ]
+                        .into_iter()
+                        .chain(aliases.iter().copied())
+                        .collect::<Vec<_>>()
+                        .join("\n");
 
                         documents.push(bm25::Document {
                             id: key_index,
@@ -1809,6 +1839,9 @@ impl SettingsWindow {
 
                         push_candidates(&mut fuzzy_match_candidates, key_index, item.title);
                         push_candidates(&mut fuzzy_match_candidates, key_index, item.description);
+                        if let Some(json_path) = json_path {
+                            push_candidates(&mut fuzzy_match_candidates, key_index, json_path);
+                        }
 
                         for alias in aliases.iter() {
                             push_candidates(&mut fuzzy_match_candidates, key_index, alias);
@@ -2124,7 +2157,7 @@ impl SettingsWindow {
                                         }),
                                     )
                                     .style(DropdownStyle::Subtle)
-                                    .trigger_tooltip(Tooltip::text("View Other Projects"))
+                                    .trigger_tooltip(Tooltip::text(i18n::t!("ui.text.view_other_projects")))
                                     .trigger_icon(IconName::ChevronDown)
                                     .attach(gpui::Corner::BottomLeft)
                                     .offset(gpui::Point { x: px(0.0), y: px(2.0) })
@@ -2135,11 +2168,11 @@ impl SettingsWindow {
                     }),
             )
             .child(
-                Button::new(edit_in_json_id, "Edit in settings.jsonc")
+                Button::new(edit_in_json_id, i18n::t!("ui.text.edit_in_settings_jsonc"))
                     .tab_index(0_isize)
                     .style(ButtonStyle::OutlinedGhost)
                     .tooltip(Tooltip::for_action_title_in(
-                        "Edit in settings.jsonc",
+                        i18n::t!("ui.text.edit_in_settings_jsonc"),
                         &OpenCurrentFile,
                         &self.focus_handle,
                     ))
@@ -2151,7 +2184,7 @@ impl SettingsWindow {
 
     pub(crate) fn display_name(&self, file: &SettingsUiFile) -> Option<String> {
         match file {
-            SettingsUiFile::User => Some("User".to_string()),
+            SettingsUiFile::User => Some(i18n::t!("ui.text.user").to_string()),
             SettingsUiFile::Project((worktree_id, path)) => {
                 self.worktree_root_dirs.get(worktree_id).map(|directory_name| {
                     let path_style = PathStyle::local();
@@ -2216,9 +2249,9 @@ impl SettingsWindow {
                 .visible_navbar_entries()
                 .any(|(_, entry)| entry.focus_handle.is_focused(window))
         {
-            "Focus Content"
+            i18n::t!("ui.text.focus_content")
         } else {
-            "Focus Navbar"
+            i18n::t!("ui.text.focus_navbar")
         };
 
         let mut key_context = KeyContext::new_with_defaults();
@@ -2563,7 +2596,7 @@ impl SettingsWindow {
             .items_center()
             .justify_center()
             .gap_1()
-            .child(Label::new("No Results"))
+            .child(Label::new(i18n::t!("search.project.no_results")))
             .child(Label::new(search_query).size(LabelSize::Small).color(Color::Muted))
     }
 
@@ -2580,8 +2613,8 @@ impl SettingsWindow {
 
         if has_no_results {
             let search_query = self.search_bar.read(cx).text(cx);
-            page_content =
-                page_content.child(self.render_empty_state(format!("No settings match \"{}\"", search_query).into()))
+            page_content = page_content
+                .child(self.render_empty_state(i18n::t!("settings.no_matches", query = search_query).into()))
         } else {
             let last_non_header_index = self
                 .visible_page_items()
@@ -2675,8 +2708,8 @@ impl SettingsWindow {
 
         if has_no_results {
             let search_query = self.search_bar.read(cx).text(cx);
-            page_content =
-                page_content.child(self.render_empty_state(format!("No settings match \"{}\"", search_query).into()))
+            page_content = page_content
+                .child(self.render_empty_state(i18n::t!("settings.no_matches", query = search_query).into()))
         } else {
             let last_non_header_index = items
                 .iter()
@@ -2760,11 +2793,11 @@ impl SettingsWindow {
                     sub_page_stack().last().is_none_or(|sub_page| sub_page.link.in_json),
                     |this| {
                         this.child(
-                            Button::new("open-in-settings-file", "Edit in settings.jsonc")
+                            Button::new("open-in-settings-file", i18n::t!("ui.text.edit_in_settings_jsonc"))
                                 .tab_index(0_isize)
                                 .style(ButtonStyle::OutlinedGhost)
                                 .tooltip(Tooltip::for_action_title_in(
-                                    "Edit in settings.jsonc",
+                                    i18n::t!("ui.text.edit_in_settings_jsonc"),
                                     &OpenCurrentFile,
                                     &self.focus_handle,
                                 ))
@@ -2799,7 +2832,7 @@ impl SettingsWindow {
                     )
                     .action_slot(
                         div().pr_1().pb_1().child(
-                            Button::new("fix-in-json", "Fix in settings.jsonc")
+                            Button::new("fix-in-json", i18n::t!("ui.text.fix_in_settings_jsonc"))
                                 .tab_index(0_isize)
                                 .style(ButtonStyle::Tinted(ui::TintColor::Warning))
                                 .on_click(cx.listener(|this, _, window, cx| {
@@ -2816,7 +2849,7 @@ impl SettingsWindow {
                 .gap_2()
                 .when_some(parse_error, |this, err| {
                     this.child(banner(
-                        "Failed to load your settings. Some values may be incorrect and changes may be lost.",
+                        i18n::t!("settings.load_failed"),
                         err,
                         &mut self.shown_errors,
                         cx,
@@ -2824,11 +2857,11 @@ impl SettingsWindow {
                 })
                 .map(|this| match &error.migration_status {
                     settings::MigrationStatus::Succeeded => this.child(banner(
-                        "Your settings are out of date, and need to be updated.",
+                        i18n::t!("settings.migration_needed"),
                         match &self.current_file {
-                            SettingsUiFile::User => "They can be automatically migrated to the latest version.",
+                            SettingsUiFile::User => i18n::t!("settings.auto_migration"),
                             SettingsUiFile::Server(_) | SettingsUiFile::Project(_) => {
-                                "They must be manually migrated to the latest version."
+                                i18n::t!("settings.manual_migration")
                             }
                         }
                         .to_string(),
@@ -2836,7 +2869,7 @@ impl SettingsWindow {
                         cx,
                     )),
                     settings::MigrationStatus::Failed { error: err } if !parse_failed => this.child(banner(
-                        "Your settings file is out of date, automatic migration failed",
+                        i18n::t!("settings.migration_failed"),
                         err.clone(),
                         &mut self.shown_errors,
                         cx,

@@ -119,7 +119,7 @@ impl LspConfigView {
                                     BinaryStatus::Failed { error }
                                 } else {
                                     BinaryStatus::Failed {
-                                        error: "Unknown error".to_string(),
+                                        error: i18n::t!("ui.text.unknown_error").to_string(),
                                     }
                                 }
                             }
@@ -270,12 +270,12 @@ impl LspConfigView {
 
     fn get_status_info(binary_status: &BinaryStatus) -> (SharedString, Color) {
         match binary_status {
-            BinaryStatus::None => ("Running".into(), Color::Success),
-            BinaryStatus::Starting => ("Starting".into(), Color::Accent),
-            BinaryStatus::Downloading => ("Downloading".into(), Color::Accent),
-            BinaryStatus::CheckingForUpdate => ("Checking".into(), Color::Muted),
-            BinaryStatus::Stopping => ("Stopping".into(), Color::Warning),
-            BinaryStatus::Stopped => ("Stopped".into(), Color::Muted),
+            BinaryStatus::None => (i18n::t!("ui.text.running").into(), Color::Success),
+            BinaryStatus::Starting => (i18n::t!("ui.text.starting").into(), Color::Accent),
+            BinaryStatus::Downloading => (i18n::t!("ui.text.downloading").into(), Color::Accent),
+            BinaryStatus::CheckingForUpdate => (i18n::t!("ui.text.checking").into(), Color::Muted),
+            BinaryStatus::Stopping => (i18n::t!("ui.text.stopping").into(), Color::Warning),
+            BinaryStatus::Stopped => (i18n::t!("ui.text.stopped").into(), Color::Muted),
             BinaryStatus::Failed { error } => (error.into(), Color::Error),
         }
     }
@@ -349,11 +349,16 @@ impl LspConfigView {
                         }),
                     )
                     .child(
-                        v_flex().gap_1p5().child(Label::new("Allow Download")).child(
-                            Label::new("Allow the editor to download a language server binary (if available)")
+                        v_flex()
+                            .gap_1p5()
+                            .child(Label::new(i18n::t!("ui.text.allow_download")))
+                            .child(
+                                Label::new(i18n::t!(
+                                    "ui.text.allow_the_editor_to_download_a_language_server_binary_if_available"
+                                ))
                                 .size(LabelSize::Small)
                                 .color(Color::Muted),
-                        ),
+                            ),
                     ),
             )
             .child(
@@ -381,11 +386,16 @@ impl LspConfigView {
                         }),
                     )
                     .child(
-                        v_flex().gap_1p5().child(Label::new("Ignore System Version")).child(
-                            Label::new("Ignore any language server binary installed system-wide")
+                        v_flex()
+                            .gap_1p5()
+                            .child(Label::new(i18n::t!("ui.text.ignore_system_version")))
+                            .child(
+                                Label::new(i18n::t!(
+                                    "ui.text.ignore_any_language_server_binary_installed_system_wide"
+                                ))
                                 .size(LabelSize::Small)
                                 .color(Color::Muted),
-                        ),
+                            ),
                     ),
             )
             .child(
@@ -413,11 +423,16 @@ impl LspConfigView {
                         }),
                     )
                     .child(
-                        v_flex().gap_1p5().child(Label::new("Auto Update")).child(
-                            Label::new("Automatically download new versions of the language server when released")
+                        v_flex()
+                            .gap_1p5()
+                            .child(Label::new(i18n::t!("ui.text.auto_update")))
+                            .child(
+                                Label::new(i18n::t!(
+                                    "ui.text.automatically_download_new_versions_of_the_language_serv_04f33829"
+                                ))
                                 .size(LabelSize::Small)
                                 .color(Color::Muted),
-                        ),
+                            ),
                     ),
             )
     }
@@ -428,11 +443,11 @@ impl LspConfigView {
             .items_center()
             .justify_between()
             .pb_2()
-            .child(Headline::new("Language Server Configuration").size(HeadlineSize::Small))
+            .child(Headline::new(i18n::t!("ui.text.language_server_configuration")).size(HeadlineSize::Small))
             .child(
                 IconButton::new("lsp-config-info", IconName::Info)
                     .icon_size(IconSize::Custom(rems(1.5)))
-                    .tooltip(Tooltip::text("Language Servers Documentation"))
+                    .tooltip(Tooltip::text(i18n::t!("ui.text.language_servers_documentation")))
                     .on_click(move |_, _, cx| cx.open_url("gram://docs/language-servers")),
             )
     }
@@ -472,11 +487,16 @@ impl LspConfigView {
                         })),
                     )
                     .child(
-                        v_flex().gap_1p5().child(Label::new("Download Node.js")).child(
-                            Label::new("Allow the editor to download a Node.js binary if it can't find one.")
+                        v_flex()
+                            .gap_1p5()
+                            .child(Label::new(i18n::t!("ui.text.download_node_js")))
+                            .child(
+                                Label::new(i18n::t!(
+                                    "ui.text.allow_the_editor_to_download_a_node_js_binary_if_it_can_t_find_one"
+                                ))
                                 .size(LabelSize::Small)
                                 .color(Color::Muted),
-                        ),
+                            ),
                     ),
             )
             .child(
@@ -493,11 +513,16 @@ impl LspConfigView {
                         })),
                     )
                     .child(
-                        v_flex().gap_1p5().child(Label::new("Download Prettier")).child(
-                            Label::new("Allow the editor to download the Prettier formatter unless already available.")
+                        v_flex()
+                            .gap_1p5()
+                            .child(Label::new(i18n::t!("ui.text.download_prettier")))
+                            .child(
+                                Label::new(i18n::t!(
+                                    "ui.text.allow_the_editor_to_download_the_prettier_formatter_unle_7458e0e4"
+                                ))
                                 .size(LabelSize::Small)
                                 .color(Color::Muted),
-                        ),
+                            ),
                     ),
             )
             .child(
@@ -512,11 +537,14 @@ impl LspConfigView {
                         ),
                     )
                     .child(
-                        v_flex().gap_1p5().child(Label::new("Allow npm install")).child(
-                            Label::new("Allow the editor to install NPM packages.")
-                                .size(LabelSize::Small)
-                                .color(Color::Muted),
-                        ),
+                        v_flex()
+                            .gap_1p5()
+                            .child(Label::new(i18n::t!("ui.text.allow_npm_install")))
+                            .child(
+                                Label::new(i18n::t!("ui.text.allow_the_editor_to_install_npm_packages"))
+                                    .size(LabelSize::Small)
+                                    .color(Color::Muted),
+                            ),
                     ),
             )
     }
@@ -579,7 +607,7 @@ impl LspConfigView {
                 .child(self.render_server_header(
                     name.0.clone(),
                     IconName::Debug,
-                    "Debug Adapter".into(),
+                    i18n::t!("ui.text.debug_adapter").into(),
                     Color::Default,
                 ))
                 .child(v_flex().gap_2().child(self.render_dap_settings(&name, settings, cx)))
@@ -620,11 +648,16 @@ impl LspConfigView {
                         }),
                     )
                     .child(
-                        v_flex().gap_1p5().child(Label::new("Allow Download")).child(
-                            Label::new("Allow the editor to download a debug adapter binary (if available)")
+                        v_flex()
+                            .gap_1p5()
+                            .child(Label::new(i18n::t!("ui.text.allow_download")))
+                            .child(
+                                Label::new(i18n::t!(
+                                    "ui.text.allow_the_editor_to_download_a_debug_adapter_binary_if_available"
+                                ))
                                 .size(LabelSize::Small)
                                 .color(Color::Muted),
-                        ),
+                            ),
                     ),
             )
             .child(
@@ -652,11 +685,16 @@ impl LspConfigView {
                         }),
                     )
                     .child(
-                        v_flex().gap_1p5().child(Label::new("Ignore System Version")).child(
-                            Label::new("Ignore any debug adapter binary installed system-wide")
+                        v_flex()
+                            .gap_1p5()
+                            .child(Label::new(i18n::t!("ui.text.ignore_system_version")))
+                            .child(
+                                Label::new(i18n::t!(
+                                    "ui.text.ignore_any_debug_adapter_binary_installed_system_wide"
+                                ))
                                 .size(LabelSize::Small)
                                 .color(Color::Muted),
-                        ),
+                            ),
                     ),
             )
             .child(
@@ -684,11 +722,16 @@ impl LspConfigView {
                         }),
                     )
                     .child(
-                        v_flex().gap_1p5().child(Label::new("Auto Update")).child(
-                            Label::new("Automatically download new versions of the debug adapter when released")
+                        v_flex()
+                            .gap_1p5()
+                            .child(Label::new(i18n::t!("ui.text.auto_update")))
+                            .child(
+                                Label::new(i18n::t!(
+                                    "ui.text.automatically_download_new_versions_of_the_debug_adapter_a1b56e93"
+                                ))
                                 .size(LabelSize::Small)
                                 .color(Color::Muted),
-                        ),
+                            ),
                     ),
             )
     }
@@ -750,6 +793,6 @@ impl Item for LspConfigView {
     type Event = EditorEvent;
 
     fn tab_content_text(&self, _detail: usize, _cx: &App) -> SharedString {
-        SharedString::from("Language Servers and Debug Adapters")
+        SharedString::from(i18n::t!("ui.text.language_servers_and_debug_adapters"))
     }
 }

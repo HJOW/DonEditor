@@ -59,9 +59,9 @@ fn render_theme_section(tab_index: &mut isize, cx: &mut App) -> impl IntoElement
                         ]
                         .map(|mode| {
                             const MODE_NAMES: [SharedString; 3] = [
-                                SharedString::new_static("Light"),
-                                SharedString::new_static("Dark"),
-                                SharedString::new_static("System"),
+                                SharedString::new_static(i18n::t!("ui.text.light")),
+                                SharedString::new_static(i18n::t!("ui.text.dark")),
+                                SharedString::new_static(i18n::t!("ui.text.system")),
                             ];
                             ToggleButtonSimple::new(MODE_NAMES[mode as usize].clone(), move |_, _, cx| {
                                 write_mode_change(mode, cx);
@@ -253,7 +253,7 @@ fn render_base_keymap_section(tab_index: &mut isize, cx: &mut App) -> impl IntoE
                     }),
                 ],
                 [
-                    ToggleButtonWithIcon::new("Minimal", IconName::Code, |_, _, cx| {
+                    ToggleButtonWithIcon::new(i18n::t!("ui.text.minimal"), IconName::Code, |_, _, cx| {
                         write_keymap_base(BaseKeymap::Minimal, cx);
                     }),
                     ToggleButtonWithIcon::new("", IconName::Blank, |_, _, _cx| {}),
@@ -288,8 +288,8 @@ fn render_vim_mode_switch(tab_index: &mut isize, cx: &mut App) -> impl IntoEleme
     };
     SwitchField::new(
         "onboarding-vim-mode",
-        Some("Vim Mode"),
-        Some("Modal editing, vim style".into()),
+        Some(i18n::t!("settings.text.vim_mode")),
+        Some(i18n::t!("ui.text.modal_editing_vim_style").into()),
         toggle_state,
         {
             let fs = <dyn Fs>::global(cx);
@@ -328,8 +328,8 @@ fn render_helix_mode_switch(tab_index: &mut isize, cx: &mut App) -> impl IntoEle
     };
     SwitchField::new(
         "onboarding-helix-mode",
-        Some("Helix Mode"),
-        Some("Modal editing, helix/kakoune style".into()),
+        Some(i18n::t!("settings.text.helix_mode")),
+        Some(i18n::t!("ui.text.modal_editing_helix_kakoune_style").into()),
         toggle_state,
         {
             let fs = <dyn Fs>::global(cx);
@@ -388,7 +388,7 @@ fn render_setting_import_button(
 fn render_import_settings_section(tab_index: &mut isize, cx: &mut App) -> impl IntoElement {
     let import_state = SettingsImportState::global(cx);
     let imports: [(SharedString, &dyn Action, bool); 1] = [(
-        "Import".into(),
+        i18n::t!("ui.text.import").into(),
         &ImportVsCodeSettings { skip_prompt: false },
         import_state.vscode,
     )];
@@ -408,8 +408,10 @@ fn render_import_settings_section(tab_index: &mut isize, cx: &mut App) -> impl I
                 .max_w_5_6()
                 .child(Label::new(i18n::t!("onboarding.import_settings")))
                 .child(
-                    Label::new("Read compatible settings from your Codium / VS Code configuration, if available.")
-                        .color(Color::Muted),
+                    Label::new(i18n::t!(
+                        "ui.text.read_compatible_settings_from_your_codium_vs_code_config_88be6240"
+                    ))
+                    .color(Color::Muted),
                 ),
         )
         .child(h_flex().gap_1().child(vscode))

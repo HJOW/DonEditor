@@ -11,6 +11,7 @@ doctest = false
 path = "src/language_tools.rs"
 
 [dependencies]
+i18n.workspace = true
 anyhow.workspace = true
 app_actions.workspace = true
 collections.workspace = true

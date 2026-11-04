@@ -65,7 +65,7 @@ impl PickerDelegate for ThemePickerDelegate {
     }
 
     fn placeholder_text(&self, _window: &mut Window, _cx: &mut App) -> Arc<str> {
-        "Search theme…".into()
+        i18n::t!("settings.search_themes").into()
     }
 
     fn update_matches(&mut self, query: String, _window: &mut Window, cx: &mut Context<ThemePicker>) -> Task<()> {

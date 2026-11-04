@@ -90,7 +90,7 @@ impl Console {
         let this = cx.weak_entity();
         let query_bar = cx.new(|cx| {
             let mut editor = Editor::single_line(window, cx);
-            editor.set_placeholder_text("Evaluate an expression", window, cx);
+            editor.set_placeholder_text(i18n::t!("ui.text.evaluate_an_expression"), window, cx);
             editor.set_use_autoclose(false);
             editor.set_show_gutter(false, cx);
             editor.set_show_wrap_guides(false, cx);
@@ -350,7 +350,7 @@ impl Console {
                                 .when_some(keybinding_target.clone(), |el, keybinding_target| {
                                     el.context(keybinding_target)
                                 })
-                                .action("Watch Expression", WatchExpression.boxed_clone())
+                                .action(i18n::t!("ui.text.watch_expression"), WatchExpression.boxed_clone())
                         }))
                     })
                 },
@@ -459,7 +459,7 @@ impl Render for Console {
                                 .on_click(move |_, window, cx| window.dispatch_action(Box::new(Confirm), cx))
                                 .layer(ui::ElevationIndex::ModalSurface)
                                 .size(ui::ButtonSize::Compact)
-                                .child(Label::new("Evaluate"))
+                                .child(Label::new(i18n::t!("ui.text.evaluate")))
                                 .tooltip({
                                     let query_focus_handle = query_focus_handle.clone();
 

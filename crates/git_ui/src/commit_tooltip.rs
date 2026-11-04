@@ -80,7 +80,11 @@ impl CommitTooltip {
             CommitDetails {
                 sha: blame.sha.to_string().into(),
                 commit_time,
-                author_name: blame.author.clone().unwrap_or("<no name>".to_string()).into(),
+                author_name: blame
+                    .author
+                    .clone()
+                    .unwrap_or(i18n::t!("ui.text.no_name").to_string())
+                    .into(),
                 author_email: blame.author_mail.clone().unwrap_or("".to_string()).into(),
                 message: details,
             },
@@ -147,7 +151,7 @@ impl Render for CommitTooltip {
             .message
             .as_ref()
             .map(|_| MarkdownElement::new(self.markdown.clone(), markdown_style).into_any())
-            .unwrap_or("<no commit message>".into_any());
+            .unwrap_or(i18n::t!("ui.text.no_commit_message").into_any());
 
         let pull_request = self
             .commit
@@ -255,7 +259,10 @@ impl Render for CommitTooltip {
                                                 }),
                                         )
                                         .child(Divider::vertical())
-                                        .child(CopyButton::new("copy-commit-sha", full_sha).tooltip_label("Copy SHA")),
+                                        .child(
+                                            CopyButton::new("copy-commit-sha", full_sha)
+                                                .tooltip_label(i18n::t!("ui.text.copy_sha")),
+                                        ),
                                 ),
                         ),
                 )

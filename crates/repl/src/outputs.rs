@@ -148,7 +148,7 @@ impl Output {
                     el.child(
                         IconButton::new(ElementId::Name("copy-output".into()), IconName::Copy)
                             .style(ButtonStyle::Transparent)
-                            .tooltip(Tooltip::text("Copy Output"))
+                            .tooltip(Tooltip::text(i18n::t!("ui.text.copy_output")))
                             .on_click(move |_, window, cx| {
                                 let clipboard_content = v.clipboard_content(window, cx);
 
@@ -163,7 +163,7 @@ impl Output {
                     el.child(
                         IconButton::new(ElementId::Name("open-in-buffer".into()), IconName::FileTextOutlined)
                             .style(ButtonStyle::Transparent)
-                            .tooltip(Tooltip::text("Open in Buffer"))
+                            .tooltip(Tooltip::text(i18n::t!("ui.text.open_in_buffer")))
                             .on_click({
                                 let workspace = workspace.clone();
                                 move |_, window, cx| {
@@ -175,7 +175,7 @@ impl Output {
                                             let multibuffer = cx.new(|cx| {
                                                 let mut multi_buffer = MultiBuffer::singleton(buffer.clone(), cx);
 
-                                                multi_buffer.set_title("REPL Output".to_string(), cx);
+                                                multi_buffer.set_title(i18n::t!("ui.text.repl_output").to_string(), cx);
                                                 multi_buffer
                                             });
 
@@ -233,7 +233,8 @@ impl Output {
                             let traceback_text = traceback.read(cx).full_text();
                             let full_error = format!("{}: {}\n{}", ename, evalue, traceback_text);
 
-                            CopyButton::new("copy-full-error", full_error).tooltip_label("Copy Full Error")
+                            CopyButton::new("copy-full-error", full_error)
+                                .tooltip_label(i18n::t!("ui.text.copy_full_error"))
                         })
                         .child(
                             IconButton::new(
@@ -241,7 +242,7 @@ impl Output {
                                 IconName::FileTextOutlined,
                             )
                             .style(ButtonStyle::Transparent)
-                            .tooltip(Tooltip::text("Open Full Error in Buffer"))
+                            .tooltip(Tooltip::text(i18n::t!("ui.text.open_full_error_in_buffer")))
                             .on_click({
                                 let ename = err.ename.clone();
                                 let evalue = err.evalue.clone();
@@ -259,7 +260,7 @@ impl Output {
                                         let editor = Box::new(cx.new(|cx| {
                                             let multibuffer = cx.new(|cx| {
                                                 let mut multi_buffer = MultiBuffer::singleton(buffer.clone(), cx);
-                                                multi_buffer.set_title("Full Error".to_string(), cx);
+                                                multi_buffer.set_title(i18n::t!("ui.text.full_error").to_string(), cx);
                                                 multi_buffer
                                             });
                                             Editor::for_multibuffer(multibuffer, None, window, cx)
@@ -307,14 +308,14 @@ impl Output {
                     content: cx.new(|_| view),
                     display_id,
                 },
-                Err(error) => Output::Message(format!("Failed to load image: {}", error)),
+                Err(error) => Output::Message(i18n::t!("ui.text.failed_to_load_image", value0 = error)),
             },
             Some(MimeType::DataTable(data)) => Output::Table {
                 content: cx.new(|cx| TableView::new(data, window, cx)),
                 display_id,
             },
             // Any other media types are not supported
-            _ => Output::Message("Unsupported media type".to_string()),
+            _ => Output::Message(i18n::t!("ui.text.unsupported_media_type").to_string()),
         }
     }
 }
@@ -527,7 +528,7 @@ impl ExecutionView {
 impl Render for ExecutionView {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let status = match &self.status {
-            ExecutionStatus::ConnectingToKernel => Label::new("Connecting to kernel...")
+            ExecutionStatus::ConnectingToKernel => Label::new(i18n::t!("ui.text.connecting_to_kernel"))
                 .color(Color::Muted)
                 .into_any_element(),
             ExecutionStatus::Executing => h_flex()
@@ -538,19 +539,25 @@ impl Render for ExecutionView {
                         .color(Color::Muted)
                         .with_rotate_animation(3),
                 )
-                .child(Label::new("Executing...").color(Color::Muted))
+                .child(Label::new(i18n::t!("ui.text.executing")).color(Color::Muted))
                 .into_any_element(),
             ExecutionStatus::Finished => Icon::new(IconName::Check).size(IconSize::Small).into_any_element(),
-            ExecutionStatus::Unknown => Label::new("Unknown status").color(Color::Muted).into_any_element(),
-            ExecutionStatus::ShuttingDown => Label::new("Kernel shutting down...")
+            ExecutionStatus::Unknown => Label::new(i18n::t!("ui.text.unknown_status"))
                 .color(Color::Muted)
                 .into_any_element(),
-            ExecutionStatus::Restarting => Label::new("Kernel restarting...")
+            ExecutionStatus::ShuttingDown => Label::new(i18n::t!("ui.text.kernel_shutting_down"))
                 .color(Color::Muted)
                 .into_any_element(),
-            ExecutionStatus::Shutdown => Label::new("Kernel shutdown").color(Color::Muted).into_any_element(),
-            ExecutionStatus::Queued => Label::new("Queued...").color(Color::Muted).into_any_element(),
-            ExecutionStatus::KernelErrored(error) => Label::new(format!("Kernel error: {}", error))
+            ExecutionStatus::Restarting => Label::new(i18n::t!("ui.text.kernel_restarting"))
+                .color(Color::Muted)
+                .into_any_element(),
+            ExecutionStatus::Shutdown => Label::new(i18n::t!("ui.text.kernel_shutdown"))
+                .color(Color::Muted)
+                .into_any_element(),
+            ExecutionStatus::Queued => Label::new(i18n::t!("ui.text.queued"))
+                .color(Color::Muted)
+                .into_any_element(),
+            ExecutionStatus::KernelErrored(error) => Label::new(i18n::t!("ui.text.kernel_error", value0 = error))
                 .color(Color::Error)
                 .into_any_element(),
         };

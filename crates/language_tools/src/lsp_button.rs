@@ -139,9 +139,9 @@ impl LanguageServerState {
         for item in &self.items {
             if let LspMenuItem::ToggleServersButton { restart } = item {
                 let label = if *restart {
-                    "Restart All Servers"
+                    i18n::t!("ui.text.restart_all_servers")
                 } else {
-                    "Stop All Servers"
+                    i18n::t!("ui.text.stop_all_servers")
                 };
 
                 let restart = *restart;
@@ -213,7 +213,7 @@ impl LanguageServerState {
                 continue;
             } else {
                 if let LspMenuItem::OpenConfigView = item {
-                    menu = menu.entry("Configure Servers", None, move |window, cx| {
+                    menu = menu.entry(i18n::t!("ui.text.configure_servers"), None, move |window, cx| {
                         window.dispatch_action(Box::new(OpenLanguageServerConfig), cx);
                     })
                 }
@@ -237,17 +237,19 @@ impl LanguageServerState {
                     BinaryStatus::CheckingForUpdate | BinaryStatus::Downloading | BinaryStatus::Starting => {
                         Some((Color::Modified, "Starting…"))
                     }
-                    BinaryStatus::Stopping | BinaryStatus::Stopped => Some((Color::Disabled, "Stopped")),
-                    BinaryStatus::Failed { .. } => Some((Color::Error, "Error")),
+                    BinaryStatus::Stopping | BinaryStatus::Stopped => {
+                        Some((Color::Disabled, i18n::t!("ui.text.stopped")))
+                    }
+                    BinaryStatus::Failed { .. } => Some((Color::Error, i18n::t!("ui.text.error"))),
                 })
                 .or_else(|| {
                     Some(match server_info.health? {
-                        ServerHealth::Ok => (Color::Success, "Running"),
-                        ServerHealth::Warning => (Color::Warning, "Warning"),
-                        ServerHealth::Error => (Color::Error, "Error"),
+                        ServerHealth::Ok => (Color::Success, i18n::t!("ui.text.running")),
+                        ServerHealth::Warning => (Color::Warning, i18n::t!("ui.text.warning")),
+                        ServerHealth::Error => (Color::Error, i18n::t!("ui.text.error")),
                     })
                 })
-                .unwrap_or((Color::Success, "Running"));
+                .unwrap_or((Color::Success, i18n::t!("ui.text.running")));
 
             let message = server_info
                 .message
@@ -295,7 +297,7 @@ impl LanguageServerState {
                         let workspace_for_message = workspace.clone();
                         let message_for_handler = message.clone();
                         let server_name_for_message = submenu_server_name.clone();
-                        submenu = submenu.entry("View Message", None, move |window, cx| {
+                        submenu = submenu.entry(i18n::t!("ui.text.view_message"), None, move |window, cx| {
                             let Some(create_buffer) = workspace_for_message
                                 .update(cx, |workspace, cx| {
                                     workspace
@@ -315,7 +317,14 @@ impl LanguageServerState {
                                 let buffer = create_buffer.await?;
                                 buffer.update(cx, |buffer, cx| {
                                     buffer.edit(
-                                        [(0..0, format!("Language server {server_name}:\n\n{message}"))],
+                                        [(
+                                            0..0,
+                                            i18n::t!(
+                                                "ui.text.language_server_server_name_message",
+                                                server_name = server_name,
+                                                message = message
+                                            ),
+                                        )],
                                         None,
                                         cx,
                                     );
@@ -349,7 +358,7 @@ impl LanguageServerState {
                         let lsp_logs_for_debug = lsp_logs.clone();
                         let workspace_for_debug = workspace.clone();
                         let server_selector_for_debug = server_selector.clone();
-                        submenu = submenu.entry("View Logs", None, move |window, cx| {
+                        submenu = submenu.entry(i18n::t!("ui.text.view_logs"), None, move |window, cx| {
                             lsp_log_view::open_server_trace(
                                 &lsp_logs_for_debug,
                                 workspace_for_debug.clone(),
@@ -364,7 +373,7 @@ impl LanguageServerState {
                     let workspace_for_restart = workspace.clone();
                     let lsp_store_for_restart = lsp_store.clone();
                     let server_name_for_restart = submenu_server_name.clone();
-                    submenu = submenu.entry("Restart Server", None, move |_window, cx| {
+                    submenu = submenu.entry(i18n::t!("ui.text.restart_server"), None, move |_window, cx| {
                         let Some(workspace) = workspace_for_restart.upgrade() else {
                             return;
                         };
@@ -440,7 +449,7 @@ impl LanguageServerState {
                         let lsp_store_for_stop = lsp_store.clone();
                         let server_selector_for_stop = server_selector.clone();
 
-                        submenu = submenu.entry("Stop Server", None, move |_window, cx| {
+                        submenu = submenu.entry(i18n::t!("ui.text.stop_server"), None, move |_window, cx| {
                             lsp_store_for_stop
                                 .update(cx, |lsp_store, cx| {
                                     lsp_store
@@ -1081,22 +1090,22 @@ impl Render for LspButton {
             (
                 IconName::BotOff,
                 Some(Indicator::dot().color(Color::Error)),
-                "One or more servers cannot run. Check Configure Servers.",
+                i18n::t!("ui.text.one_or_more_servers_cannot_run_check_configure_servers"),
             )
         } else if has_warnings {
             (
                 IconName::BotMessage,
                 Some(Indicator::dot().color(Color::Warning)),
-                "One or more servers have warnings.",
+                i18n::t!("ui.text.one_or_more_servers_have_warnings"),
             )
         } else if has_other_notifications {
             (
                 IconName::BotMessage,
                 Some(Indicator::dot().color(Color::Modified)),
-                "One or more servers have notifications.",
+                i18n::t!("ui.text.one_or_more_servers_have_notifications"),
             )
         } else {
-            (IconName::Bot, None, "All servers are running.")
+            (IconName::Bot, None, i18n::t!("ui.text.all_servers_are_running"))
         };
 
         let lsp_button = cx.weak_entity();
@@ -1123,7 +1132,14 @@ impl Render for LspButton {
                         .when_some(indicator, IconButton::indicator)
                         .icon_size(icon_size.icon_size())
                         .indicator_border_color(Some(cx.theme().colors().status_bar_background)),
-                    move |_window, cx| Tooltip::with_meta("Language Servers", Some(&ToggleMenu), description, cx),
+                    move |_window, cx| {
+                        Tooltip::with_meta(
+                            i18n::t!("settings.text.language_servers"),
+                            Some(&ToggleMenu),
+                            description,
+                            cx,
+                        )
+                    },
                 ),
         )
     }

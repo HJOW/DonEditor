@@ -356,22 +356,26 @@ fn render_conflict_buttons(
                     }
                 }),
         )
-        .child(Button::new("both", "Use Both").label_size(LabelSize::Small).on_click({
-            let conflict = conflict.clone();
-            let ours = conflict.ours.clone();
-            let theirs = conflict.theirs.clone();
-            move |_, window, cx| {
-                resolve_conflict(
-                    editor.clone(),
-                    excerpt_id,
-                    conflict.clone(),
-                    vec![ours.clone(), theirs.clone()],
-                    window,
-                    cx,
-                )
-                .detach()
-            }
-        }))
+        .child(
+            Button::new("both", i18n::t!("ui.text.use_both"))
+                .label_size(LabelSize::Small)
+                .on_click({
+                    let conflict = conflict.clone();
+                    let ours = conflict.ours.clone();
+                    let theirs = conflict.theirs.clone();
+                    move |_, window, cx| {
+                        resolve_conflict(
+                            editor.clone(),
+                            excerpt_id,
+                            conflict.clone(),
+                            vec![ours.clone(), theirs.clone()],
+                            window,
+                            cx,
+                        )
+                        .detach()
+                    }
+                }),
+        )
         .into_any()
 }
 

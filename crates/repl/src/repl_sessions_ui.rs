@@ -163,7 +163,7 @@ impl Item for ReplSessionsPage {
     type Event = ItemEvent;
 
     fn tab_content_text(&self, _detail: usize, _cx: &App) -> SharedString {
-        "REPL Sessions".into()
+        i18n::t!("ui.text.repl_sessions").into()
     }
 
     fn show_toolbar(&self) -> bool {
@@ -190,9 +190,9 @@ impl Render for ReplSessionsPage {
         // install kernels. It can be assumed they don't have a running kernel if we have no
         // specifications.
         if kernel_specifications.is_empty() {
-            let instructions = "To start interactively running code in your editor, you need to install and configure Jupyter kernels.";
+            let instructions = i18n::t!("ui.text.to_start_interactively_running_code_in_your_editor_you_n_2e38ea18");
 
-            return ReplSessionsContainer::new("No Jupyter Kernels Available")
+            return ReplSessionsContainer::new(i18n::t!("ui.text.no_jupyter_kernels_available"))
                 .child(Label::new(instructions))
                 .child(
                     h_flex().w_full().p_4().justify_center().gap_2().child(
@@ -200,7 +200,7 @@ impl Render for ReplSessionsPage {
                             .style(ButtonStyle::Filled)
                             .size(ButtonSize::Large)
                             .layer(ElevationIndex::ModalSurface)
-                            .child(Label::new("Install Kernels"))
+                            .child(Label::new(i18n::t!("ui.text.install_kernels")))
                             .on_click(move |_, _, cx| cx.open_url("gram://docs/repl#language-specific-instructions")),
                     ),
                 );
@@ -208,16 +208,16 @@ impl Render for ReplSessionsPage {
 
         // When there are no sessions, show the command to run code in an editor
         if sessions.is_empty() {
-            let instructions = "To run code in a Jupyter kernel, select some code and use the 'repl::Run' command.";
+            let instructions = i18n::t!("ui.text.to_run_code_in_a_jupyter_kernel_select_some_code_and_use_0ee580c3");
 
-            return ReplSessionsContainer::new("No Jupyter Kernel Sessions").child(
+            return ReplSessionsContainer::new(i18n::t!("ui.text.no_jupyter_kernel_sessions")).child(
                 v_flex()
                     .child(Label::new(instructions))
                     .child(KeyBinding::for_action(&Run, cx)),
             );
         }
 
-        ReplSessionsContainer::new("Jupyter Kernel Sessions").children(sessions)
+        ReplSessionsContainer::new(i18n::t!("ui.text.jupyter_kernel_sessions")).children(sessions)
     }
 }
 

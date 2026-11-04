@@ -88,10 +88,10 @@ impl AskPassModal {
                             Icon::new(IconName::Forge).size(IconSize::Small)
                         )
                         .child(
-                            Label::new("You may need to configure git for Github.")
+                            Label::new(i18n::t!("ui.text.you_may_need_to_configure_git_for_github"))
                                 .size(LabelSize::Small),
                         )
-                        .child(Button::new("learn-more", "Learn more").color(Color::Accent).label_size(LabelSize::Small).on_click(|_, _, cx| {
+                        .child(Button::new("learn-more", i18n::t!("ui.text.learn_more")).color(Color::Accent).label_size(LabelSize::Small).on_click(|_, _, cx| {
                             cx.open_url("https://docs.github.com/en/get-started/git-basics/set-up-git#authenticating-with-github-from-git")
                         })),
                 )

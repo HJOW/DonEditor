@@ -39,9 +39,9 @@ impl Render for ToolbarControls {
         }
 
         let warning_tooltip = if include_warnings {
-            "Exclude Warnings"
+            i18n::t!("ui.text.exclude_warnings")
         } else {
-            "Include Warnings"
+            i18n::t!("settings.text.include_warnings")
         };
 
         let warning_color = if include_warnings { Color::Warning } else { Color::Muted };
@@ -55,7 +55,7 @@ impl Render for ToolbarControls {
                             .icon_color(Color::Info)
                             .shape(IconButtonShape::Square)
                             .tooltip(Tooltip::for_action_title(
-                                "Stop diagnostics update",
+                                i18n::t!("ui.text.stop_diagnostics_update"),
                                 &ToggleDiagnosticsRefresh,
                             ))
                             .on_click(cx.listener(move |toolbar_controls, _, _, cx| {
@@ -71,7 +71,7 @@ impl Render for ToolbarControls {
                             .icon_color(Color::Info)
                             .shape(IconButtonShape::Square)
                             .tooltip(Tooltip::for_action_title(
-                                "Refresh diagnostics",
+                                i18n::t!("ui.text.refresh_diagnostics"),
                                 &ToggleDiagnosticsRefresh,
                             ))
                             .on_click(cx.listener({

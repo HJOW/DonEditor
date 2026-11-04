@@ -38,13 +38,13 @@ pub fn format_output(action: &RemoteAction, output: RemoteCommandOutput) -> Succ
         RemoteAction::Fetch(remote) => {
             if output.stderr.is_empty() {
                 SuccessMessage {
-                    message: "Fetch: Already up to date".into(),
+                    message: i18n::t!("ui.text.fetch_already_up_to_date").into(),
                     style: SuccessStyle::Toast,
                 }
             } else {
                 let message = match remote {
-                    Some(remote) => format!("Synchronized with {}", remote.name),
-                    None => "Synchronized with remotes".into(),
+                    Some(remote) => i18n::t!("ui.text.synchronized_with", value0 = remote.name),
+                    None => i18n::t!("ui.text.synchronized_with_remotes").into(),
                 };
                 SuccessMessage {
                     message,
@@ -71,20 +71,19 @@ pub fn format_output(action: &RemoteAction, output: RemoteCommandOutput) -> Succ
             };
             if output.stdout.ends_with("Already up to date.\n") {
                 SuccessMessage {
-                    message: "Pull: Already up to date".into(),
+                    message: i18n::t!("ui.text.pull_already_up_to_date").into(),
                     style: SuccessStyle::Toast,
                 }
             } else if output.stdout.starts_with("Updating") {
                 let files_changed = get_changes(&output).log_err();
                 let message = if let Some(files_changed) = files_changed {
-                    format!(
-                        "Received {} file change{} from {}",
-                        files_changed,
-                        if files_changed == 1 { "" } else { "s" },
-                        remote_ref.name
+                    i18n::t!(
+                        "ui.text.received_file_change_from",
+                        value0 = files_changed,
+                        value2 = remote_ref.name
                     )
                 } else {
-                    format!("Fast forwarded from {}", remote_ref.name)
+                    i18n::t!("ui.text.fast_forwarded_from", value0 = remote_ref.name)
                 };
                 SuccessMessage {
                     message,
@@ -93,14 +92,13 @@ pub fn format_output(action: &RemoteAction, output: RemoteCommandOutput) -> Succ
             } else if output.stdout.starts_with("Merge") {
                 let files_changed = get_changes(&output).log_err();
                 let message = if let Some(files_changed) = files_changed {
-                    format!(
-                        "Merged {} file change{} from {}",
-                        files_changed,
-                        if files_changed == 1 { "" } else { "s" },
-                        remote_ref.name
+                    i18n::t!(
+                        "ui.text.merged_file_change_from",
+                        value0 = files_changed,
+                        value2 = remote_ref.name
                     )
                 } else {
-                    format!("Merged from {}", remote_ref.name)
+                    i18n::t!("ui.text.merged_from", value0 = remote_ref.name)
                 };
                 SuccessMessage {
                     message,
@@ -108,31 +106,31 @@ pub fn format_output(action: &RemoteAction, output: RemoteCommandOutput) -> Succ
                 }
             } else if output.stdout.contains("Successfully rebased") {
                 SuccessMessage {
-                    message: format!("Successfully rebased from {}", remote_ref.name),
+                    message: i18n::t!("ui.text.successfully_rebased_from", value0 = remote_ref.name),
                     style: SuccessStyle::ToastWithLog { output },
                 }
             } else {
                 SuccessMessage {
-                    message: format!("Successfully pulled from {}", remote_ref.name),
+                    message: i18n::t!("ui.text.successfully_pulled_from", value0 = remote_ref.name),
                     style: SuccessStyle::ToastWithLog { output },
                 }
             }
         }
         RemoteAction::Push(branch_name, remote_ref) => {
             let message = if output.stderr.ends_with("Everything up-to-date\n") {
-                "Push: Everything is up-to-date".to_string()
+                i18n::t!("ui.text.push_everything_is_up_to_date").to_string()
             } else {
-                format!("Pushed {} to {}", branch_name, remote_ref.name)
+                i18n::t!("git.pushed_to", branch = branch_name, remote = remote_ref.name)
             };
 
             let style = if output.stderr.ends_with("Everything up-to-date\n") {
                 Some(SuccessStyle::Toast)
             } else if output.stderr.contains("\nremote: ") {
                 let pr_hints = [
-                    ("Create a pull request", "Create Pull Request"),   // GitHub
-                    ("Create pull request", "Create Pull Request"),     // Bitbucket
-                    ("create a merge request", "Create Merge Request"), // GitLab
-                    ("View merge request", "View Merge Request"),       // GitLab
+                    ("Create a pull request", i18n::t!("ui.text.create_pull_request")), // GitHub
+                    ("Create pull request", i18n::t!("ui.text.create_pull_request")),   // Bitbucket
+                    ("create a merge request", i18n::t!("ui.text.create_merge_request")), // GitLab
+                    ("View merge request", i18n::t!("ui.text.view_merge_request_c630a828")), // GitLab
                 ];
                 pr_hints
                     .iter()
@@ -165,6 +163,35 @@ pub fn format_output(action: &RemoteAction, output: RemoteCommandOutput) -> Succ
 mod tests {
     use super::*;
     use indoc::indoc;
+
+    /// 한국어에서도 Git의 영어 프로토콜은 그대로 해석하고 사용자에게 보이는 결과만 번역합니다.
+    #[test]
+    fn korean_output_preserves_git_protocol_and_user_values() {
+        i18n::with_language(i18n::Language::Korean, || {
+            let remote = Remote { name: "Save".into() };
+            let action = RemoteAction::Push("Create".into(), remote.clone());
+            let output = RemoteCommandOutput {
+                stdout: String::new(),
+                stderr: "\nremote: Create a pull request at https://example.com/pull/1\n".into(),
+            };
+            let result = format_output(&action, output);
+            assert_eq!(result.message, "Create을(를) Save에 보냈습니다");
+            let SuccessStyle::PushPrLink { text, link } = result.style else {
+                panic!("영어 Git 출력에서 풀 리퀘스트 링크를 찾지 못했습니다");
+            };
+            assert_eq!(text, "풀 리퀘스트 만들기");
+            assert_eq!(link, "https://example.com/pull/1");
+
+            let result = format_output(
+                &RemoteAction::Pull(remote),
+                RemoteCommandOutput {
+                    stdout: "Successfully rebased and updated refs/heads/Create.\n".into(),
+                    stderr: String::new(),
+                },
+            );
+            assert_eq!(result.message, "Save에서 리베이스했습니다");
+        });
+    }
 
     #[test]
     fn test_push_new_branch_pull_request() {

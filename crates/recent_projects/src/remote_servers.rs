@@ -148,7 +148,7 @@ impl EditNicknameState {
             .and_then(|state| state.nickname)
             .filter(|text| !text.is_empty());
         this.editor.update(cx, |this, cx| {
-            this.set_placeholder_text("Add a nickname for this server", window, cx);
+            this.set_placeholder_text(i18n::t!("ui.text.add_a_nickname_for_this_server"), window, cx);
             if let Some(starting_text) = starting_text {
                 this.set_text(starting_text, window, cx);
             }
@@ -669,7 +669,7 @@ impl RemoteServerProjects {
             window,
             cx,
         )
-        .prompt_err("Failed to connect", window, cx, |_, _, _| None);
+        .prompt_err(i18n::t!("ui.text.failed_to_connect"), window, cx, |_, _, _| None);
 
         let address_editor = editor.clone();
         let creating = cx.spawn_in(window, async move |this, cx| {
@@ -735,7 +735,7 @@ impl RemoteServerProjects {
             window,
             cx,
         )
-        .prompt_err("Failed to connect", window, cx, |_, _, _| None);
+        .prompt_err(i18n::t!("ui.text.failed_to_connect"), window, cx, |_, _, _| None);
 
         let wsl_picker = picker.clone();
         let creating = cx.spawn_in(window, async move |this, cx| {
@@ -833,7 +833,7 @@ impl RemoteServerProjects {
                     window,
                     cx,
                 )
-                .prompt_err("Failed to connect", window, cx, |_, _, _| None);
+                .prompt_err(i18n::t!("ui.text.failed_to_connect"), window, cx, |_, _, _| None);
 
                 cx.spawn_in(window, async move |workspace, cx| {
                     let session = connect.await;
@@ -1013,7 +1013,7 @@ impl RemoteServerProjects {
                 } => {
                     let index = *index;
                     List::new()
-                        .empty_message("No projects.")
+                        .empty_message(i18n::t!("ui.text.no_projects"))
                         .children(projects.iter().enumerate().map(|(pix, p)| {
                             v_flex().gap_0p5().child(self.render_ssh_project(
                                 index,
@@ -1041,7 +1041,7 @@ impl RemoteServerProjects {
                                         .inset(true)
                                         .spacing(ui::ListItemSpacing::Sparse)
                                         .start_slot(Icon::new(IconName::Plus).color(Color::Muted))
-                                        .child(Label::new("Open Folder"))
+                                        .child(Label::new(i18n::t!("ui.text.open_folder")))
                                         .on_click(cx.listener({
                                             let connection = connection.clone();
                                             move |this, _, window, cx| {
@@ -1072,7 +1072,7 @@ impl RemoteServerProjects {
                                         .inset(true)
                                         .spacing(ui::ListItemSpacing::Sparse)
                                         .start_slot(Icon::new(IconName::Settings).color(Color::Muted))
-                                        .child(Label::new("View Server Options"))
+                                        .child(Label::new(i18n::t!("ui.text.view_server_options")))
                                         .on_click(cx.listener({
                                             let ssh_connection = connection.clone();
                                             move |this, _, window, cx| {
@@ -1105,7 +1105,7 @@ impl RemoteServerProjects {
                                 .inset(true)
                                 .spacing(ui::ListItemSpacing::Sparse)
                                 .start_slot(Icon::new(IconName::Plus).color(Color::Muted))
-                                .child(Label::new("Open Folder"))
+                                .child(Label::new(i18n::t!("ui.text.open_folder")))
                                 .on_click(cx.listener({
                                     let host = host.clone();
                                     move |this, _, window, cx| {
@@ -1181,9 +1181,9 @@ impl RemoteServerProjects {
                         log::error!("Failed to connect: {e:#}");
                         cx.prompt(
                             gpui::PromptLevel::Critical,
-                            "Failed to connect",
+                            i18n::t!("ui.text.failed_to_connect"),
                             Some(&e.to_string()),
-                            &["Ok"],
+                            &[i18n::t!("common.ok")],
                         )
                         .await
                         .ok();
@@ -1232,7 +1232,7 @@ impl RemoteServerProjects {
                                         .icon_size(IconSize::Small)
                                         .shape(IconButtonShape::Square)
                                         .size(ButtonSize::Large)
-                                        .tooltip(Tooltip::text("Delete Remote Project"))
+                                        .tooltip(Tooltip::text(i18n::t!("ui.text.delete_remote_project")))
                                         .on_click(cx.listener(move |this, _, _, cx| {
                                             this.delete_remote_project(server_ix, &project, cx)
                                         }))
@@ -1382,12 +1382,14 @@ impl RemoteServerProjects {
                                     .w_full()
                                     .gap_1()
                                     .child(
-                                        Label::new("Enter the command you use to SSH into this server.")
-                                            .color(Color::Muted)
-                                            .size(LabelSize::Small),
+                                        Label::new(i18n::t!(
+                                            "ui.text.enter_the_command_you_use_to_ssh_into_this_server"
+                                        ))
+                                        .color(Color::Muted)
+                                        .size(LabelSize::Small),
                                     )
                                     .child(
-                                        Button::new("learn-more", "Learn More")
+                                        Button::new("learn-more", i18n::t!("common.learn_more"))
                                             .label_size(LabelSize::Small)
                                             .icon(IconName::ArrowUpRight)
                                             .icon_size(IconSize::XSmall)
@@ -1490,7 +1492,7 @@ impl RemoteServerProjects {
                                         .inset(true)
                                         .spacing(ui::ListItemSpacing::Sparse)
                                         .start_slot(Icon::new(IconName::ArrowLeft).color(Color::Muted))
-                                        .child(Label::new("Go Back"))
+                                        .child(Label::new(i18n::t!("ui.text.go_back")))
                                         .on_click(cx.listener(|this, _, window, cx| {
                                             this.mode = Mode::default_mode(&this.ssh_config_servers, cx);
                                             cx.focus_self(window);
@@ -1527,13 +1529,13 @@ impl RemoteServerProjects {
                 window: &mut Window,
                 cx: &mut App,
             ) {
-                let prompt_message = format!("Remove WSL distro `{}`?", distro_name);
+                let prompt_message = i18n::t!("ui.text.remove_wsl_distro", value0 = distro_name);
 
                 let confirmation = window.prompt(
                     PromptLevel::Warning,
                     &prompt_message,
                     None,
-                    &["Yes, remove it", "No, keep it"],
+                    &[i18n::t!("ui.text.yes_remove_it"), i18n::t!("ui.text.no_keep_it")],
                     cx,
                 );
 
@@ -1571,7 +1573,7 @@ impl RemoteServerProjects {
                         .inset(true)
                         .spacing(ui::ListItemSpacing::Sparse)
                         .start_slot(Icon::new(IconName::Trash).color(Color::Error))
-                        .child(Label::new("Remove Distro").color(Color::Error))
+                        .child(Label::new(i18n::t!("ui.text.remove_distro")).color(Color::Error))
                         .on_click(cx.listener(move |_, _, window, cx| {
                             remove_wsl_distro(cx.entity(), index, distro_name.clone(), window, cx);
                             cx.focus_self(window);
@@ -1593,9 +1595,9 @@ impl RemoteServerProjects {
         v_flex()
             .child({
                 let label = if connection.nickname.is_some() {
-                    "Edit Nickname"
+                    i18n::t!("ui.text.edit_nickname")
                 } else {
-                    "Add Nickname to Server"
+                    i18n::t!("ui.text.add_nickname_to_server")
                 };
                 div()
                     .id("ssh-options-add-nickname")
@@ -1624,7 +1626,8 @@ impl RemoteServerProjects {
                     workspace
                         .update(cx, |this, cx| {
                             struct SshServerAddressCopiedToClipboard;
-                            let notification = format!("Copied server address ({}) to clipboard", connection_string);
+                            let notification =
+                                i18n::t!("ui.text.copied_server_address_to_clipboard", value0 = connection_string);
 
                             this.show_toast(
                                 Toast::new(
@@ -1655,7 +1658,7 @@ impl RemoteServerProjects {
                             .inset(true)
                             .spacing(ui::ListItemSpacing::Sparse)
                             .start_slot(Icon::new(IconName::Copy).color(Color::Muted))
-                            .child(Label::new("Copy Server Address"))
+                            .child(Label::new(i18n::t!("ui.text.copy_server_address")))
                             .end_hover_slot(Label::new(connection_string.clone()).color(Color::Muted))
                             .on_click({
                                 let connection_string = connection_string.clone();
@@ -1673,13 +1676,13 @@ impl RemoteServerProjects {
                     window: &mut Window,
                     cx: &mut App,
                 ) {
-                    let prompt_message = format!("Remove server `{}`?", connection_string);
+                    let prompt_message = i18n::t!("ui.text.remove_server_97a56703", value0 = connection_string);
 
                     let confirmation = window.prompt(
                         PromptLevel::Warning,
                         &prompt_message,
                         None,
-                        &["Yes, remove it", "No, keep it"],
+                        &[i18n::t!("ui.text.yes_remove_it"), i18n::t!("ui.text.no_keep_it")],
                         cx,
                     );
 
@@ -1717,7 +1720,7 @@ impl RemoteServerProjects {
                             .inset(true)
                             .spacing(ui::ListItemSpacing::Sparse)
                             .start_slot(Icon::new(IconName::Trash).color(Color::Error))
-                            .child(Label::new("Remove Server").color(Color::Error))
+                            .child(Label::new(i18n::t!("ui.text.remove_server")).color(Color::Error))
                             .on_click(cx.listener(move |_, _, window, cx| {
                                 remove_ssh_server(cx.entity(), index, connection_string.clone(), window, cx);
                                 cx.focus_self(window);
@@ -1836,7 +1839,7 @@ impl RemoteServerProjects {
                     .inset(true)
                     .spacing(ui::ListItemSpacing::Sparse)
                     .start_slot(Icon::new(IconName::Plus).color(Color::Muted))
-                    .child(Label::new("Connect New Server"))
+                    .child(Label::new(i18n::t!("ui.text.connect_new_server")))
                     .on_click(cx.listener(|this, _, window, cx| {
                         let state = CreateRemoteServer::new(window, cx);
                         this.mode = Mode::CreateRemoteServer(state);
@@ -1862,7 +1865,7 @@ impl RemoteServerProjects {
                     .inset(true)
                     .spacing(ui::ListItemSpacing::Sparse)
                     .start_slot(Icon::new(IconName::Plus).color(Color::Muted))
-                    .child(Label::new("Add WSL Distro"))
+                    .child(Label::new(i18n::t!("ui.text.add_wsl_distro")))
                     .on_click(cx.listener(|this, _, window, cx| {
                         let state = AddWslDistro::new(window, cx);
                         this.mode = Mode::AddWslDistro(state);
@@ -1897,9 +1900,10 @@ impl RemoteServerProjects {
                         .empty_message(
                             v_flex()
                                 .child(
-                                    div()
-                                        .px_3()
-                                        .child(Label::new("No remote servers registered yet.").color(Color::Muted)),
+                                    div().px_3().child(
+                                        Label::new(i18n::t!("ui.text.no_remote_servers_registered_yet"))
+                                            .color(Color::Muted),
+                                    ),
                                 )
                                 .into_any_element(),
                         )
@@ -1947,14 +1951,16 @@ impl RemoteServerProjects {
                 window.keystroke_text_for(&menu::Confirm),
             )
         };
-        let placeholder_text = Arc::from(format!(
-            "{reuse_window} reuses this window, {create_window} opens a new one",
+        let placeholder_text = Arc::from(i18n::t!(
+            "ui.text.reuse_window_reuses_this_window_create_window_opens_a_new_one",
+            reuse_window = reuse_window,
+            create_window = create_window
         ));
 
         Modal::new("remote-projects", None)
             .header(
                 ModalHeader::new()
-                    .child(Headline::new("Remote Projects").size(HeadlineSize::XSmall))
+                    .child(Headline::new(i18n::t!("ui.text.remote_projects")).size(HeadlineSize::XSmall))
                     .child(Label::new(placeholder_text).color(Color::Muted).size(LabelSize::XSmall)),
             )
             .section(

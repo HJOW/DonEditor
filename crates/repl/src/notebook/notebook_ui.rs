@@ -268,7 +268,9 @@ impl NotebookEditor {
                         Self::button_group(window, cx)
                             .child(
                                 Self::render_notebook_control("run-all-cells", IconName::PlayFilled, window, cx)
-                                    .tooltip(move |window, cx| Tooltip::for_action("Execute all cells", &RunAll, cx))
+                                    .tooltip(move |window, cx| {
+                                        Tooltip::for_action(i18n::t!("ui.text.execute_all_cells"), &RunAll, cx)
+                                    })
                                     .on_click(|_, window, cx| {
                                         window.dispatch_action(Box::new(RunAll), cx);
                                     }),
@@ -277,7 +279,7 @@ impl NotebookEditor {
                                 Self::render_notebook_control("clear-all-outputs", IconName::ListX, window, cx)
                                     .disabled(!has_outputs)
                                     .tooltip(move |window, cx| {
-                                        Tooltip::for_action("Clear all outputs", &ClearOutputs, cx)
+                                        Tooltip::for_action(i18n::t!("ui.text.clear_all_outputs"), &ClearOutputs, cx)
                                     })
                                     .on_click(|_, window, cx| {
                                         window.dispatch_action(Box::new(ClearOutputs), cx);
@@ -288,14 +290,18 @@ impl NotebookEditor {
                         Self::button_group(window, cx)
                             .child(
                                 Self::render_notebook_control("move-cell-up", IconName::ArrowUp, window, cx)
-                                    .tooltip(move |window, cx| Tooltip::for_action("Move cell up", &MoveCellUp, cx))
+                                    .tooltip(move |window, cx| {
+                                        Tooltip::for_action(i18n::t!("ui.text.move_cell_up"), &MoveCellUp, cx)
+                                    })
                                     .on_click(|_, window, cx| {
                                         window.dispatch_action(Box::new(MoveCellUp), cx);
                                     }),
                             )
                             .child(
                                 Self::render_notebook_control("move-cell-down", IconName::ArrowDown, window, cx)
-                                    .tooltip(move |window, cx| Tooltip::for_action("Move cell down", &MoveCellDown, cx))
+                                    .tooltip(move |window, cx| {
+                                        Tooltip::for_action(i18n::t!("ui.text.move_cell_down"), &MoveCellDown, cx)
+                                    })
                                     .on_click(|_, window, cx| {
                                         window.dispatch_action(Box::new(MoveCellDown), cx);
                                     }),
@@ -306,7 +312,11 @@ impl NotebookEditor {
                             .child(
                                 Self::render_notebook_control("new-markdown-cell", IconName::Plus, window, cx)
                                     .tooltip(move |window, cx| {
-                                        Tooltip::for_action("Add markdown block", &AddMarkdownBlock, cx)
+                                        Tooltip::for_action(
+                                            i18n::t!("ui.text.add_markdown_block"),
+                                            &AddMarkdownBlock,
+                                            cx,
+                                        )
                                     })
                                     .on_click(|_, window, cx| {
                                         window.dispatch_action(Box::new(AddMarkdownBlock), cx);
@@ -314,7 +324,9 @@ impl NotebookEditor {
                             )
                             .child(
                                 Self::render_notebook_control("new-code-cell", IconName::Code, window, cx)
-                                    .tooltip(move |window, cx| Tooltip::for_action("Add code block", &AddCodeBlock, cx))
+                                    .tooltip(move |window, cx| {
+                                        Tooltip::for_action(i18n::t!("ui.text.add_code_block"), &AddCodeBlock, cx)
+                                    })
                                     .on_click(|_, window, cx| {
                                         window.dispatch_action(Box::new(AddCodeBlock), cx);
                                     }),

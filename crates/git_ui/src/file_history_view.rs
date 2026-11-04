@@ -430,7 +430,7 @@ impl FileHistoryView {
         {
             path.as_unix_str().to_string().into()
         } else {
-            "Git History".into()
+            i18n::t!("ui.text.git_history").into()
         }
     }
 
@@ -481,7 +481,7 @@ impl Render for FileHistoryView {
                         h_flex()
                             .gap_1()
                             .child(
-                                Button::new("refresh", "Refresh")
+                                Button::new("refresh", i18n::t!("ui.text.refresh"))
                                     .disabled(self.loading_more)
                                     .label_size(LabelSize::Small)
                                     .icon(IconName::ArrowCircle)
@@ -493,7 +493,7 @@ impl Render for FileHistoryView {
                                     })),
                             )
                             .child(
-                                Button::new("load-more", "Load More")
+                                Button::new("load-more", i18n::t!("ui.text.load_more"))
                                     .disabled(self.loading_more | !self.has_more)
                                     .label_size(LabelSize::Small)
                                     .icon(IconName::ArrowCircle)
@@ -548,9 +548,10 @@ impl Item for FileHistoryView {
 
     fn tab_tooltip_text(&self, _cx: &App) -> Option<SharedString> {
         Some(
-            format!(
-                "Git history for {}",
-                self.history
+            i18n::t!(
+                "ui.text.git_history_for",
+                value0 = self
+                    .history
                     .path
                     .as_ref()
                     .map(|path| if !path.is_empty() {

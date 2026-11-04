@@ -437,7 +437,7 @@ impl DebugPanel {
                     gpui::PromptLevel::Warning,
                     "This Debug Session is still running. Are you sure you want to terminate it?",
                     None,
-                    &["Yes", "No"],
+                    &["Yes", i18n::t!("ui.text.no")],
                 );
                 if response.await == Ok(1) {
                     return;
@@ -546,14 +546,14 @@ impl DebugPanel {
                 .on_click(|_, window, cx| {
                     window.dispatch_action(app_actions::OpenProjectDebugTasks.boxed_clone(), cx);
                 })
-                .tooltip(Tooltip::text("Edit debug.jsonc"))
+                .tooltip(Tooltip::text(i18n::t!("ui.text.edit_debug_jsonc")))
         };
 
         let documentation_button = || {
             IconButton::new("debug-open-documentation", IconName::CircleHelp)
                 .icon_size(IconSize::Small)
                 .on_click(move |_, _, cx| cx.open_url("gram://docs/debugger"))
-                .tooltip(Tooltip::text("Open Documentation"))
+                .tooltip(Tooltip::text(i18n::t!("welcome.open_documentation")))
         };
 
         let logs_button = || {
@@ -562,7 +562,7 @@ impl DebugPanel {
                 .on_click(move |_, window, cx| {
                     window.dispatch_action(debugger_tools::OpenDebugAdapterLogs.boxed_clone(), cx)
                 })
-                .tooltip(Tooltip::text("Open Debug Adapter Logs"))
+                .tooltip(Tooltip::text(i18n::t!("ui.text.open_debug_adapter_logs")))
         };
 
         let close_bottom_panel_button = {
@@ -572,7 +572,7 @@ impl DebugPanel {
                     .on_click(move |_, window, cx| {
                         window.dispatch_action(workspace::ToggleBottomDock.boxed_clone(), cx)
                     })
-                    .tooltip(Tooltip::text("Close Panel")),
+                    .tooltip(Tooltip::text(i18n::t!("ui.text.close_panel"))),
             )
         };
 
@@ -1473,7 +1473,7 @@ impl Render for DebugPanel {
                         .justify_center()
                         .gap_2()
                         .child(
-                            Button::new("spawn-new-session-empty-state", "New Session")
+                            Button::new("spawn-new-session-empty-state", i18n::t!("ui.text.new_session"))
                                 .icon(IconName::Plus)
                                 .icon_size(IconSize::Small)
                                 .icon_color(Color::Muted)
@@ -1483,7 +1483,7 @@ impl Render for DebugPanel {
                                 }),
                         )
                         .child(
-                            Button::new("edit-debug-settings", "Edit debug.jsonc")
+                            Button::new("edit-debug-settings", i18n::t!("ui.text.edit_debug_jsonc"))
                                 .icon(IconName::Code)
                                 .icon_size(IconSize::Small)
                                 .icon_color(Color::Muted)
@@ -1493,7 +1493,7 @@ impl Render for DebugPanel {
                                 }),
                         )
                         .child(
-                            Button::new("open-debugger-docs", "Debugger Docs")
+                            Button::new("open-debugger-docs", i18n::t!("ui.text.debugger_docs"))
                                 .icon(IconName::Book)
                                 .icon_size(IconSize::Small)
                                 .icon_color(Color::Muted)
@@ -1501,21 +1501,24 @@ impl Render for DebugPanel {
                                 .on_click(|_, _, cx| cx.open_url("gram://docs/debugger")),
                         )
                         .child(
-                            Button::new("spawn-new-session-install-extensions", "Debugger Extensions")
-                                .icon(IconName::Blocks)
-                                .icon_size(IconSize::Small)
-                                .icon_color(Color::Muted)
-                                .icon_position(IconPosition::Start)
-                                .on_click(|_, window, cx| {
-                                    window.dispatch_action(
-                                        app_actions::Extensions {
-                                            category_filter: Some(app_actions::ExtensionCategoryFilter::DebugAdapters),
-                                            id: None,
-                                        }
-                                        .boxed_clone(),
-                                        cx,
-                                    );
-                                }),
+                            Button::new(
+                                "spawn-new-session-install-extensions",
+                                i18n::t!("ui.text.debugger_extensions"),
+                            )
+                            .icon(IconName::Blocks)
+                            .icon_size(IconSize::Small)
+                            .icon_color(Color::Muted)
+                            .icon_position(IconPosition::Start)
+                            .on_click(|_, window, cx| {
+                                window.dispatch_action(
+                                    app_actions::Extensions {
+                                        category_filter: Some(app_actions::ExtensionCategoryFilter::DebugAdapters),
+                                        id: None,
+                                    }
+                                    .boxed_clone(),
+                                    cx,
+                                );
+                            }),
                         );
 
                     let has_breakpoints = self
@@ -1543,7 +1546,7 @@ impl Render for DebugPanel {
                                 .justify_between()
                                 .border_b_1()
                                 .border_color(cx.theme().colors().border_variant)
-                                .child(Label::new("Breakpoints").size(LabelSize::Small))
+                                .child(Label::new(i18n::t!("ui.text.breakpoints")).size(LabelSize::Small))
                                 .child(
                                     h_flex()
                                         .visible_on_hover("base-breakpoint-list")
@@ -1554,7 +1557,7 @@ impl Render for DebugPanel {
                         .when(!has_breakpoints, |this| {
                             this.child(
                                 v_flex().size_full().items_center().justify_center().child(
-                                    Label::new("No Breakpoints Set")
+                                    Label::new(i18n::t!("ui.text.no_breakpoints_set"))
                                         .size(LabelSize::Small)
                                         .color(Color::Muted),
                                 ),

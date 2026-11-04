@@ -67,7 +67,7 @@ impl PickerDelegate for FontPickerDelegate {
     }
 
     fn placeholder_text(&self, _window: &mut Window, _cx: &mut App) -> Arc<str> {
-        "Search fonts…".into()
+        i18n::t!("settings.search_fonts").into()
     }
 
     fn update_matches(&mut self, query: String, _window: &mut Window, cx: &mut Context<FontPicker>) -> Task<()> {

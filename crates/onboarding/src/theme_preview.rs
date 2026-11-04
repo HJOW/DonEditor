@@ -334,7 +334,7 @@ impl Component for ThemePreviewTile {
                 })
                 .child(
                     example_group(vec![single_example(
-                        "Default Themes",
+                        i18n::t!("ui.text.default_themes"),
                         h_flex()
                             .gap_4()
                             .children(

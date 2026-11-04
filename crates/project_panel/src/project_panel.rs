@@ -5779,7 +5779,7 @@ impl Render for ProjectPanel {
                 .gap_1()
                 .track_focus(&self.focus_handle(cx))
                 .child(
-                    Button::new("open_project", "Open Project")
+                    Button::new("open_project", i18n::t!("welcome.open_project"))
                         .full_width()
                         .key_binding(KeyBinding::for_action_in(&workspace::Open, &focus_handle, cx))
                         .on_click(cx.listener(|this, _, window, cx| {
@@ -5795,11 +5795,15 @@ impl Render for ProjectPanel {
                         .gap_2()
                         .justify_center()
                         .child(Divider::horizontal())
-                        .child(Label::new("or").size(LabelSize::XSmall).color(Color::Muted))
+                        .child(
+                            Label::new(i18n::t!("ui.text.or"))
+                                .size(LabelSize::XSmall)
+                                .color(Color::Muted),
+                        )
                         .child(Divider::horizontal()),
                 )
                 .child(
-                    Button::new("clone_repo", "Clone Repository")
+                    Button::new("clone_repo", i18n::t!("welcome.clone_repository"))
                         .full_width()
                         .on_click(cx.listener(|this, _, window, cx| {
                             this.workspace

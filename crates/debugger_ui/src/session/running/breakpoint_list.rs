@@ -175,9 +175,9 @@ impl BreakpointList {
     fn set_active_breakpoint_property(&mut self, prop: ActiveBreakpointStripMode, window: &mut Window, cx: &mut App) {
         self.strip_mode = Some(prop);
         let placeholder = match prop {
-            ActiveBreakpointStripMode::Log => "Set Log Message",
-            ActiveBreakpointStripMode::Condition => "Set Condition",
-            ActiveBreakpointStripMode::HitCondition => "Set Hit Condition",
+            ActiveBreakpointStripMode::Log => i18n::t!("ui.text.set_log_message"),
+            ActiveBreakpointStripMode::Condition => i18n::t!("ui.text.set_condition"),
+            ActiveBreakpointStripMode::HitCondition => i18n::t!("ui.text.set_hit_condition"),
         };
         let mut is_exception_breakpoint = true;
         let active_value = self.selected_ix.and_then(|ix| {
@@ -525,19 +525,21 @@ impl BreakpointList {
         let focus_handle = self.focus_handle.clone();
 
         let remove_breakpoint_tooltip = selection_kind.map(|(kind, _)| match kind {
-            SelectedBreakpointKind::Source => "Remove breakpoint from a breakpoint list",
-            SelectedBreakpointKind::Exception => "Exception Breakpoints cannot be removed from the breakpoint list",
-            SelectedBreakpointKind::Data => "Remove data breakpoint from a breakpoint list",
+            SelectedBreakpointKind::Source => i18n::t!("ui.text.remove_breakpoint_from_a_breakpoint_list"),
+            SelectedBreakpointKind::Exception => {
+                i18n::t!("ui.text.exception_breakpoints_cannot_be_removed_from_the_breakpoint_list")
+            }
+            SelectedBreakpointKind::Data => i18n::t!("ui.text.remove_data_breakpoint_from_a_breakpoint_list"),
         });
 
         let toggle_label = selection_kind.map(|(_, is_enabled)| {
             if is_enabled {
                 (
-                    "Disable Breakpoint",
-                    "Disable a breakpoint without removing it from the list",
+                    i18n::t!("ui.text.disable_breakpoint"),
+                    i18n::t!("ui.text.disable_a_breakpoint_without_removing_it_from_the_list"),
                 )
             } else {
-                ("Enable Breakpoint", "Re-enable a breakpoint")
+                (i18n::t!("ui.text.enable_breakpoint"), "Re-enable a breakpoint")
             }
         });
 
@@ -570,7 +572,7 @@ impl BreakpointList {
                             let focus_handle = focus_handle.clone();
                             move |_window, cx| {
                                 Tooltip::with_meta_in(
-                                    "Remove Breakpoint",
+                                    i18n::t!("ui.text.remove_breakpoint"),
                                     Some(&UnsetBreakpoint),
                                     tooltip,
                                     &focus_handle,
@@ -761,9 +763,9 @@ impl LineBreakpoint {
                 move |_window, cx| {
                     Tooltip::for_action_in(
                         if is_enabled {
-                            "Disable Breakpoint"
+                            i18n::t!("ui.text.disable_breakpoint")
                         } else {
-                            "Enable Breakpoint"
+                            i18n::t!("ui.text.enable_breakpoint")
                         },
                         &ToggleEnableBreakpoint,
                         &focus_handle,
@@ -907,9 +909,9 @@ impl DataBreakpoint {
                     move |_window, cx| {
                         Tooltip::for_action_in(
                             if is_enabled {
-                                "Disable Data Breakpoint"
+                                i18n::t!("ui.text.disable_data_breakpoint")
                             } else {
-                                "Enable Data Breakpoint"
+                                i18n::t!("ui.text.enable_data_breakpoint")
                             },
                             &ToggleEnableBreakpoint,
                             &focus_handle,
@@ -999,9 +1001,9 @@ impl ExceptionBreakpoint {
                         move |_window, cx| {
                             Tooltip::for_action_in(
                                 if is_enabled {
-                                    "Disable Exception Breakpoint"
+                                    i18n::t!("ui.text.disable_exception_breakpoint")
                                 } else {
-                                    "Enable Exception Breakpoint"
+                                    i18n::t!("ui.text.enable_exception_breakpoint")
                                 },
                                 &ToggleEnableBreakpoint,
                                 &focus_handle,
@@ -1263,34 +1265,28 @@ impl RenderOnce for BreakpointOptionsStrip {
             .when(has_logs || self.is_selected, |this| {
                 this.child(
                     div()
-                    .map(self.add_focus_styles(
-                        ActiveBreakpointStripMode::Log,
-                        supports_logs,
-                        window,
-                        cx,
-                    ))
-                    .child(
-                        IconButton::new(
-                            SharedString::from(format!("{id}-log-toggle")),
-                            IconName::Notepad,
-                        )
-                        .shape(ui::IconButtonShape::Square)
-                        .style(style_for_toggle(ActiveBreakpointStripMode::Log, has_logs))
-                        .icon_size(IconSize::Small)
-                        .icon_color(color_for_toggle(has_logs))
-                        .when(has_logs, |this| this.indicator(Indicator::dot().color(Color::Info)))
-                        .disabled(!supports_logs)
-                        .toggle_state(self.is_toggled(ActiveBreakpointStripMode::Log))
-                        .on_click(self.on_click_callback(ActiveBreakpointStripMode::Log))
-                        .tooltip(|_window, cx|  {
-                            Tooltip::with_meta(
-                                "Set Log Message",
-                                None,
-                                "Set log message to display (instead of stopping) when a breakpoint is hit.",
-                                cx,
-                            )
-                        }),
-                    )
+                        .map(self.add_focus_styles(ActiveBreakpointStripMode::Log, supports_logs, window, cx))
+                        .child(
+                            IconButton::new(SharedString::from(format!("{id}-log-toggle")), IconName::Notepad)
+                                .shape(ui::IconButtonShape::Square)
+                                .style(style_for_toggle(ActiveBreakpointStripMode::Log, has_logs))
+                                .icon_size(IconSize::Small)
+                                .icon_color(color_for_toggle(has_logs))
+                                .when(has_logs, |this| this.indicator(Indicator::dot().color(Color::Info)))
+                                .disabled(!supports_logs)
+                                .toggle_state(self.is_toggled(ActiveBreakpointStripMode::Log))
+                                .on_click(self.on_click_callback(ActiveBreakpointStripMode::Log))
+                                .tooltip(|_window, cx| {
+                                    Tooltip::with_meta(
+                                        i18n::t!("ui.text.set_log_message"),
+                                        None,
+                                        i18n::t!(
+                                            "ui.text.set_log_message_to_display_instead_of_stopping_when_a_br_3ae2ed47"
+                                        ),
+                                        cx,
+                                    )
+                                }),
+                        ),
                 )
             })
             .when(has_condition || self.is_selected, |this| {
@@ -1303,66 +1299,69 @@ impl RenderOnce for BreakpointOptionsStrip {
                             cx,
                         ))
                         .child(
-                            IconButton::new(
-                                SharedString::from(format!("{id}-condition-toggle")),
-                                IconName::SplitAlt,
-                            )
-                            .shape(ui::IconButtonShape::Square)
-                            .style(style_for_toggle(
-                                ActiveBreakpointStripMode::Condition,
-                                has_condition,
-                            ))
-                            .icon_size(IconSize::Small)
-                            .icon_color(color_for_toggle(has_condition))
-                            .when(has_condition, |this| this.indicator(Indicator::dot().color(Color::Info)))
-                            .disabled(!supports_condition)
-                            .toggle_state(self.is_toggled(ActiveBreakpointStripMode::Condition))
-                            .on_click(self.on_click_callback(ActiveBreakpointStripMode::Condition))
-                            .tooltip(|_window, cx|  {
-                                Tooltip::with_meta(
-                                    "Set Condition",
-                                    None,
-                                    "Set condition to evaluate when a breakpoint is hit. Program execution will stop only when the condition is met.",
-                                    cx,
-                                )
-                            }),
-                        )
+                            IconButton::new(SharedString::from(format!("{id}-condition-toggle")), IconName::SplitAlt)
+                                .shape(ui::IconButtonShape::Square)
+                                .style(style_for_toggle(ActiveBreakpointStripMode::Condition, has_condition))
+                                .icon_size(IconSize::Small)
+                                .icon_color(color_for_toggle(has_condition))
+                                .when(has_condition, |this| {
+                                    this.indicator(Indicator::dot().color(Color::Info))
+                                })
+                                .disabled(!supports_condition)
+                                .toggle_state(self.is_toggled(ActiveBreakpointStripMode::Condition))
+                                .on_click(self.on_click_callback(ActiveBreakpointStripMode::Condition))
+                                .tooltip(|_window, cx| {
+                                    Tooltip::with_meta(
+                                        i18n::t!("ui.text.set_condition"),
+                                        None,
+                                        i18n::t!(
+                                            "ui.text.set_condition_to_evaluate_when_a_breakpoint_is_hit_progr_a6f8d1b3"
+                                        ),
+                                        cx,
+                                    )
+                                }),
+                        ),
                 )
             })
             .when(has_hit_condition || self.is_selected, |this| {
-                this.child(div()
-                    .map(self.add_focus_styles(
-                        ActiveBreakpointStripMode::HitCondition,
-                        supports_hit_condition,
-                        window,
-                        cx,
-                    ))
-                    .child(
-                        IconButton::new(
-                            SharedString::from(format!("{id}-hit-condition-toggle")),
-                            IconName::ArrowDown10,
-                        )
-                        .style(style_for_toggle(
+                this.child(
+                    div()
+                        .map(self.add_focus_styles(
                             ActiveBreakpointStripMode::HitCondition,
-                            has_hit_condition,
+                            supports_hit_condition,
+                            window,
+                            cx,
                         ))
-                        .shape(ui::IconButtonShape::Square)
-                        .icon_size(IconSize::Small)
-                        .icon_color(color_for_toggle(has_hit_condition))
-                        .when(has_hit_condition, |this| this.indicator(Indicator::dot().color(Color::Info)))
-                        .disabled(!supports_hit_condition)
-                        .toggle_state(self.is_toggled(ActiveBreakpointStripMode::HitCondition))
-                        .on_click(self.on_click_callback(ActiveBreakpointStripMode::HitCondition))
-                        .tooltip(|_window, cx|  {
-                            Tooltip::with_meta(
-                                "Set Hit Condition",
-                                None,
-                                "Set expression that controls how many hits of the breakpoint are ignored.",
-                                cx,
+                        .child(
+                            IconButton::new(
+                                SharedString::from(format!("{id}-hit-condition-toggle")),
+                                IconName::ArrowDown10,
                             )
-                        }),
-                    ))
-
+                            .style(style_for_toggle(
+                                ActiveBreakpointStripMode::HitCondition,
+                                has_hit_condition,
+                            ))
+                            .shape(ui::IconButtonShape::Square)
+                            .icon_size(IconSize::Small)
+                            .icon_color(color_for_toggle(has_hit_condition))
+                            .when(has_hit_condition, |this| {
+                                this.indicator(Indicator::dot().color(Color::Info))
+                            })
+                            .disabled(!supports_hit_condition)
+                            .toggle_state(self.is_toggled(ActiveBreakpointStripMode::HitCondition))
+                            .on_click(self.on_click_callback(ActiveBreakpointStripMode::HitCondition))
+                            .tooltip(|_window, cx| {
+                                Tooltip::with_meta(
+                                    i18n::t!("ui.text.set_hit_condition"),
+                                    None,
+                                    i18n::t!(
+                                        "ui.text.set_expression_that_controls_how_many_hits_of_the_breakp_135eecc9"
+                                    ),
+                                    cx,
+                                )
+                            }),
+                        ),
+                )
             })
     }
 }

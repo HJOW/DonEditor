@@ -129,13 +129,13 @@ impl QuickSearch {
 
         let included_files_editor = cx.new(|cx| {
             let mut editor = Editor::single_line(window, cx);
-            editor.set_placeholder_text("Include: e.g. src/**/*.rs", window, cx);
+            editor.set_placeholder_text(i18n::t!("ui.text.include_e_g_src_rs"), window, cx);
             editor
         });
 
         let excluded_files_editor = cx.new(|cx| {
             let mut editor = Editor::single_line(window, cx);
-            editor.set_placeholder_text("Exclude: e.g. vendor/*, *.lock", window, cx);
+            editor.set_placeholder_text(i18n::t!("ui.text.exclude_e_g_vendor_lock"), window, cx);
             editor
         });
 

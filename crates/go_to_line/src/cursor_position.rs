@@ -182,9 +182,7 @@ impl CursorPosition {
             if wrote_once {
                 write!(text, ", ").unwrap();
             }
-            let name = if is_short_format { &name[..1] } else { name };
-            let plural_suffix = if count > 1 && !is_short_format { "s" } else { "" };
-            write!(text, "{count} {name}{plural_suffix}").unwrap();
+            text.push_str(&selection_count_text(count, name, is_short_format));
             wrote_once = true;
         }
         text.push(')');
@@ -198,6 +196,43 @@ impl CursorPosition {
     #[cfg(test)]
     pub(crate) fn position(&self) -> Option<UserCaretPosition> {
         self.position
+    }
+}
+
+/// 선택 통계는 한국어 단위를 사용하고 영어에서는 기존 축약·복수형 형식을 유지합니다.
+fn selection_count_text(count: usize, name: &str, is_short_format: bool) -> String {
+    if i18n::language() == i18n::Language::Korean {
+        return match name {
+            "line" => i18n::t!("cursor.lines", count = count),
+            "character" => i18n::t!("cursor.characters", count = count),
+            "selection" if is_short_format => i18n::t!("cursor.selections_short", count = count),
+            "selection" => i18n::t!("cursor.selections", count = count),
+            _ => format!("{count} {name}"),
+        };
+    }
+    let name = if is_short_format { &name[..1] } else { name };
+    let plural_suffix = if count > 1 && !is_short_format { "s" } else { "" };
+    format!("{count} {name}{plural_suffix}")
+}
+
+#[cfg(test)]
+mod localization_tests {
+    use super::*;
+
+    /// 한글 단위를 UTF-8 바이트로 자르지 않고 영어의 기존 표시도 유지하는지 검사합니다.
+    #[test]
+    fn selection_units_follow_the_display_language() {
+        i18n::with_language(i18n::Language::Korean, || {
+            assert_eq!(selection_count_text(3, "selection", false), "3개 선택");
+            assert_eq!(selection_count_text(3, "selection", true), "3선");
+            assert_eq!(selection_count_text(2, "line", false), "2줄");
+            assert_eq!(selection_count_text(5, "character", true), "5자");
+        });
+        i18n::with_language(i18n::Language::English, || {
+            assert_eq!(selection_count_text(3, "selection", false), "3 selections");
+            assert_eq!(selection_count_text(3, "selection", true), "3 s");
+            assert_eq!(selection_count_text(1, "character", false), "1 character");
+        });
     }
 }
 
