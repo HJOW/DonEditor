@@ -9,6 +9,16 @@
 - README.md의 나머지 부분(`## 목표 기능` 이후)은 기존처럼 수정할 수 있다. 다만 다른 부분을 고칠 때도 위 두 단락이 바뀌지 않았는지 diff로 확인한다.
 - 위 두 단락의 내용이 실제 기능과 맞지 않게 되면 직접 고치지 말고 사용자에게 알리고 수정 여부를 묻는다.
 
+
+## 2026-11-05 Windows 릴리스 배포본 재생성과 실행 확인 (Markdown 미리보기·캐릭터셋·Typst 반영)
+
+- 사용자 목표("PROGRESS.md의 작업을 모두 진행")에 따라 위 세 기능(Markdown 미리보기/편집 전환 `475437a`, 인코딩 표시·다시 불러오기 `c29fe81`, Typst 지원 `4421531`)과 MCP 확인(`2e9ff1c`)을 반영한 Windows x86_64 배포본을 새로 만들었다. `script/package-zip.ps1 -Yes -OutDir dist/windows-20261105-040131`을 Visual Studio 개발자 셸(amd64)에서 실행했고 `cargo build --locked --package gram --package cli --package mcp_server --release`가 **83분 59초**에 성공했다(종료 코드 0).
+- 배포 파일: `dist/windows-20261105-040131/DonEditor-0.1.0-windows-x86_64.zip` (95,883,435바이트, 91.4 MiB). SHA-256 `933f5f2e42b59bd0e8665d184af63043b4fd22045a512e2769b3526b7263b5a0`이며 동봉 `.sha256`과 별도 계산값이 일치한다. `dist/`는 `.gitignore` 대상이라 저장소에는 커밋하지 않는다.
+- **크기 변화:** GUI `doneditor.exe`가 이전 릴리스(3.4.0 기반, 173,635,584바이트 ≈ 165.6 MiB)에서 **202.5 MiB(약 +37 MiB, +22%)**로, ZIP이 77,238,393바이트에서 95,883,435바이트(+18.6 MB, +24%)로 늘었다. Typst 컴파일러·PDF/SVG 내보내기와 그 의존 crate 117개, Typst 내장 글꼴(Libertinus Serif·New Computer Modern·DejaVu Sans Mono)이 원인으로 보이나 PDB 기여량 분석은 하지 않았다([용량 보고서](WINDOWS-SIZE-REPORT.md)는 이전 3.4.0 배포본 기준이며 갱신하지 않음). CLI는 `bin/doneditor.exe` 2.5 MiB, MCP 브릿지 `bin/don-mcp.exe` 0.5 MiB.
+- **압축 해제 확인(`extracted/`):** 구성은 `doneditor.exe`·`bin/`·`licenses/`(193개 파일: Typst·typst-assets·md2typ 라이선스와 NOTICE, 새 외부 crate 117개의 고지 `typst-deps/`와 `typst-dependencies.md`)·`source/`·`LICENSE`·`licenses.md`·`README.md`·`SOURCE.txt`다. `bin/doneditor.exe --version`은 `Don Editor 0.1.0 (2e9ff1c…)`를 출력하고 `bin/don-mcp.exe`는 사용법을 출력한다.
+- **압축 해제본 GUI 실행 확인(격리 데이터 폴더 `smoke-data`):** `.typ`를 열면 미리보기 모드로 한글·수식·목록·표가 조판되고(상태 표시줄 `Typst  UTF-8`), `.md`는 미리보기로, EUC-KR `.txt`는 올바른 한글과 `EUC-KR` 표시로 열렸다. 디버그 빌드에서 확인한 흐름이 릴리스에서도 같다. 릴리스 빌드에서의 변환·PDF·인쇄 메뉴, 인코딩 다시 불러오기, MCP 실행은 따로 반복하지 않았다.
+- **한계:** Linux/macOS 배포본(tar.gz)은 사용자 지시에 따라 직접 만들거나 실행하지 않았다. 깨끗한 Windows 환경·ARM64·코드 서명은 확인하지 않았다.
+
 ## Typst 지원, Markdown→Typst 변환, 인쇄·PDF 변환 (사용자 요청 2026-11-04 접수, 2026-11-05 구현 — 결과는 이 절 맨 아래 "구현 결과" 참고)
 
 - **선행 작업:** Markdown 미리보기/편집 모드 작업(같은 탭의 대체 화면 `Editor::set_alternate_view`, 툴바 `미리보기 | 편집` 토글, 열 때 미리보기로 시작)은 2026-11-04에 구현·Windows GUI 검증을 마쳤다(아래 "Markdown 미리보기/편집 모드" 절). 아래 작업은 이 구조를 재사용한다.
