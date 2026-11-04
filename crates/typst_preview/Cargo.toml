@@ -18,7 +18,9 @@ i18n.workspace = true
 markdown_preview.workspace = true
 schemars.workspace = true
 serde.workspace = true
+smol.workspace = true
 ui.workspace = true
+util.workspace = true
 workspace.workspace = true
 
 [lints]

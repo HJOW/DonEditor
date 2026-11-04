@@ -355,7 +355,7 @@ fn print_document(workspace: &mut Workspace, window: &mut Window, cx: &mut Conte
                 .background_spawn(async move {
                     let pdf = build_pdf(kind, text, root, &fonts)?;
                     // 임시 PDF 를 쓰고 인쇄를 요청한다. 쓰기·실행 실패는 진단 형태로 감싸 같은 경로로 알린다
-                    send_to_printer(&stem, pdf).map_err(|error| {
+                    send_to_printer(&stem, pdf).await.map_err(|error| {
                         vec![Diagnostic {
                             is_error: true,
                             message: i18n::t!("typst_preview.print.failed", error = error),
@@ -415,7 +415,7 @@ fn remove_stale_print_files(directory: &Path) {
 }
 
 /// PDF 를 임시 파일로 쓰고 운영체제의 인쇄 기능으로 넘긴다.
-fn send_to_printer(stem: &str, pdf: Vec<u8>) -> Result<PrintOutcome> {
+async fn send_to_printer(stem: &str, pdf: Vec<u8>) -> Result<PrintOutcome> {
     let directory = print_directory();
     std::fs::create_dir_all(&directory).with_context(|| directory.display().to_string())?;
     remove_stale_print_files(&directory);
@@ -438,18 +438,16 @@ fn send_to_printer(stem: &str, pdf: Vec<u8>) -> Result<PrintOutcome> {
     let file_name = format!("{safe_stem}-{seconds}.pdf");
     let path = directory.join(&file_name);
     std::fs::write(&path, pdf).with_context(|| path.display().to_string())?;
-    open_for_printing(&path, file_name)
+    open_for_printing(&path, file_name).await
 }
 
 #[cfg(target_os = "windows")]
-fn open_for_printing(path: &Path, name: String) -> Result<PrintOutcome> {
-    use std::os::windows::process::CommandExt as _;
+async fn open_for_printing(path: &Path, name: String) -> Result<PrintOutcome> {
     // 연결된 PDF 프로그램의 "인쇄" 동작으로 보낸다. 프로그램이 인쇄 동작을 지원하지 않으면(연결 없음 오류)
     // 같은 파일을 일반 "열기"로 열어 뷰어에서 인쇄하게 한다. 경로는 환경 변수로 넘겨 인용 문제를 피한다.
-    const CREATE_NO_WINDOW: u32 = 0x0800_0000;
-    let script = "$f = $env:DON_PRINT_FILE; try { Start-Process -FilePath $f -Verb Print -ErrorAction Stop; exit 0 } \
-                  catch { try { Start-Process -FilePath $f -ErrorAction Stop; exit 2 } catch { exit 1 } }";
-    let status = std::process::Command::new("powershell.exe")
+    let script = "$f = $env:DON_PRINT_FILE; try { Start-Process -FilePath $f -Verb Print -ErrorAction Stop; exit 0 }                   catch { try { Start-Process -FilePath $f -ErrorAction Stop; exit 2 } catch { exit 1 } }";
+    // 프로젝트 표준 비동기 명령(Windows 에서 콘솔 창을 띄우지 않는다)을 쓴다
+    let status = util::command::new_smol_command("powershell.exe")
         .args([
             "-NoProfile",
             "-NonInteractive",
@@ -459,8 +457,8 @@ fn open_for_printing(path: &Path, name: String) -> Result<PrintOutcome> {
             script,
         ])
         .env("DON_PRINT_FILE", path)
-        .creation_flags(CREATE_NO_WINDOW)
         .status()
+        .await
         .context("powershell.exe")?;
     match status.code() {
         Some(0) => Ok(PrintOutcome::SentToPrinter(name)),
@@ -470,24 +468,26 @@ fn open_for_printing(path: &Path, name: String) -> Result<PrintOutcome> {
 }
 
 #[cfg(not(target_os = "windows"))]
-fn open_for_printing(path: &Path, name: String) -> Result<PrintOutcome> {
-    use std::process::{Command, Stdio};
+async fn open_for_printing(path: &Path, name: String) -> Result<PrintOutcome> {
+    use smol::process::Stdio;
     // CUPS 의 lp 로 기본 프린터에 보낸다. lp 가 없거나 실패하면 PDF 뷰어로 연다.
-    let printed = Command::new("lp")
+    let printed = util::command::new_smol_command("lp")
         .arg(path)
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .status()
+        .await
         .is_ok_and(|status| status.success());
     if printed {
         return Ok(PrintOutcome::SentToPrinter(name));
     }
     let opener = if cfg!(target_os = "macos") { "open" } else { "xdg-open" };
-    let opened = Command::new(opener)
+    let opened = util::command::new_smol_command(opener)
         .arg(path)
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .status()
+        .await
         .is_ok_and(|status| status.success());
     if opened {
         Ok(PrintOutcome::OpenedInViewer(name))

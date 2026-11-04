@@ -74,7 +74,7 @@ fn has_content(editor: &Editor, cx: &App) -> bool {
         return false;
     };
     let buffer = buffer.read(cx);
-    buffer.file().is_some() && buffer.len() > 0
+    buffer.file().is_some() && !buffer.is_empty()
 }
 
 /// 단일 버퍼 전체 편집기이고, 그 버퍼가 Typst 이면 `true`.
