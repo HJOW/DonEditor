@@ -1,7 +1,14 @@
 [
+  {
+    // [DonEditor] Agent 입력란에서 대화를 전송한다.
+    "context": "AgentPanel",
+    "bindings": { "ctrl-enter": "agent_panel::Send" },
+  },
   // Standard Linux bindings
   {
     "bindings": {
+      // [DonEditor] Agent 패널의 포커스를 전환한다.
+      "ctrl-alt-a": "agent_panel::ToggleFocus",
       "home": "menu::SelectFirst",
       "shift-pageup": "menu::SelectFirst",
       "pageup": "menu::SelectFirst",

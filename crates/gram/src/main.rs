@@ -119,7 +119,8 @@ fn fail_to_open_window_async(e: anyhow::Error, cx: &mut AsyncApp) {
 }
 
 fn fail_to_open_window(e: anyhow::Error, _cx: &mut App) {
-    eprintln!("Gram failed to open a window: {e:?}. See gram://docs/linux for troubleshooting steps.");
+    // [DonEditor] 시작 실패 시에도 제품 이름을 일관되게 표시한다.
+    eprintln!("Don Editor failed to open a window: {e:?}. See gram://docs/linux for troubleshooting steps.");
     // Maybe unify this with gpui::platform::linux::platform::ResultExt::notify_err(..)?
     cfg_select! {
         any(target_os = "linux", target_os = "freebsd") => {
@@ -538,6 +539,9 @@ pub fn main() {
         project_symbols::init(cx);
         project_panel::init(cx);
         outline_panel::init(cx);
+        // [DonEditor] MCP와 Agent 액션은 기존 패널 초기화 흐름에 추가한다.
+        mcp_server::init(cx);
+        agent_panel::init(cx);
         tasks_ui::init(cx);
         snippets_ui::init(cx);
         search::init(cx);

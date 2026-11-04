@@ -73,6 +73,8 @@ name = "doneditor"
 path = "src/gram-main.rs"
 
 [dependencies]
+agent_panel.workspace = true
+mcp_server.workspace = true
 activity_indicator.workspace = true
 anyhow.workspace = true
 

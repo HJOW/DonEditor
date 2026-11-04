@@ -49,6 +49,10 @@ pub fn app_menus(cx: &mut App) -> Vec<Menu> {
         MenuItem::action(i18n::t!("menu.view.outline_panel"), outline_panel::ToggleFocus),
         MenuItem::action(i18n::t!("menu.view.terminal_panel"), terminal_panel::ToggleFocus),
         MenuItem::action(i18n::t!("menu.view.debugger_panel"), ToggleDebugPanel),
+        // [DonEditor] 숨겨진 Agent 패널과 로컬 MCP 서버에 메뉴로도 접근한다.
+        MenuItem::action(i18n::t!("menu.view.agent_panel"), agent_panel::ToggleFocus),
+        MenuItem::action(i18n::t!("menu.view.mcp_toggle"), mcp_server::ToggleServer),
+        MenuItem::action(i18n::t!("menu.view.mcp_connection"), mcp_server::ShowConnectionInfo),
         MenuItem::separator(),
         MenuItem::action(i18n::t!("menu.view.diagnostics"), diagnostics::Deploy),
         MenuItem::separator(),
@@ -318,6 +322,13 @@ pub fn app_menus(cx: &mut App) -> Vec<Menu> {
                 MenuItem::action(i18n::t!("menu.help.license"), app_actions::ViewLicense),
                 MenuItem::action(i18n::t!("menu.help.welcome"), onboarding::ShowWelcome),
                 MenuItem::separator(),
+                // [DonEditor] 자체 안내를 먼저 제공하며 원본 도움말도 그대로 유지한다.
+                MenuItem::action(
+                    i18n::t!("menu.help.don_guide"),
+                    app_actions::OpenDocsAt {
+                        path: "don/index".into(),
+                    },
+                ),
                 MenuItem::action(
                     i18n::t!("menu.help.documentation"),
                     super::OpenGramUrl {

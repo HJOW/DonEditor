@@ -555,6 +555,8 @@ fn initialize_panels(window: &mut Window, cx: &mut Context<Workspace>) {
     cx.spawn_in(window, async move |workspace_handle, cx| {
         let project_panel = ProjectPanel::load(workspace_handle.clone(), cx.clone());
         let outline_panel = OutlinePanel::load(workspace_handle.clone(), cx.clone());
+        // [DonEditor] 기본 우측 Agent 패널을 기존 도크와 함께 복원한다.
+        let agent_panel = agent_panel::AgentPanel::load(workspace_handle.clone(), cx.clone());
         let terminal_panel = TerminalPanel::load(workspace_handle.clone(), cx.clone());
         let git_panel = GitPanel::load(workspace_handle.clone(), cx.clone());
         let debug_panel = DebugPanel::load(workspace_handle.clone(), cx);
@@ -576,6 +578,7 @@ fn initialize_panels(window: &mut Window, cx: &mut Context<Workspace>) {
         futures::join!(
             add_panel_when_ready(project_panel, workspace_handle.clone(), cx.clone()),
             add_panel_when_ready(outline_panel, workspace_handle.clone(), cx.clone()),
+            add_panel_when_ready(agent_panel, workspace_handle.clone(), cx.clone()),
             add_panel_when_ready(terminal_panel, workspace_handle.clone(), cx.clone()),
             add_panel_when_ready(git_panel, workspace_handle.clone(), cx.clone()),
             add_panel_when_ready(debug_panel, workspace_handle.clone(), cx.clone()),
@@ -1148,7 +1151,7 @@ fn open_about(cx: &mut App) {
                                     window.remove_window();
                                 }))
                                 .child(
-                                    Button::new("ok", "Ok")
+                                    Button::new("ok", i18n::t!("common.ok"))
                                         .full_width()
                                         .style(ButtonStyle::OutlinedGhost)
                                         .toggle_state(ok_is_focused)

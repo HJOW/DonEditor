@@ -20,6 +20,8 @@
   // "auto" follows the OS language (Korean on a Korean system, otherwise English),
   // "ko" is Korean, and "en" is English.
   "ui_language": "auto",
+  // [DonEditor] 로컬 MCP 서버는 명시적으로 켜야 하며 포트 0은 자동 할당이다.
+  "mcp_server": { "enabled": false, "port": 0 },
   // Features that can be globally enabled or disabled
   "features": {},
   // The name of a font to use for rendering text in the editor

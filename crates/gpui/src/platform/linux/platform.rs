@@ -64,7 +64,8 @@ impl<T> ResultExt for anyhow::Result<T> {
                     block_on(
                         proxy.add_notification(
                             notification_id,
-                            Notification::new("Gram failed to launch")
+                            // [DonEditor] 플랫폼 시작 알림에도 파생 제품 이름을 사용한다.
+                            Notification::new("Don Editor failed to launch")
                                 .body(Some(
                                     format!("{e:?}. See docs/linux.md for troubleshooting steps.").as_str(),
                                 ))

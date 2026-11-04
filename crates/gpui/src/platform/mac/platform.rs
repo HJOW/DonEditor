@@ -64,20 +64,23 @@ define_class!(
         #[unsafe(method(applicationWillFinishLaunching:))]
         fn will_finish_launching(&self, notification: &NSNotification) {
             if !matches!(std::env::var("GRAM_STATELESS").as_deref(), Ok("1")) {
-                let bundle_id = ns_string!("app.liten.Gram");
-                let running_apps = NSRunningApplication::runningApplicationsWithBundleIdentifier(bundle_id);
                 let this = NSRunningApplication::currentApplication();
+                // [DonEditor] 실제 번들의 식별자를 사용해 원본 Gram 및 stable/dev 채널과 분리한다.
+                if let Some(bundle_id) = this.bundleIdentifier() {
+                let running_apps = NSRunningApplication::runningApplicationsWithBundleIdentifier(&bundle_id);
                 if !running_apps.is_empty() {
+                    // 같은 번들에서 이미 실행 중인 인스턴스만 활성화한다.
                     for running_app in running_apps {
                         let exe = running_app.executableURL().and_then(|url| url.lastPathComponent()).map(|s| s.to_string()).unwrap_or("".into());
-                        if running_app != this && exe.starts_with("gram") {
-                            log::info!("Application with bundle ID app.liten.Gram already running: {exe}");
+                        if running_app != this {
+                            log::info!("Application with bundle ID {} already running: {exe}", bundle_id.to_string());
                             #[allow(deprecated)]
                             running_app.activateWithOptions(NSApplicationActivationOptions::ActivateIgnoringOtherApps);
                             this.terminate();
                             return;
                         }
                     }
+                }
                 }
             }
 

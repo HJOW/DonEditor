@@ -162,8 +162,9 @@ impl ReleaseChannel {
     /// This also has to match the bundle identifier for Gram on macOS.
     pub fn app_id(&self) -> &'static str {
         match self {
-            ReleaseChannel::Dev => "app.liten.Gram-Dev",
-            ReleaseChannel::Stable => "app.liten.Gram",
+            // [DonEditor] macOS 번들 및 Linux 창 식별자를 원본과 분리한다.
+            ReleaseChannel::Dev => "app.doneditor.DonEditor-Dev",
+            ReleaseChannel::Stable => "app.doneditor.DonEditor",
         }
     }
 

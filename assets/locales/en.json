@@ -1758,5 +1758,7 @@
   "ui.text.error_with_kernel_kernel_name_e": "Error with kernel {kernel_name}: {e}",
   "debugger.adapter_logs": "Adapter Logs",
   "debugger.initialization_sequence": "Initialization Sequence",
-  "debugger.cannot_determine_scenario": "Don Editor cannot determine how to run this debug scenario. The build field was not provided and the debug adapter rejected the configuration: {error}"
+  "debugger.cannot_determine_scenario": "Don Editor cannot determine how to run this debug scenario. The build field was not provided and the debug adapter rejected the configuration: {error}",
+  "tools.diff.before": "Before",
+  "tools.diff.after": "After"
 }

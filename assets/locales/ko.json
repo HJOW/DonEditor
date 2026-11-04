@@ -1758,5 +1758,7 @@
   "ui.text.error_with_kernel_kernel_name_e": "커널 {kernel_name} 오류: {e}",
   "debugger.adapter_logs": "어댑터 로그",
   "debugger.initialization_sequence": "초기화 순서",
-  "debugger.cannot_determine_scenario": "이 디버그 시나리오의 실행 방법을 확인할 수 없습니다. build 항목이 없고 디버그 어댑터가 설정을 거절했습니다: {error}"
+  "debugger.cannot_determine_scenario": "이 디버그 시나리오의 실행 방법을 확인할 수 없습니다. build 항목이 없고 디버그 어댑터가 설정을 거절했습니다: {error}",
+  "tools.diff.before": "이전",
+  "tools.diff.after": "변경 후"
 }

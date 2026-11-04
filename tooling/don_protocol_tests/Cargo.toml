@@ -1,0 +1,26 @@
+[package]
+name = "don_protocol_tests"
+version.workspace = true
+edition.workspace = true
+license = "GPL-3.0-or-later"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "don-mcp-contract-bridge"
+path = "../../crates/mcp_server/src/bridge.rs"
+
+[[bin]]
+name = "don-mcp-test-server"
+path = "src/server.rs"
+
+[dependencies]
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+
+[lints]
+workspace = true

@@ -73,6 +73,9 @@ pub struct SettingsContent {
     /// Default: auto
     pub ui_language: Option<UiLanguageContent>,
 
+    /// [DonEditor] 로컬 MCP 서버 설정. 기본 비활성, 포트 0은 빈 포트를 선택한다.
+    pub mcp_server: Option<McpServerSettingsContent>,
+
     pub debugger: Option<DebuggerSettingsContent>,
 
     /// Configuration for Diagnostics-related features.
@@ -234,6 +237,16 @@ impl strum::VariantNames for BaseKeymapContent {
         "Minimal",
         "None",
     ];
+}
+
+/// [DonEditor] 외부 MCP 클라이언트가 접속할 루프백 서버의 옵션.
+#[with_fallible_options]
+#[derive(Clone, PartialEq, Default, Serialize, Deserialize, JsonSchema, MergeFrom, Debug)]
+pub struct McpServerSettingsContent {
+    /// 서버 활성화 여부. API 제어는 토큰 인증과 앱 내 승인을 거친다.
+    pub enabled: Option<bool>,
+    /// 수신 포트. 0이면 운영체제가 자동 지정한다.
+    pub port: Option<u16>,
 }
 
 #[with_fallible_options]

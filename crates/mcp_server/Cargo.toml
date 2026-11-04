@@ -1,0 +1,32 @@
+[package]
+name = "mcp_server"
+version.workspace = true
+edition.workspace = true
+license = "GPL-3.0-or-later"
+publish = false
+
+[lib]
+path = "src/mcp_server.rs"
+doctest = false
+
+[[bin]]
+name = "don-mcp"
+path = "src/bridge.rs"
+
+[dependencies]
+anyhow.workspace = true
+don_tools.workspace = true
+futures.workspace = true
+gpui.workspace = true
+i18n.workspace = true
+log.workspace = true
+paths.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+settings.workspace = true
+smol.workspace = true
+uuid.workspace = true
+workspace.workspace = true
+
+[lints]
+workspace = true

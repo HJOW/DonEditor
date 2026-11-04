@@ -2250,6 +2250,11 @@ impl Workspace {
         state.task.clone().unwrap()
     }
 
+    /// [DonEditor] MCP·Agent에서 전체 저장의 완료/취소를 기다리는 공용 진입점.
+    pub fn save_all_for_tools(&mut self, window: &mut Window, cx: &mut Context<Self>) -> Task<Result<bool>> {
+        self.save_all_internal(SaveIntent::SaveAll, window, cx)
+    }
+
     fn save_all_internal(
         &mut self,
         mut save_intent: SaveIntent,

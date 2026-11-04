@@ -12,6 +12,7 @@ dependencies = [
  "fs",
  "futures",
  "gpui",
+ "i18n",
  "language",
  "project",
  "proto",
@@ -50,6 +51,30 @@ checksum = "95fdeddf7d69819d0e52ea0b20a9520fa2a88683aa180c9104d925318593c413"
 dependencies = [
  "cc",
  "tree-sitter-language",
+]
+
+[[package]]
+name = "agent_panel"
+version = "3.4.0"
+dependencies = [
+ "anyhow",
+ "db",
+ "don_tools",
+ "editor",
+ "futures",
+ "gpui",
+ "http_client",
+ "i18n",
+ "keyring",
+ "log",
+ "markdown",
+ "schemars",
+ "serde",
+ "serde_json",
+ "smol",
+ "ui",
+ "ui_input",
+ "workspace",
 ]
 
 [[package]]
@@ -1921,6 +1946,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "dbus"
+version = "0.9.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ab69f03cc8c4340c9c8e315114e1658e6775a9b16a04357973aa21cec22b32e"
+dependencies = [
+ "libc",
+ "libdbus-sys",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "dbus-secret-service"
+version = "4.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "708b509edf7889e53d7efb0ffadd994cc6c2345ccb62f55cfd6b0682165e4fa6"
+dependencies = [
+ "dbus",
+ "zeroize",
+]
+
+[[package]]
 name = "debug_adapter_extension"
 version = "3.4.0"
 dependencies = [
@@ -1944,6 +1990,7 @@ dependencies = [
  "editor",
  "futures",
  "gpui",
+ "i18n",
  "project",
  "serde_json",
  "settings",
@@ -2232,6 +2279,7 @@ dependencies = [
  "assets",
  "editor",
  "gpui",
+ "i18n",
  "language",
  "markdown_preview",
  "regex",
@@ -2274,6 +2322,36 @@ dependencies = [
  "quote",
  "strum 0.27.2",
  "syn 2.0.119",
+]
+
+[[package]]
+name = "don_protocol_tests"
+version = "3.4.0"
+dependencies = [
+ "anyhow",
+ "serde",
+ "serde_json",
+ "uuid",
+]
+
+[[package]]
+name = "don_tools"
+version = "3.4.0"
+dependencies = [
+ "anyhow",
+ "editor",
+ "futures",
+ "gpui",
+ "i18n",
+ "language",
+ "schemars",
+ "serde_json",
+ "settings",
+ "task",
+ "terminal_view",
+ "theme",
+ "ui",
+ "workspace",
 ]
 
 [[package]]
@@ -2694,6 +2772,7 @@ dependencies = [
  "extension_host",
  "fuzzy",
  "gpui",
+ "i18n",
  "language",
  "log",
  "menu",
@@ -3585,6 +3664,7 @@ name = "gram"
 version = "3.4.0"
 dependencies = [
  "activity_indicator",
+ "agent_panel",
  "anyhow",
  "app_actions",
  "ashpd",
@@ -3640,6 +3720,7 @@ dependencies = [
  "log",
  "markdown",
  "markdown_preview",
+ "mcp_server",
  "menu",
  "migrator",
  "mimalloc",
@@ -4188,6 +4269,7 @@ dependencies = [
  "editor",
  "file_icons",
  "gpui",
+ "i18n",
  "language",
  "log",
  "project",
@@ -4316,6 +4398,7 @@ version = "3.4.0"
 dependencies = [
  "anyhow",
  "gpui",
+ "i18n",
  "release_channel",
  "smol",
  "util",
@@ -4677,6 +4760,7 @@ dependencies = [
  "fs",
  "fuzzy",
  "gpui",
+ "i18n",
  "itertools 0.14.0",
  "json_schema_store",
  "language",
@@ -4696,6 +4780,21 @@ dependencies = [
  "ui_input",
  "util",
  "workspace",
+]
+
+[[package]]
+name = "keyring"
+version = "3.6.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eebcc3aff044e5944a8fbaf69eb277d11986064cba30c468730e8b9909fb551c"
+dependencies = [
+ "byteorder",
+ "dbus-secret-service",
+ "log",
+ "security-framework 2.11.1",
+ "security-framework 3.7.0",
+ "windows-sys 0.60.2",
+ "zeroize",
 ]
 
 [[package]]
@@ -4873,6 +4972,7 @@ dependencies = [
  "editor",
  "futures",
  "gpui",
+ "i18n",
  "itertools 0.14.0",
  "language",
  "lsp",
@@ -5010,6 +5110,15 @@ name = "libc"
 version = "0.2.191"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "65cd87c9a6d60536580b316ad985726104730a5151c99845f2490428ef91240a"
+
+[[package]]
+name = "libdbus-sys"
+version = "0.2.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "328c4789d42200f1eeec05bd86c9c13c7f091d2ba9a6ea35acdf51f31bc0f043"
+dependencies = [
+ "pkg-config",
+]
 
 [[package]]
 name = "libflate"
@@ -5373,6 +5482,25 @@ name = "maybe-owned"
 version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4facc753ae494aeb6e3c22f839b158aebd4f9270f55cd3c79906c45476c47ab4"
+
+[[package]]
+name = "mcp_server"
+version = "3.4.0"
+dependencies = [
+ "anyhow",
+ "don_tools",
+ "futures",
+ "gpui",
+ "i18n",
+ "log",
+ "paths",
+ "serde",
+ "serde_json",
+ "settings",
+ "smol",
+ "uuid",
+ "workspace",
+]
 
 [[package]]
 name = "memchr"
@@ -8007,6 +8135,7 @@ dependencies = [
  "gpui",
  "gpui_tokio",
  "http_client",
+ "i18n",
  "image",
  "indoc",
  "jupyter-protocol",
@@ -8310,7 +8439,7 @@ dependencies = [
  "openssl-probe",
  "rustls-pki-types",
  "schannel",
- "security-framework",
+ "security-framework 3.7.0",
 ]
 
 [[package]]
@@ -8347,7 +8476,7 @@ dependencies = [
  "rustls-native-certs",
  "rustls-platform-verifier-android",
  "rustls-webpki",
- "security-framework",
+ "security-framework 3.7.0",
  "security-framework-sys",
  "webpki-root-certs",
  "windows-sys 0.61.2",
@@ -8536,6 +8665,19 @@ dependencies = [
  "util_macros",
  "workspace",
  "worktree",
+]
+
+[[package]]
+name = "security-framework"
+version = "2.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "897b2245f0b511c87893af39b033e5ca9cce68824c4d7e7630b5a1d339658d02"
+dependencies = [
+ "bitflags 2.13.2",
+ "core-foundation 0.9.4",
+ "core-foundation-sys",
+ "libc",
+ "security-framework-sys",
 ]
 
 [[package]]
@@ -9068,6 +9210,7 @@ dependencies = [
  "file_icons",
  "fuzzy",
  "gpui",
+ "i18n",
  "language",
  "paths",
  "picker",
@@ -9599,6 +9742,7 @@ dependencies = [
  "file_icons",
  "fuzzy",
  "gpui",
+ "i18n",
  "itertools 0.14.0",
  "language",
  "menu",
@@ -10193,6 +10337,7 @@ dependencies = [
  "futures",
  "fuzzy",
  "gpui",
+ "i18n",
  "language",
  "menu",
  "picker",
@@ -11149,6 +11294,7 @@ dependencies = [
  "fuzzy",
  "git_ui",
  "gpui",
+ "i18n",
  "indoc",
  "itertools 0.14.0",
  "language",
@@ -13274,6 +13420,20 @@ name = "zeroize"
 version = "1.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e13084392c5e4bc371903e2935a5eaeed24905a7511356b883835e18a78f6879"
+dependencies = [
+ "zeroize_derive",
+]
+
+[[package]]
+name = "zeroize_derive"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3c50655cbb0fe3fc43170059e702f1ce5e19b84cec58dc87b037a09935c2f328"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
 
 [[package]]
 name = "zeromq"

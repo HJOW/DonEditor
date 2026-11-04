@@ -1,4 +1,7 @@
 //! [DonEditor] stdio JSON-RPC를 실행 중인 편집기의 루프백 MCP HTTP로 중계한다.
+// 서버 전용 결과 상한도 같은 파일에 있어 이 바이너리에서는 미사용 상수를 허용한다.
+#[allow(dead_code)]
+mod limits;
 use anyhow::{Context as _, Result, ensure};
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -23,7 +26,7 @@ struct Connection {
     token: String,
 }
 /// stdio 입력과 HTTP 응답의 크기 상한.
-const MAX_MESSAGE: u64 = 16 * 1024 * 1024;
+const MAX_MESSAGE: u64 = limits::MAX_MESSAGE as u64;
 /// stdin을 막지 않고 동시에 중계할 일반 요청 수.
 const MAX_ACTIVE: usize = 8;
 /// 취소 알림은 일반 요청과 별도 작업자로 전달하되 대기열 크기도 제한한다.

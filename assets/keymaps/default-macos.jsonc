@@ -1,8 +1,15 @@
 [
+  {
+    // [DonEditor] Agent 입력란에서 대화를 전송한다.
+    "context": "AgentPanel",
+    "bindings": { "cmd-enter": "agent_panel::Send" },
+  },
   // Standard macOS bindings
   {
     "use_key_equivalents": true,
     "bindings": {
+      // [DonEditor] Agent 패널의 포커스를 전환한다.
+      "cmd-alt-a": "agent_panel::ToggleFocus",
       "f4": "debugger::Start",
       "shift-f5": "debugger::Stop",
       "shift-cmd-f5": "debugger::RerunSession",
