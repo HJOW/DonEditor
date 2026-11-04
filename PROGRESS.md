@@ -6,6 +6,7 @@
 - Windows 통합 검사에서 VS Code 설정 가져오기에 새 `mcp_server` 필드 초기화가 빠진 컴파일 오류를 발견해 수정했으며, 재검사에서 `settings` crate를 통과했다. 전체 앱 검사는 계속 진행 중이다.
 - 기본 셸에서는 다른 MSVC가 선택되어 Spectre 라이브러리 검사가 실패했다. `C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools`의 개발자 셸을 `amd64`로 불러온 뒤 검사를 재개해 해당 단계를 통과했다.
 - MCP 공용 도구의 선택 영역 조회를 불변 버퍼 스냅샷과 앵커를 사용하도록 수정하고, 실행 취소 액션·전역 설정 접근의 공개 API 및 불필요한 가져오기를 바로잡았다. Windows `cargo check`에서 `don_tools`가 경고 없이 통과했다. GUI에서의 동작 검증은 아직 남았다.
+- 단일 파일 편집 승인 후에도 활성 편집기가 미리보기 대상과 같은지 및 원본 파일 버퍼인지 다시 검사하도록 보강했다. Windows 실행 파일 빌드에서 `don_tools` 컴파일은 통과했으며, 실제 승인 대기 중 탭 변경 시나리오는 GUI 실행 후 검증해야 한다.
 - Windows 빌드 도구 설치 스크립트 검증(15개 메뉴 시나리오)과 배포 zip PowerShell 검증이 다시 통과했다. 두 검사는 모의 설치·스테이징을 포함하며 실제 최종 앱 빌드를 대신하지 않는다.
 - Agent 대화 기록 선택·삭제와 패널 좌우 이동에 MCP 범용 액션을 추가했다. Windows 통합 `cargo check`에서 해당 crate가 통과했으며 실제 창과 MCP 클라이언트의 동작 검증은 남았다.
 - MCP에서 Agent 대화 제목·번호를 조회하는 `list_agent_conversations` 도구를 추가했다. 변경 후 Windows `cargo check -p gram -p mcp_server`, MCP 계약 테스트 23개 및 공식 Python MCP SDK의 HTTP/stdio 자동 협상·도구 33개 조회가 통과했다. 실제 편집기 GUI와의 통합 테스트는 남았다.

@@ -203,11 +203,17 @@ pub fn execute_cancellable(
                 let preview = diff_preview(&format!("{name} — {title}"),&old,&new);
                 let accepted = workspace.update_in(cx, |workspace,window,cx| approve(preview,workspace,window,cx))?;
                 ensure!(accepted.await.unwrap_or(false), "사용자가 편집을 거절했습니다");
-                editor.update_in(cx, |editor,_,cx| {
+                workspace.update_in(cx, |workspace,_,cx| {
                     ensure!(!cancelled.load(Ordering::Acquire), "도구 요청이 취소되었습니다");
-                    ensure!(editor.text(cx)==old,"승인 대기 중 파일이 변경되었습니다. 새 변경안을 요청하세요");
-                    ensure!(!editor.read_only(cx),"읽기 전용 편집기입니다");
-                    editor.edit([(MultiBufferOffset(start)..MultiBufferOffset(end),args["text"].as_str().unwrap().to_owned())],cx);
+                    // 승인받은 편집기에서 벗어났다면 다른 탭을 보고 승인한 것으로 간주하지 않는다.
+                    ensure!(active_editor(workspace,cx)?.entity_id()==editor.entity_id(), "승인 대기 중 활성 탭이 변경되었습니다. 새 변경안을 요청하세요");
+                    editor.update(cx, |editor,cx| {
+                        ensure!(editor.text(cx)==old,"승인 대기 중 파일이 변경되었습니다. 새 변경안을 요청하세요");
+                        ensure!(!editor.read_only(cx),"읽기 전용 편집기입니다");
+                        ensure!(editor.buffer().read(cx).is_singleton(), "원본 파일 탭이 아닙니다");
+                        editor.edit([(MultiBufferOffset(start)..MultiBufferOffset(end),args["text"].as_str().unwrap().to_owned())],cx);
+                        Ok::<_,anyhow::Error>(())
+                    })?;
                     Ok::<_,anyhow::Error>(())
                 })??;
                 return Ok(json!({"edited":true,"saved":false}));
