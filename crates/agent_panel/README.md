@@ -14,7 +14,7 @@ Agent와 MCP는 `don_tools`의 같은 도구 정의와 실행기를 사용한다
 
 MCP의 `list_actions`로 Agent 액션의 입력 스키마도 조회할 수 있다. `dispatch_action`을 통해 `agent_panel::Configure`에 `{"provider":"anthropic","model":"claude-sonnet-5-5"}`를, `agent_panel::SendPrompt`에 `{"text":"현재 코드의 문제를 확인해 줘"}`를 전달한다. 인자 없는 `ToggleFocus`, `AttachContext`, `NewChat`, `ShowHistory`, `Send`, `Stop`도 같은 `agent_panel::` 이름 공간에 있다. API 키는 이 액션 인자로 받지 않는다.
 
-기록은 `agent_panel::SelectConversation`에 `{"index":0}`처럼 표시 순서의 번호를 전달해 열고, `agent_panel::ClearHistory`로 삭제할 수 있다. `agent_panel::MovePanel`의 `{"position":"left"}` 또는 `{"position":"right"}`로 패널을 옮긴다. 이 액션도 MCP의 일반 액션 실행 승인 절차를 따른다.
+기록은 `list_agent_conversations` 도구에서 제목과 번호를 조회한 다음 `agent_panel::SelectConversation`에 `{"index":0}`처럼 표시 순서의 번호를 전달해 열고, `agent_panel::ClearHistory`로 삭제할 수 있다. `agent_panel::MovePanel`의 `{"position":"left"}` 또는 `{"position":"right"}`로 패널을 옮긴다. 이 액션도 MCP의 일반 액션 실행 승인 절차를 따른다.
 
 **새 대화**로 대화를 나누고 **대화 기록**에서 워크스페이스별 최근 20개 대화를 다시 열 수 있다. 기록은 해당 사용자의 Don Editor 로컬 데이터 DB에 저장한다. **기록 삭제**로 저장된 대화를 지울 수 있다.
 

@@ -6,7 +6,7 @@ pub use registry::definitions;
 use anyhow::{Context as _, Result, bail, ensure};
 use editor::{Editor, MultiBufferOffset, SelectionEffects, ToOffset as _};
 use futures::channel::oneshot;
-use gpui::{App, Context, Entity, Focusable as _, ReadGlobal as _, Task, Window};
+use gpui::{App, Context, Entity, Focusable as _, Global, ReadGlobal as _, Task, Window};
 use serde_json::{Value, json};
 use settings::{SettingsContent, SettingsStore};
 use std::{
@@ -17,6 +17,15 @@ use std::{
     },
 };
 use workspace::{OpenOptions, OpenVisible, Workspace, pane::SaveIntent};
+
+/// Agent 패널이 등록하는 읽기 전용 대화 기록 조회 함수이다.
+struct AgentHistoryProvider(fn(&Workspace, &App) -> Value);
+impl Global for AgentHistoryProvider {}
+
+/// 순환 의존성 없이 Agent 패널의 대화 기록을 공용 도구에 연결한다.
+pub fn register_agent_history(cx: &mut App, provider: fn(&Workspace, &App) -> Value) {
+    cx.set_global(AgentHistoryProvider(provider));
+}
 
 /// 현재 편집기를 요구하는 도구에서 공통으로 오류를 반환한다.
 fn active_editor(workspace: &Workspace, cx: &App) -> Result<Entity<Editor>> {
@@ -324,6 +333,12 @@ fn execute_sync(
             Ok(json!({"actions":actions,"$defs":generator.definitions()}))
         }
         "list_open_tabs" => Ok(json!({"tabs":tabs(workspace,cx)})),
+        "list_agent_conversations" => {
+            let provider = cx
+                .try_global::<AgentHistoryProvider>()
+                .context("Agent 패널이 초기화되지 않았습니다")?;
+            Ok((provider.0)(workspace, cx))
+        }
         "list_project_files" => {
             Ok(json!({"files":project_files(workspace,args["limit"].as_u64().unwrap_or(10000) as usize,cx)}))
         }

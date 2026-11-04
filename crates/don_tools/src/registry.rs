@@ -71,6 +71,13 @@ pub fn definitions() -> Vec<Value> {
             true,
         ),
         tool(
+            "list_agent_conversations",
+            "List saved Agent conversation titles and indexes for SelectConversation.",
+            json!({}),
+            &[],
+            true,
+        ),
+        tool(
             "list_project_files",
             "List visible project files (up to limit, default 10000).",
             json!({"limit":{"type":"integer","minimum":1,"maximum":100000}}),

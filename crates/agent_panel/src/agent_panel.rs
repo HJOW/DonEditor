@@ -156,6 +156,18 @@ pub struct AgentPanel {
 
 /// 모든 새 워크스페이스에 패널 토글 액션을 등록한다. 패널은 앱의 기존 load 흐름에서 추가한다.
 pub fn init(cx: &mut App) {
+    // 저장된 대화의 제목과 인덱스를 MCP가 조회할 수 있게 한다.
+    don_tools::register_agent_history(cx, |workspace, cx| {
+        if let Some(panel) = workspace.panel::<AgentPanel>(cx) {
+            let panel = panel.read(cx);
+            let conversations: Vec<_> = panel.conversations.iter().enumerate().map(|(index, conversation)| {
+                json!({"index":index,"title":conversation.title,"selected":conversation.id==panel.current.id})
+            }).collect();
+            json!({"conversations":conversations,"running":panel.running})
+        } else {
+            json!({"conversations":[],"available":false})
+        }
+    });
     cx.observe_new(|workspace: &mut Workspace, _, _| {
         workspace.register_action(|workspace, _: &ToggleFocus, window, cx| {
             workspace.toggle_panel_focus::<AgentPanel>(window, cx);

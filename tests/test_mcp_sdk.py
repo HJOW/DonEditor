@@ -21,7 +21,8 @@ import httpx2
 async def verify(client):
     """도구·리소스 조회 및 한글 응답이 실제 SDK로 파싱되는지 검사한다."""
     tools = await client.list_tools()
-    assert len(tools.tools) == 32
+    assert len(tools.tools) == 33
+    assert any(tool.name == "list_agent_conversations" for tool in tools.tools)
     result = await client.call_tool("get_buffer_text", {})
     assert result.structured_content["text"] == "Don Editor 한글🙂"
     resources = await client.list_resources()
@@ -49,7 +50,7 @@ async def connect(connection_path, bridge):
         )
         async with Client(parameters, mode=mode) as client:
             await verify(client)
-    print("공식 MCP SDK: HTTP·stdio 초기화/자동 협상/32개 도구/3개 리소스 검증 통과")
+    print("공식 MCP SDK: HTTP·stdio 초기화/자동 협상/33개 도구/3개 리소스 검증 통과")
 
 
 def main():

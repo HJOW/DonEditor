@@ -8,6 +8,7 @@
 - MCP 공용 도구의 선택 영역 조회를 불변 버퍼 스냅샷과 앵커를 사용하도록 수정하고, 실행 취소 액션·전역 설정 접근의 공개 API 및 불필요한 가져오기를 바로잡았다. Windows `cargo check`에서 `don_tools`가 경고 없이 통과했다. GUI에서의 동작 검증은 아직 남았다.
 - Windows 빌드 도구 설치 스크립트 검증(15개 메뉴 시나리오)과 배포 zip PowerShell 검증이 다시 통과했다. 두 검사는 모의 설치·스테이징을 포함하며 실제 최종 앱 빌드를 대신하지 않는다.
 - Agent 대화 기록 선택·삭제와 패널 좌우 이동에 MCP 범용 액션을 추가했다. Windows 통합 `cargo check`에서 해당 crate가 통과했으며 실제 창과 MCP 클라이언트의 동작 검증은 남았다.
+- MCP에서 Agent 대화 제목·번호를 조회하는 `list_agent_conversations` 도구를 추가했다. 변경 후 Windows `cargo check -p gram -p mcp_server`, MCP 계약 테스트 23개 및 공식 Python MCP SDK의 HTTP/stdio 자동 협상·도구 33개 조회가 통과했다. 실제 편집기 GUI와의 통합 테스트는 남았다.
 - 2026-11-04 Windows 개발자 셸에서 `cargo check -p gram -p mcp_server`가 경고 없이 통과했다. 설정 가져오기·MCP 공개 API, Vim 상태 문자열·키맵 편집기·온보딩 테마·구문 트리의 번역 문자열 컴파일 오류를 수정했다. 실제 실행 파일 빌드·실행과 GUI 테스트는 별도 진행한다.
 - 현재 프로세스 환경에서 OpenAI/Anthropic API 키 환경 변수와 Claude Code 명령은 감지되지 않았다. 실제 계정 연결은 별도 검증 대상이다.
 - Windows 자격 증명 저장소는 별도 고유 테스트 항목과 가짜 값으로 저장·읽기·삭제를 검증했다. 이 검사는 keyring 백엔드 수준이며, 실제 API 키나 Agent 화면을 통한 조작은 검증하지 않았다.
