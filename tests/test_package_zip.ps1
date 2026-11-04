@@ -78,7 +78,14 @@ try {
 
     $zipPath = Join-Path $OutDir 'test-package.zip'
     New-ZipArchive $packageDir $zipPath
+    # 외부 cmdlet이 없거나 섀도잉되어도 실제 SHA-256 값을 생성해야 한다.
+    function Get-FileHash { throw 'Get-FileHash를 사용하면 안 됩니다' }
+    $knownPath = Join-Path $OutDir 'known-hash.txt'
+    [System.IO.File]::WriteAllText($knownPath, 'abc', (New-Object System.Text.UTF8Encoding $false))
+    $knownDigest = New-HashFile $knownPath
+    Assert-Package ($knownDigest -eq 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad') '알려진 SHA256 값 불일치'
     $digest = New-HashFile $zipPath
+    Remove-Item Function:\Get-FileHash
     Assert-Package ((Get-Content "$zipPath.sha256" -Raw) -eq "$digest *test-package.zip`n") 'SHA256 파일 불일치'
     $archive = [System.IO.Compression.ZipFile]::OpenRead($zipPath)
     try {

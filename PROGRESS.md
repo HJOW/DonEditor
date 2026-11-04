@@ -8,6 +8,7 @@
 - MCP 공용 도구의 선택 영역 조회를 불변 버퍼 스냅샷과 앵커를 사용하도록 수정하고, 실행 취소 액션·전역 설정 접근의 공개 API 및 불필요한 가져오기를 바로잡았다. Windows `cargo check`에서 `don_tools`가 경고 없이 통과했다. GUI에서의 동작 검증은 아직 남았다.
 - 단일 파일 편집 승인 후에도 활성 편집기가 미리보기 대상과 같은지 및 원본 파일 버퍼인지 다시 검사하도록 보강했다. Windows 실행 파일 빌드에서 `don_tools` 컴파일은 통과했으며, 실제 승인 대기 중 탭 변경 시나리오는 GUI 실행 후 검증해야 한다.
 - Windows 빌드 도구 설치 스크립트 검증(15개 메뉴 시나리오)과 배포 zip PowerShell 검증이 다시 통과했다. 두 검사는 모의 설치·스테이징을 포함하며 실제 최종 앱 빌드를 대신하지 않는다.
+- 실제 Windows 디버그 바이너리로 ZIP을 만들다가 `Get-FileHash` 명령을 찾지 못하는 실패가 발생했다. PowerShell 모듈 자동 로딩에 의존하지 않고 .NET SHA-256으로 계산하도록 고쳤다. 알려진 `abc` 해시와 `Get-FileHash`를 쓸 수 없는 상황을 포함한 회귀 테스트가 통과했으며, 실제 디버그 ZIP 재생성 후 해시·압축 무결성·GUI/CLI/MCP 실행 파일 3개·라이선스·수정 소스 동봉을 검증했다. 릴리스 ZIP 빌드 및 압축 해제 후 실행은 아직 남았다.
 - Agent 대화 기록 선택·삭제와 패널 좌우 이동에 MCP 범용 액션을 추가했다. Windows 통합 `cargo check`에서 해당 crate가 통과했으며 실제 창과 MCP 클라이언트의 동작 검증은 남았다.
 - MCP에서 Agent 대화 제목·번호를 조회하는 `list_agent_conversations` 도구를 추가했다. 변경 후 Windows `cargo check -p gram -p mcp_server`, MCP 계약 테스트 23개 및 공식 Python MCP SDK의 HTTP/stdio 자동 협상·도구 33개 조회가 통과했다. 실제 편집기 GUI와의 통합 테스트는 남았다.
 - 2026-11-04 Windows 개발자 셸에서 `cargo check -p gram -p mcp_server`가 경고 없이 통과했다. 설정 가져오기·MCP 공개 API, Vim 상태 문자열·키맵 편집기·온보딩 테마·구문 트리의 번역 문자열 컴파일 오류를 수정했다. 실제 실행 파일 빌드·실행과 GUI 테스트는 별도 진행한다.

@@ -715,7 +715,18 @@ function New-ZipArchive {
 # zip 의 SHA256 을 계산해 sha256sum 호환 형식("<해시> *<파일명>")으로 .sha256 파일에 쓴다
 function New-HashFile {
     Param([string]$ZipPath)
-    $hash = (Get-FileHash -Algorithm SHA256 -Path $ZipPath).Hash.ToLower()
+    # 개발자 셸에서 PowerShell 모듈 자동 로딩이 달라져도 동일하게 해시를 계산한다.
+    $stream = [System.IO.File]::OpenRead($ZipPath)
+    try {
+        $algorithm = [System.Security.Cryptography.SHA256]::Create()
+        try {
+            $hash = [System.BitConverter]::ToString($algorithm.ComputeHash($stream)).Replace('-', '').ToLowerInvariant()
+        } finally {
+            $algorithm.Dispose()
+        }
+    } finally {
+        $stream.Dispose()
+    }
     $hashPath = "$ZipPath.sha256"
     [System.IO.File]::WriteAllText($hashPath, "$hash *$([System.IO.Path]::GetFileName($ZipPath))`n", (New-Object System.Text.UTF8Encoding $false))
     return $hash
