@@ -18,7 +18,10 @@ GramEditor 을 클론 및 커스텀하여
   java, c, cpp, sql, c#, rust, javascript (mjs, cjs 포함), typescript, python, ruby, json, json5, yml (yaml), properties (java 의 java.util.Properties 와 호환), xml, html, xhtml, md (Markdown), swift, scala, r, bat (Windows Batch), powershell, sh (Unix Shell), go, dart
 - 프로그램의 모든 기능을 컨트롤할 수 있는 MCP (로컬) 적용
 - OpenAI 혹은 Claude API Key 를 연동하여 Agent 기능을 사용할 수 있는 사이드 패널 (기본적으로 우측에 배치) 개발
-- 배포용 zip 파일 생성 스크립트 (별도 파일로 준비, bat 혹은 ps1 사용) 작성
+  이 사이드 패널은 숨길 수 있어야 하며, 별도 아이콘을 화면 내에 배치해 아이콘을 클릭해 다시 사이드 패널을 띄울 수 있도록 한다.
+- Windows 배포용 zip 파일 생성 스크립트 (별도 파일로 준비, bat 혹은 ps1 사용) 작성
+  이 스크립트 호출 시, 빌드에 필요한 프로그램 존재여부도 검사하여, 미설치 시 사용자에게 설치를 묻는 절차를 포함한다.
+- Linux/MAC 배포용 tar.gz 파일 생성 스크립트 (별도 파일로 준비, sh 사용) 작성
   이 스크립트 호출 시, 빌드에 필요한 프로그램 존재여부도 검사하여, 미설치 시 사용자에게 설치를 묻는 절차를 포함한다.
 - 그외 기존에 존재하던 기능은 최대한 포함한다.
 
