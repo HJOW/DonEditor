@@ -2,7 +2,7 @@
 use editor::Editor;
 use futures::channel::oneshot;
 use gpui::{DismissEvent, Entity, EventEmitter, FocusHandle, Focusable};
-use ui::{Button, ButtonCommon, Clickable, prelude::*};
+use ui::{Button, Clickable, prelude::*};
 use workspace::ModalView;
 
 pub struct ToolApproval {

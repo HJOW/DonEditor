@@ -4,11 +4,11 @@ pub mod registry;
 pub use registry::definitions;
 
 use anyhow::{Context as _, Result, bail, ensure};
-use editor::{Editor, MultiBufferOffset, SelectionEffects};
+use editor::{Editor, MultiBufferOffset, SelectionEffects, ToOffset as _};
 use futures::channel::oneshot;
-use gpui::{App, AppContext as _, Context, Entity, Focusable as _, Task, Window};
+use gpui::{App, Context, Entity, Focusable as _, ReadGlobal as _, Task, Window};
 use serde_json::{Value, json};
-use settings::{Settings, SettingsContent, SettingsStore};
+use settings::{SettingsContent, SettingsStore};
 use std::{
     path::PathBuf,
     sync::{
@@ -43,12 +43,14 @@ pub fn active_context(workspace: &Workspace, cx: &App) -> Value {
     let editor = workspace.active_item_as::<Editor>(cx);
     let active = editor.map(|editor| {
         let editor = editor.read(cx);
-        let snapshot = editor.display_snapshot(cx);
+        // 표시 맵을 갱신하지 않고 버퍼 스냅샷으로 선택 앵커를 해석한다.
+        let snapshot = editor.buffer().read(cx).snapshot(cx);
         let selections: Vec<_> = editor
             .selections
-            .all::<MultiBufferOffset>(&snapshot)
-            .into_iter()
-            .map(|selection| json!({"start":selection.start.0,"end":selection.end.0}))
+            .disjoint_anchors()
+            .iter()
+            .chain(editor.selections.pending_anchor())
+            .map(|selection| json!({"start":selection.start.to_offset(&snapshot).0,"end":selection.end.to_offset(&snapshot).0}))
             .collect();
         let path = editor
             .project_path(cx)
@@ -136,7 +138,7 @@ pub fn execute(
 pub fn execute_cancellable(
     name: &str,
     arguments: Value,
-    workspace: &mut Workspace,
+    _workspace: &mut Workspace,
     window: &mut Window,
     cx: &mut Context<Workspace>,
     cancelled: Arc<AtomicBool>,
@@ -421,9 +423,9 @@ fn execute_sync(
         "undo" | "redo" => {
             active_editor(workspace, cx)?.update(cx, |editor, cx| {
                 if name == "undo" {
-                    editor.undo(&editor::Undo, window, cx)
+                    editor.undo(&editor::actions::Undo, window, cx)
                 } else {
-                    editor.redo(&editor::Redo, window, cx)
+                    editor.redo(&editor::actions::Redo, window, cx)
                 }
             });
             Ok(json!({"executed":true}))

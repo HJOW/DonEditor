@@ -4,6 +4,8 @@
 
 - 사용자 요청으로 작업을 재개했다. Linux/macOS에서 직접 테스트해야 하는 항목은 이번 작업에서 건너뛴다.
 - Windows 통합 검사에서 VS Code 설정 가져오기에 새 `mcp_server` 필드 초기화가 빠진 컴파일 오류를 발견해 수정했으며, 재검사에서 `settings` crate를 통과했다. 전체 앱 검사는 계속 진행 중이다.
+- 기본 셸에서는 다른 MSVC가 선택되어 Spectre 라이브러리 검사가 실패했다. `C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools`의 개발자 셸을 `amd64`로 불러온 뒤 검사를 재개해 해당 단계를 통과했다.
+- MCP 공용 도구의 선택 영역 조회를 불변 버퍼 스냅샷과 앵커를 사용하도록 수정하고, 실행 취소 액션·전역 설정 접근의 공개 API 및 불필요한 가져오기를 바로잡았다. Windows `cargo check`에서 `don_tools`가 경고 없이 통과했다. GUI에서의 동작 검증은 아직 남았다.
 - Windows 빌드 도구 설치 스크립트 검증(15개 메뉴 시나리오)과 배포 zip PowerShell 검증이 다시 통과했다. 두 검사는 모의 설치·스테이징을 포함하며 실제 최종 앱 빌드를 대신하지 않는다.
 - Agent 대화 기록 선택·삭제와 패널 좌우 이동에 MCP 범용 액션을 추가하고 있으며 통합 컴파일 검증 전이다.
 - 현재 프로세스 환경에서 OpenAI/Anthropic API 키 환경 변수와 Claude Code 명령은 감지되지 않았다. 실제 계정 연결은 별도 검증 대상이다.
