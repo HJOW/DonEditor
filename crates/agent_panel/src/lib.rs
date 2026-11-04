@@ -2,8 +2,9 @@
 
 #[cfg(feature = "gui")]
 mod agent_panel;
+/// 설정 화면에서도 API 키 등록 상태를 조회·저장할 수 있도록 공개한다.
 #[cfg(feature = "gui")]
-mod credentials;
+pub mod credentials;
 pub mod provider;
 #[cfg(feature = "gui")]
 pub use agent_panel::*;

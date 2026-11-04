@@ -4234,7 +4234,11 @@ impl Workspace {
 
         fn build_serialized_docks(this: &Workspace, window: &mut Window, cx: &mut App) -> DockStructure {
             let left_dock = this.left_dock.read(cx);
-            let left_visible = left_dock.is_open();
+            // [DonEditor] 왼쪽으로 옮긴 Agent 패널도 다음 실행에는 닫힌 상태로 저장한다.
+            let left_visible = left_dock.is_open()
+                && !left_dock
+                    .active_panel()
+                    .is_some_and(|panel| panel.hidden_on_startup(cx));
             let left_active_panel = left_dock
                 .active_panel()
                 .map(|panel| panel.persistent_name().to_string());
@@ -4244,7 +4248,11 @@ impl Workspace {
                 .unwrap_or(false);
 
             let right_dock = this.right_dock.read(cx);
-            let right_visible = right_dock.is_open();
+            // [DonEditor] 시작 시 숨김 패널이 보이는 상태로 종료해도 다음 실행에는 닫힌 상태로 저장한다.
+            let right_visible = right_dock.is_open()
+                && !right_dock
+                    .active_panel()
+                    .is_some_and(|panel| panel.hidden_on_startup(cx));
             let right_active_panel = right_dock
                 .active_panel()
                 .map(|panel| panel.persistent_name().to_string());

@@ -76,6 +76,10 @@ pub struct SettingsContent {
     /// [DonEditor] 로컬 MCP 서버 설정. 기본 비활성, 포트 0은 빈 포트를 선택한다.
     pub mcp_server: Option<McpServerSettingsContent>,
 
+    /// [DonEditor] Agent 패널의 제공자별 API 서버 설정.
+    /// API 키는 이 파일이 아니라 OS 자격 증명 저장소에 기록한다.
+    pub agent: Option<AgentSettingsContent>,
+
     pub debugger: Option<DebuggerSettingsContent>,
 
     /// Configuration for Diagnostics-related features.
@@ -247,6 +251,25 @@ pub struct McpServerSettingsContent {
     pub enabled: Option<bool>,
     /// 수신 포트. 0이면 운영체제가 자동 지정한다.
     pub port: Option<u16>,
+}
+
+/// [DonEditor] Agent 패널이 사용하는 제공자별 설정 묶음.
+/// 제공자를 추가할 때는 이 구조체에 필드를 하나씩 추가한다.
+#[with_fallible_options]
+#[derive(Clone, PartialEq, Default, Serialize, Deserialize, JsonSchema, MergeFrom, Debug)]
+pub struct AgentSettingsContent {
+    /// OpenAI 제공자 설정.
+    pub openai: Option<AgentProviderSettingsContent>,
+    /// Anthropic(Claude) 제공자 설정.
+    pub anthropic: Option<AgentProviderSettingsContent>,
+}
+
+/// [DonEditor] 한 제공자의 API 서버 설정. API 키는 포함하지 않는다.
+#[with_fallible_options]
+#[derive(Clone, PartialEq, Default, Serialize, Deserialize, JsonSchema, MergeFrom, Debug)]
+pub struct AgentProviderSettingsContent {
+    /// API 서버의 기본 URL. 비우면 제공자의 공식 주소를 사용한다.
+    pub api_url: Option<String>,
 }
 
 #[with_fallible_options]

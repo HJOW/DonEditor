@@ -1,5 +1,29 @@
 # Don Editor 진행 상황
 
+## 2026-11-04 Agent 사이드 패널 수정 (사용자 요청)
+
+- **사용자 요청:** ① 프로그램 실행 시 Agent 패널은 기본적으로 숨김, ② 제공자 이름 클릭 토글을 콤보박스로 변경(이후 Google·OpenCode·LM Studio 추가 예정), ③ API 키는 패널이 아닌 Don Editor 기본 설정에서 제공자별로 사전 입력하고 선택 사항인 API 서버 URL(공란이면 기본값)도 입력, ④ 패널의 키 입력란은 숨기되 해당 제공자 키가 없으면 프롬프트 입력란 자리에 키 입력란을 보여 입력 즉시 기본 설정에 반영, ⑤ AI 요청에 현재 파일·폴더 경로가 컨텍스트로 들어가는지 확인.
+- **① 시작 시 숨김:** 기존 `starts_open()`이 `true`라 매 실행마다 도크 복원 후 강제로 열렸다. `false`로 바꾸고, `workspace::Panel`에 기본값 `false`인 `hidden_on_startup()`을 추가해 Agent 패널만 `true`로 지정했다. 도크 복원(`Dock::restore_state`)은 저장된 활성 패널이 이 패널이면 도크를 닫고, 작업 공간 저장(`build_serialized_docks`)은 이 패널이 보이는 채로 종료해도 닫힌 상태로 기록한다. 따라서 이전 실행에서 열어 둔 사용자의 DB 상태도 다음 실행에서 숨김으로 시작한다. 다른 패널의 복원 동작은 그대로다.
+- **② 제공자 콤보박스:** 패널 상단의 제공자 버튼을 `DropdownMenu` + `ContextMenu`(현재 선택 체크 표시)로 바꿨다. 항목은 `Provider::ALL`에서 만들고 실행 중에는 비활성화한다. 선택은 기존 `Configure` 경로를 그대로 써서 MCP 액션과 동작이 같다.
+- **③ 기본 설정의 API 키·API 서버 URL:** 설정 화면에 **에이전트** 페이지를 추가해 OpenAI·Anthropic 절마다 **API 키**와 **API 서버 URL**을 둔다(사용자 설정에서만 표시).
+  - API 키는 settings.json에 쓰지 않고 기존처럼 OS 자격 증명 저장소(`DonEditor.Agent`)에 저장한다. 평문 settings.json에 두면 MCP·Agent의 `get_settings` 도구 결과로 키가 노출되기 때문이다. 설정 UI에는 값 없는 표식 타입(`AgentApiKeyField`)과 전용 렌더러를 등록해 마스킹 입력·Enter/키 저장·키 삭제·현재 출처(저장됨/환경 변수/없음/확인 중)를 표시한다. 저장·삭제 시 세대 번호를 올려 입력란을 새로 만들어 실행 취소 기록에도 키가 남지 않게 했다.
+  - 키 등록 상태는 `agent_panel::credentials`의 전역 상태로 관리하고 앱 시작 시 백그라운드에서 조회한다. 설정 창과 Agent 패널이 같은 상태를 보므로 어느 쪽에서 저장해도 다른 쪽에 즉시 반영된다.
+  - API 서버 URL은 `SettingsContent.agent.{openai,anthropic}.api_url`(신규 `AgentSettingsContent`)에 저장한다. 공란이면 OpenAI `https://api.openai.com/v1`, Anthropic `https://api.anthropic.com`을 쓰고 요청 경로를 자동으로 붙인다. 키 유출을 막기 위해 `http://`는 localhost·루프백에만 허용하고 계정 정보·쿼리·조각이 든 URL은 거절한다. 전역(사용자) 설정만 읽어 프로젝트 폴더 설정이 키 전송 주소를 바꿀 수 없게 했고, `update_settings` 도구의 `agent` 항목 변경은 승인 창 전에 거절한다.
+- **④ 패널의 키 입력:** 패널의 상시 키 입력란·키 저장/삭제 버튼을 없앴다. 선택한 제공자의 키가 저장소와 환경 변수 어디에도 없을 때만 프롬프트 입력란과 보내기/첨부 버튼 자리에 안내 문구·마스킹 키 입력란·**키 저장**·**설정 열기** 버튼을 보여 준다. Enter·`Ctrl+Enter`·키 저장 버튼으로 저장하면 즉시 기본 설정(OS 저장소)에 반영되어 프롬프트 입력란이 다시 나타나고 초점도 옮겨진다. 조회가 끝나기 전에는 프롬프트 입력란을 그대로 보여 준다.
+- **⑤ 컨텍스트 확인 결과와 보완:** 수정 전에는 **현재 컨텍스트 첨부** 버튼을 눌렀을 때만 현재 파일 제목·경로·전체 내용·선택 영역·열린 탭이 메시지에 들어갔고, 누르지 않으면 파일·폴더 정보가 전혀 전달되지 않았다. **열린 폴더(워크트리) 경로는 첨부 버튼을 눌러도 포함되지 않았다.** 이를 보완해 `don_tools::editor_state()`를 추가하고, 매 요청(도구 호출 후 이어지는 요청 포함)마다 열린 프로젝트 폴더 경로(파일 하나만 연 경우 그 파일의 상위 폴더, 중복 제거)·현재 활성 파일의 제목/경로/저장 안 된 변경 여부·열린 탭(최대 50개) 제목/경로를 시스템 안내문 뒤에 자동으로 붙인다. 대화 기록에는 저장하지 않고 매번 새로 만든다. 파일 내용은 자동으로 보내지 않으며 모델이 도구로 읽거나 사용자가 첨부 버튼으로 넣는다.
+- **문자열:** 신규 13개 키(설정 페이지·키 상태·키 필요 안내·설정 열기·잘못된 URL 오류)를 영·한에 추가하고 키 저장 안내 등 3개 문구를 고쳤다. 카탈로그는 **1,775키**다.
+- **기본 설정 파일:** `assets/settings/default.jsonc`에 `agent.openai.api_url`·`agent.anthropic.api_url`의 빈 기본값을 추가했다(없으면 디버그 빌드 설정 화면에 `NO DEFAULT`가 표시됨). 설정 화면의 API 키 항목은 JSON에 쓰지 않지만 json_path를 제공자 경로(`agent.openai` 등)로 지정해, 패널의 **설정 열기**(`agent.<제공자>.api_url` 링크)에서 키·URL 항목이 함께 보이게 했다.
+- **변경 파일:** `crates/agent_panel/src/{agent_panel,credentials,provider,lib}.rs`, `crates/agent_panel/Cargo.toml`·`README.md`, `crates/settings/src/{settings_content,vscode_import}.rs`, `crates/settings_ui/src/{settings_ui,page_data,components}.rs`, 신규 `crates/settings_ui/src/components/agent_api_key.rs`, `crates/settings_ui/Cargo.toml`, `crates/workspace/src/{dock,workspace}.rs`, `crates/don_tools/src/don_tools.rs`, `assets/locales/{en,ko}.json`, `assets/settings/default.jsonc`, `FEATURE-INVENTORY.md`, `Cargo.lock`.
+- **자동 검증:** GUI 없는 공급자 계약 테스트 **13개 통과**(기존 9개 + API 서버 URL 기본/사용자 지정·위험 URL 거절·사용자 URL 실제 요청·편집기 상태 첨부 4개). i18n 카탈로그 테스트 **11개 통과**. Windows 개발자 셸에서 `cargo check -p gram -p settings_ui -p agent_panel -p don_tools` **경고 없이 통과**, `cargo build -p gram` 성공(기존 Wasmtime `LNK4217` 링커 경고만 있음). `cargo clippy -p agent_panel -p settings_ui -p don_tools`는 `agent_panel`·`settings_ui` 경고 0건이며, 기존 `prettier` 1건과 이번 변경 전부터 있던 `don_tools` 1건(`dispatch_action` 포커스 `if` 병합 제안)만 남았다. 변경 Rust 파일의 `rustfmt --check` 통과.
+- **실제 GUI 검증 (Windows, 디버그 빌드, 격리 데이터 폴더 `--user-data-dir`):** 화면 캡처는 이번에는 .NET `CopyFromScreen` 방식으로 성공했다.
+  - 새 데이터 폴더로 실행 시 Agent 패널이 **숨겨진 채 시작**하고 우측 아래 반짝임 아이콘이 남는다. 패널을 열어 둔 채 종료한 뒤 다시 실행해도 숨김으로 시작했고, 이전 빌드로 쓰던 테스트 데이터 폴더(`gui-test-feaeda…`)로 실행해도 숨김으로 시작했다. 아이콘 클릭과 `Ctrl+Alt+A`로 다시 열린다.
+  - 제공자 **콤보박스**가 열려 OpenAI(체크)·Anthropic 항목이 보이고, Anthropic 선택 시 모델이 `claude-sonnet-5-5`로 바뀐다. 마지막 선택 제공자는 다음 실행에서 복원된다.
+  - 키가 없을 때 프롬프트 입력란 자리에 안내 문구·마스킹 키 입력란(초점 이동)·설정 열기·키 저장이 표시된다. 키 입력 후 Enter를 누르면 Windows 자격 증명 관리자에 저장되고 즉시 프롬프트 입력란과 보내기/첨부 버튼이 돌아오며 초점도 옮겨진다. 열려 있던 설정 창에도 즉시 "저장되어 있습니다"가 표시됐다. 설정 화면의 **키 삭제**로 지우면 자격 증명이 삭제되고 패널이 즉시 키 입력란으로 돌아가며, 이전 "저장했습니다" 문구도 지워진다(검증 중 발견해 수정).
+  - 설정 화면 **에이전트** 페이지에서 제공자별 API 키(마스킹·키 저장·키 삭제·출처 표시)와 API 서버 URL(공식 주소 placeholder)이 보이고, `API` 검색으로도 찾을 수 있다. 처음에는 버튼·상태 문구가 오른쪽으로 넘쳐 잘려 입력란·버튼·상태를 세로로 쌓는 고정 너비 배치로 고쳤다. 환경 변수 `ANTHROPIC_API_KEY`로 실행하면 "환경 변수 ANTHROPIC_API_KEY의 키를 사용 중"으로 표시되고 키 삭제는 비활성이다.
+  - 설정 화면에서 URL을 입력하면 사용자 `settings.jsonc`의 `agent.anthropic.api_url`에 저장된다. 원격 `http://example.com`은 네트워크 요청 없이 "API 서버 URL이 올바르지 않습니다" 오류로 거절됐다. 루프백 캡처 서버(`http://127.0.0.1:18765`, 401 응답)로 바꾸면 실제 요청이 `/v1/messages`로 도착했고 `x-api-key` 헤더와 도구 33개, 시스템 안내문의 편집기 상태(열린 폴더 `proj`, 단일 파일의 상위 폴더, 활성 파일 경로, 탭 목록)를 확인했다. 외부 API 서버로는 어떤 요청도 보내지 않았다.
+  - **자격 증명 정리:** 저장·삭제 확인을 위해 처음에 `DonEditor.Agent` 항목이 없음을 `cmdkey`로 확인한 뒤 가짜 값만 사용했다. 테스트 입력이 키 입력란에 들어가 OpenAI 가짜 키가 한 번 더 저장된 일이 있어 즉시 `cmdkey /delete`로 지웠고, 종료 시 `DonEditor.Agent` 항목이 하나도 남지 않았음을 확인했다. 실제 사용자 키는 읽거나 저장하지 않았다.
+- **남은 확인:** 유효한 키로 실제 OpenAI/Claude 호출(이전 사용자 지시에 따라 생략), macOS/Linux의 키 저장소·화면, 릴리스 빌드에서의 같은 흐름 확인이 남았다. 테스트 데이터는 `target/gui-test-agent-802d0ebc/`에 남겨 두었다. 이번 변경은 아직 Git 커밋하지 않았다.
+
 ## 2026-11-04 재개 후 일시 중지 체크포인트
 
 - **사용자 지시:** 진행 중인 Windows ZIP 오류 수정과 이미 시작한 정적 검사를 마친 뒤 문서·커밋을 정리하고 목표를 일시 정지한다. 새 작업은 시작하지 않는다.
@@ -324,17 +348,21 @@ GramEditor(Zed 하드포크, Rust/GPUI 기반)를 복제·커스텀하여 아래
   - `workspace::Panel` 구현, **기본 위치 `DockPosition::Right`**, 좌/우 이동 가능
   - 토글 액션 `agent_panel::ToggleFocus` + 기본 단축키(기존 키맵과 충돌 확인 후 지정), 메뉴 "보기 > Agent 패널"
   - **패널 숨김 지원:** 닫기/숨기기 조작으로 패널을 감출 수 있게 한다.
-  - **다시 표시하는 별도 아이콘:** 패널을 숨겨도 화면 안에 아이콘을 유지하고, 클릭하면 Agent 패널을 다시 표시한다. 기존 도크 버튼과의 통합 위치를 구현 시 정하고, 한국어 툴팁·표시 상태를 함께 점검한다 (2026-11-04 AGENTS.md 추가, 미구현).
+  - **다시 표시하는 별도 아이콘:** 패널을 숨겨도 화면 안에 아이콘을 유지하고, 클릭하면 Agent 패널을 다시 표시한다. 기존 도크 버튼과의 통합 위치를 구현 시 정하고, 한국어 툴팁·표시 상태를 함께 점검한다 (2026-11-04 AGENTS.md 추가).
+  - **시작 시 숨김 (2026-11-04 사용자 요청):** 프로그램 실행 시 기본적으로 숨긴 상태로 시작한다. 지난 실행에서 열어 둔 채 종료해도 다시 열지 않는다(`Panel::hidden_on_startup`).
 - Provider 추상화 (`LlmProvider` 트레이트)
   - **Anthropic**: Messages API(`/v1/messages`), SSE 스트리밍, tool use
   - **OpenAI**: Responses API(또는 Chat Completions), SSE 스트리밍, function calling
   - 모델은 설정에서 선택/직접 입력 (Claude 기본값은 최신 모델 ID로 지정, 구현 시점에 확인)
-- API Key 관리
-  - 패널 내 키 입력 UI → Windows 자격 증명 관리자에 저장 (`keyring` crate), settings 파일에 평문 저장 금지
+  - **제공자 선택은 콤보박스(드롭다운)** 로 한다(2026-11-04 사용자 요청, 이전 토글 버튼 대체). 이후 Google, OpenCode, LM Studio를 추가할 예정이므로 목록은 `Provider::ALL`에서 만든다.
+- API Key 관리 (2026-11-04 사용자 요청으로 변경)
+  - **기본 설정(설정 > 에이전트)에서 제공자별로 사전 입력**한다. 저장소는 OS 자격 증명 저장소(`keyring` crate)이며 settings 파일에 평문 저장하지 않는다.
+  - 제공자별 **API 서버 URL**(선택 사항)도 기본 설정에서 입력받는다. 공란이면 공식 기본 주소를 사용한다. 사용자 `settings.json`의 `agent.<제공자>.api_url`에 저장한다.
+  - Agent 패널에는 키 입력란을 두지 않는다. 선택한 제공자의 키가 없을 때만 프롬프트 입력란 자리에 키 입력란을 보여 주고, 입력 즉시 기본 설정에 저장한 뒤 프롬프트 입력란을 다시 표시한다.
   - 환경 변수 `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` 폴백
 - 기능
   - 채팅 UI (응답은 기존 `markdown` crate로 렌더링), 스트리밍 표시, 생성 중단 버튼
-  - 컨텍스트 첨부: 현재 파일, 선택 영역, 열린 탭 목록
+  - 컨텍스트: 매 요청마다 열린 폴더·현재 파일 경로·열린 탭 경로를 자동으로 포함(2026-11-04), 첨부 버튼으로 현재 파일 내용·선택 영역 추가
   - 도구 호출: `don_tools` 레지스트리 사용 → 편집은 diff 미리보기 후 사용자 승인 시 적용
   - 대화 기록 저장 (`db`/`sqlez` crate 활용), 새 대화/기록 목록
   - 오류(키 누락, 401, 429, 네트워크) 한국어 메시지 표시

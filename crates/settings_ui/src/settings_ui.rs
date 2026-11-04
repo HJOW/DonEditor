@@ -37,7 +37,8 @@ use util::{ResultExt as _, paths::PathStyle, rel_path::RelPath};
 use workspace::{AppState, OpenOptions, OpenVisible, Workspace, WorkspaceSettings, client_side_decorations};
 
 use crate::components::{
-    EnumVariantDropdown, SettingsInputField, SettingsSectionHeader, font_picker, icon_theme_picker, theme_picker,
+    AgentApiKeyField, AgentApiKeyInput, EnumVariantDropdown, SettingsInputField, SettingsSectionHeader, font_picker,
+    icon_theme_picker, theme_picker,
 };
 
 const NAVBAR_CONTAINER_TAB_INDEX: isize = 0;
@@ -417,6 +418,8 @@ fn init_renderers(cx: &mut App) {
             },
         )
         .add_basic_renderer::<bool>(render_toggle_button)
+        // [DonEditor] settings.json 대신 OS 자격 증명 저장소에 저장하는 Agent API 키 입력란
+        .add_basic_renderer::<AgentApiKeyField>(render_agent_api_key)
         .add_basic_renderer::<String>(render_text_field)
         .add_basic_renderer::<SharedString>(render_text_field)
         .add_basic_renderer::<settings::SaturatingBool>(render_toggle_button)
@@ -3347,6 +3350,19 @@ fn render_text_field<T: From<String> + Into<String> + AsRef<str> + Clone>(
             }
         })
         .into_any_element()
+}
+
+/// [DonEditor] Agent API 키 항목을 그린다. 표식 값에서 제공자를 읽고, 값은 OS 저장소에서 다룬다.
+fn render_agent_api_key(
+    field: SettingField<AgentApiKeyField>,
+    _file: SettingsUiFile,
+    _metadata: Option<&SettingsFieldMetadata>,
+    _window: &mut Window,
+    cx: &mut App,
+) -> AnyElement {
+    let provider = (field.pick)(SettingsStore::global(cx).raw_default_settings())
+        .map_or(agent_panel::provider::Provider::OpenAi, |field| field.0);
+    AgentApiKeyInput::new(provider).tab_index(0).into_any_element()
 }
 
 fn render_toggle_button<B: Into<bool> + From<bool> + Copy>(

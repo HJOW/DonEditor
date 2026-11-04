@@ -22,6 +22,12 @@
   "ui_language": "auto",
   // [DonEditor] 로컬 MCP 서버는 명시적으로 켜야 하며 포트 0은 자동 할당이다.
   "mcp_server": { "enabled": false, "port": 0 },
+  // [DonEditor] Agent 패널 제공자별 API 서버 URL. 비워 두면 공식 주소를 사용한다.
+  // API 키는 이 파일에 쓰지 않고 설정 > 에이전트에서 입력하며 OS 자격 증명 저장소에 저장된다.
+  "agent": {
+    "openai": { "api_url": "" },
+    "anthropic": { "api_url": "" }
+  },
   // Features that can be globally enabled or disabled
   "features": {},
   // The name of a font to use for rendering text in the editor

@@ -4,9 +4,11 @@ use std::sync::Arc;
 use strum::IntoDiscriminant as _;
 use ui::{IntoElement, SharedString};
 
+use agent_panel::provider::Provider;
+
 use crate::{
     ActionLink, DynamicItem, PROJECT, SettingField, SettingItem, SettingsFieldMetadata, SettingsPage, SettingsPageItem,
-    SubPageLink, USER, all_language_names, sub_page_stack,
+    SubPageLink, USER, all_language_names, components::AgentApiKeyField, sub_page_stack,
 };
 
 /// 빈 기본값을 공유하는 정적 문자열입니다.
@@ -5922,6 +5924,90 @@ pub(crate) fn settings_data(cx: &App) -> Vec<SettingsPage> {
                 }),
             ],
         },
+        // [DonEditor] Agent 패널 제공자별 API 키·API 서버 URL. 사용자 설정에서만 표시한다.
+        SettingsPage {
+            title: i18n::t!("settings.agent.title"),
+            items: agent_settings_data(),
+        },
+    ]
+}
+
+/// [DonEditor] 제공자마다 API 키(OS 자격 증명 저장소)와 선택 사항인 API 서버 URL 항목을 만든다.
+/// 설정 항목의 pick/write는 함수 포인터여야 하므로 제공자별로 따로 적는다.
+fn agent_settings_data() -> Vec<SettingsPageItem> {
+    vec![
+        SettingsPageItem::SectionHeader(Provider::OpenAi.name()),
+        SettingsPageItem::SettingItem(SettingItem {
+            title: i18n::t!("settings.agent.api_key"),
+            description: i18n::t!("settings.agent.api_key_description"),
+            aliases: Some(&["openai", "api key", "token", "API 키"]),
+            field: Box::new(SettingField {
+                // JSON에 쓰지 않는 항목이므로 제공자 경로를 지정해 `agent.openai.api_url` 링크에서도 함께 표시한다.
+                json_path: Some("agent.openai"),
+                pick: |_| Some(&AgentApiKeyField(Provider::OpenAi)),
+                write: |_, _| {},
+            }),
+            metadata: None,
+            files: USER,
+        }),
+        SettingsPageItem::SettingItem(SettingItem {
+            title: i18n::t!("settings.agent.api_url"),
+            description: i18n::t!("settings.agent.api_url_description"),
+            aliases: Some(&["openai", "base url", "endpoint", "server", "API 서버"]),
+            field: Box::new(SettingField {
+                json_path: Some("agent.openai.api_url"),
+                pick: |settings_content| settings_content.agent.as_ref()?.openai.as_ref()?.api_url.as_ref(),
+                write: |settings_content, value| {
+                    settings_content
+                        .agent
+                        .get_or_insert_default()
+                        .openai
+                        .get_or_insert_default()
+                        .api_url = value;
+                },
+            }),
+            metadata: Some(Box::new(SettingsFieldMetadata {
+                placeholder: Some(Provider::OpenAi.default_api_url()),
+                ..Default::default()
+            })),
+            files: USER,
+        }),
+        SettingsPageItem::SectionHeader(Provider::Anthropic.name()),
+        SettingsPageItem::SettingItem(SettingItem {
+            title: i18n::t!("settings.agent.api_key"),
+            description: i18n::t!("settings.agent.api_key_description"),
+            aliases: Some(&["anthropic", "claude", "api key", "token", "API 키"]),
+            field: Box::new(SettingField {
+                // JSON에 쓰지 않는 항목이므로 제공자 경로를 지정해 `agent.anthropic.api_url` 링크에서도 함께 표시한다.
+                json_path: Some("agent.anthropic"),
+                pick: |_| Some(&AgentApiKeyField(Provider::Anthropic)),
+                write: |_, _| {},
+            }),
+            metadata: None,
+            files: USER,
+        }),
+        SettingsPageItem::SettingItem(SettingItem {
+            title: i18n::t!("settings.agent.api_url"),
+            description: i18n::t!("settings.agent.api_url_description"),
+            aliases: Some(&["anthropic", "claude", "base url", "endpoint", "server", "API 서버"]),
+            field: Box::new(SettingField {
+                json_path: Some("agent.anthropic.api_url"),
+                pick: |settings_content| settings_content.agent.as_ref()?.anthropic.as_ref()?.api_url.as_ref(),
+                write: |settings_content, value| {
+                    settings_content
+                        .agent
+                        .get_or_insert_default()
+                        .anthropic
+                        .get_or_insert_default()
+                        .api_url = value;
+                },
+            }),
+            metadata: Some(Box::new(SettingsFieldMetadata {
+                placeholder: Some(Provider::Anthropic.default_api_url()),
+                ..Default::default()
+            })),
+            files: USER,
+        }),
     ]
 }
 

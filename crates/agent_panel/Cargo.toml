@@ -12,6 +12,7 @@ doctest = false
 
 [dependencies]
 anyhow.workspace = true
+app_actions = { workspace = true, optional = true }
 db = { workspace = true, optional = true }
 don_tools = { workspace = true, optional = true }
 editor = { workspace = true, optional = true }
@@ -21,9 +22,11 @@ http_client.workspace = true
 i18n = { workspace = true, optional = true }
 log = { workspace = true, optional = true }
 markdown = { workspace = true, optional = true }
+menu = { workspace = true, optional = true }
 serde.workspace = true
 serde_json.workspace = true
 schemars = { workspace = true, optional = true }
+settings = { workspace = true, optional = true }
 smol.workspace = true
 ui = { workspace = true, optional = true }
 ui_input = { workspace = true, optional = true }
@@ -44,7 +47,7 @@ http_client = { workspace = true, features = ["test-support"] }
 [features]
 # 실제 앱에서는 UI·OS 자격 증명 저장소를 포함하며, 프로토콜 검증은 GUI 없이 실행할 수 있다.
 default = ["gui"]
-gui = ["dep:db", "dep:don_tools", "dep:editor", "dep:gpui", "dep:i18n", "dep:log", "dep:markdown", "dep:schemars", "dep:ui", "dep:ui_input", "dep:workspace", "dep:keyring"]
+gui = ["dep:app_actions", "dep:db", "dep:don_tools", "dep:editor", "dep:gpui", "dep:i18n", "dep:log", "dep:markdown", "dep:menu", "dep:schemars", "dep:settings", "dep:ui", "dep:ui_input", "dep:workspace", "dep:keyring"]
 
 [lints]
 workspace = true

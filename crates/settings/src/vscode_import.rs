@@ -174,6 +174,8 @@ impl VsCodeSettings {
             log: None,
             // [DonEditor] VS Code 가져오기에서 로컬 MCP 서버를 자동 활성화하지 않는다.
             mcp_server: None,
+            // [DonEditor] Agent API 서버 주소는 VS Code 설정에서 가져오지 않는다.
+            agent: None,
             node: self.node_binary_settings(),
             outline_panel: self.outline_panel_settings_content(),
             preview_tabs: self.preview_tabs_settings_content(),

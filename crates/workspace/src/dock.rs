@@ -44,6 +44,10 @@ pub trait Panel: Focusable + EventEmitter<PanelEvent> + Render + Sized {
     fn starts_open(&self, _window: &Window, _cx: &App) -> bool {
         false
     }
+    /// [DonEditor] 이전 실행에서 열려 있었더라도 프로그램 시작 시 복원하지 않고 숨길 패널이면 true.
+    fn hidden_on_startup(&self) -> bool {
+        false
+    }
     fn set_zoomed(&mut self, _zoomed: bool, _window: &mut Window, _cx: &mut Context<Self>) {}
     fn set_active(&mut self, _active: bool, _window: &mut Window, _cx: &mut Context<Self>) {}
     fn pane(&self) -> Option<Entity<Pane>> {
@@ -80,6 +84,8 @@ pub trait PanelHandle: Send + Sync {
     fn to_any(&self) -> AnyView;
     fn activation_priority(&self, cx: &App) -> u32;
     fn enabled(&self, cx: &App) -> bool;
+    /// [DonEditor] 시작 시 숨김 패널 여부. [`Panel::hidden_on_startup`] 참고.
+    fn hidden_on_startup(&self, cx: &App) -> bool;
     fn move_to_next_position(&self, window: &mut Window, cx: &mut App) {
         let current_position = self.position(window, cx);
         let next_position = [DockPosition::Left, DockPosition::Bottom, DockPosition::Right]
@@ -179,6 +185,10 @@ where
 
     fn enabled(&self, cx: &App) -> bool {
         self.read(cx).enabled(cx)
+    }
+
+    fn hidden_on_startup(&self, cx: &App) -> bool {
+        self.read(cx).hidden_on_startup()
     }
 }
 
@@ -579,6 +589,11 @@ impl Dock {
             if let Some(active_panel) = serialized.active_panel.filter(|_| serialized.visible)
                 && let Some(idx) = self.panel_index_for_persistent_name(active_panel.as_str(), cx)
             {
+                // [DonEditor] 시작 시 숨김 패널(Agent 패널 등)은 지난 실행에서 열려 있었어도 닫아 둔다.
+                if self.panel_entries[idx].panel.hidden_on_startup(cx) {
+                    self.set_open(false, window, cx);
+                    return true;
+                }
                 self.activate_panel(idx, window, cx);
             }
 

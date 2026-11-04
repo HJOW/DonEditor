@@ -12,6 +12,8 @@ path = "src/settings_ui.rs"
 
 [dependencies]
 anyhow.workspace = true
+# [DonEditor] 기본 설정 화면에서 Agent API 키를 OS 자격 증명 저장소에 저장한다.
+agent_panel.workspace = true
 app_actions.workspace = true
 bm25.workspace = true
 convert_case.workspace = true

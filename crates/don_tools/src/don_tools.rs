@@ -47,6 +47,49 @@ fn tabs(workspace: &Workspace, cx: &App) -> Vec<Value> {
         .collect()
 }
 
+/// 요청마다 보내는 편집기 상태에 넣을 최대 탭 수이다. 탭이 많아도 요청이 과도하게 커지지 않게 한다.
+const MAX_STATE_TABS: usize = 50;
+
+/// [DonEditor] Agent가 매 요청의 시스템 안내문에 붙이는 가벼운 편집기 상태이다.
+/// 파일 내용은 넣지 않고 열린 폴더·현재 파일 경로·열린 탭 경로만 담는다(내용은 도구로 읽는다).
+pub fn editor_state(workspace: &Workspace, cx: &App) -> Value {
+    let project = workspace.project().read(cx);
+    // 프로젝트 패널에 보이는 최상위 폴더의 절대 경로를 모은다.
+    // 파일 하나만 연 경우(단일 파일 워크트리)에는 그 파일이 있는 폴더를 현재 폴더로 본다.
+    let mut folders: Vec<String> = Vec::new();
+    for worktree in project.visible_worktrees(cx) {
+        let worktree = worktree.read(cx);
+        let path = worktree.abs_path();
+        let folder = if worktree.is_single_file() {
+            path.parent().map(|parent| parent.to_path_buf())
+        } else {
+            Some(path.to_path_buf())
+        };
+        // 같은 폴더의 파일을 여러 개 열어도 폴더는 한 번만 넣는다.
+        if let Some(folder) = folder.map(|folder| folder.to_string_lossy().into_owned())
+            && !folders.contains(&folder)
+        {
+            folders.push(folder);
+        }
+    }
+    // 경로를 문자열로 바꿔 운영체제별 경로 인코딩과 무관하게 직렬화한다.
+    let path_of = |item: &dyn workspace::item::ItemHandle| {
+        item.project_path(cx)
+            .and_then(|path| project.absolute_path(&path, cx))
+            .map(|path| path.to_string_lossy().into_owned())
+    };
+    let active = workspace.active_item(cx).map(
+        |item| json!({"title":item.tab_content_text(0, cx),"path":path_of(item.as_ref()),"dirty":item.is_dirty(cx)}),
+    );
+    // 열린 탭은 개수를 제한하고 제목·경로만 보낸다.
+    let tabs: Vec<_> = workspace
+        .items(cx)
+        .take(MAX_STATE_TABS)
+        .map(|item| json!({"title":item.tab_content_text(0, cx),"path":path_of(item.as_ref())}))
+        .collect();
+    json!({"project_folders":folders,"active_file":active,"open_tabs":tabs})
+}
+
 /// 활성 파일·텍스트·선택·탭을 Agent 첨부와 MCP 리소스에서 공유한다.
 pub fn active_context(workspace: &Workspace, cx: &App) -> Value {
     let editor = workspace.active_item_as::<Editor>(cx);
@@ -290,6 +333,11 @@ pub fn execute_cancellable(
                 task.await?;
                 return Ok(json!({"started":true}));
             }
+            // [DonEditor] API 서버 주소가 담긴 Agent 설정 변경은 승인 창을 띄우기 전에 거절한다.
+            "update_settings" => ensure!(
+                args["settings"].get("agent").is_none(),
+                "agent settings (API server URLs) can only be changed in the Don Editor settings window"
+            ),
             _ => {}
         }
         let read_only=definitions().into_iter().find(|tool| tool["name"]==name).is_some_and(|tool| tool["annotations"]["readOnlyHint"]==true);
@@ -419,6 +467,11 @@ fn execute_sync(
                 "set_theme" => json!({"theme":args["name"]}),
                 _ => args["settings"].clone(),
             };
+            // [DonEditor] API 키가 전송될 서버 주소가 도구로 바뀌지 않도록 Agent 설정은 설정 화면에서만 바꾼다.
+            ensure!(
+                patch.get("agent").is_none(),
+                "agent settings (API server URLs) can only be changed in the Don Editor settings window"
+            );
             let mut candidate = serde_json::to_value(
                 SettingsStore::global(cx)
                     .raw_user_settings()

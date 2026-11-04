@@ -1,8 +1,12 @@
 //! [DonEditor] 우측 Agent 패널. GPL-3.0-or-later; GramEditor/Zed 기반 UI를 사용한다.
 
-use crate::{credentials, provider};
+use crate::{
+    credentials::{self, KeySource},
+    provider,
+};
 
 use anyhow::{Result, anyhow};
+use app_actions::OpenSettingsAt;
 use db::kvp::KEY_VALUE_STORE;
 use futures::{
     FutureExt as _,
@@ -14,12 +18,15 @@ use gpui::{
 };
 use http_client::HttpClient;
 use markdown::{Markdown, MarkdownElement, style::MarkdownStyle};
-use provider::{ApiError, Message, Provider};
+use provider::{ApiError, Message, Provider, TurnRequest};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
+use settings::{RegisterSetting, Settings, SettingsContent};
 use std::sync::Arc;
-use ui::{Button, ButtonStyle, IconButton, Tooltip, prelude::*};
+use ui::{
+    Button, ButtonStyle, ContextMenu, DropdownMenu, DropdownStyle, IconButton, IconPosition, Tooltip, prelude::*,
+};
 use ui_input::InputField;
 use workspace::{
     Workspace,
@@ -40,7 +47,42 @@ fn localized_error(error: &anyhow::Error) -> String {
         Some(ApiError::Http(status @ (401 | 403))) => i18n::t!("agent.error.auth", status = status),
         Some(ApiError::Http(429)) => i18n::t!("agent.error.rate").into(),
         Some(ApiError::Http(status)) => i18n::t!("agent.error.http", status = status),
+        Some(ApiError::InvalidUrl) => i18n::t!("agent.error.invalid_url").into(),
         None => error.to_string(),
+    }
+}
+
+/// [DonEditor] 사용자 설정 파일의 제공자별 API 서버 URL이다.
+/// 전역 값만 사용하므로 프로젝트 폴더의 설정 파일이 키 전송 주소를 바꿀 수 없다.
+#[derive(RegisterSetting, Clone, PartialEq, Default)]
+pub struct AgentSettings {
+    openai_api_url: Option<String>,
+    anthropic_api_url: Option<String>,
+}
+
+impl Settings for AgentSettings {
+    /// 비어 있는 URL은 지정하지 않은 것으로 보고 공식 기본 주소를 쓰게 한다.
+    fn from_settings(content: &SettingsContent) -> Self {
+        let agent = content.agent.as_ref();
+        let url = |provider: Option<&settings::AgentProviderSettingsContent>| {
+            provider
+                .and_then(|provider| provider.api_url.clone())
+                .filter(|url| !url.trim().is_empty())
+        };
+        Self {
+            openai_api_url: url(agent.and_then(|agent| agent.openai.as_ref())),
+            anthropic_api_url: url(agent.and_then(|agent| agent.anthropic.as_ref())),
+        }
+    }
+}
+
+impl AgentSettings {
+    /// 제공자에 지정된 API 서버 URL을 돌려준다. 없으면 기본 주소를 사용한다.
+    pub fn api_url(&self, provider: Provider) -> Option<&str> {
+        match provider {
+            Provider::OpenAi => self.openai_api_url.as_deref(),
+            Provider::Anthropic => self.anthropic_api_url.as_deref(),
+        }
     }
 }
 
@@ -135,7 +177,10 @@ pub struct AgentPanel {
     client: Arc<dyn HttpClient>,
     input: Entity<InputField>,
     model: Entity<InputField>,
+    /// 기본 설정에 선택한 제공자의 키가 없을 때만 프롬프트 입력란 자리에 표시한다.
     api_key: Entity<InputField>,
+    /// `api_key` 입력란을 만든 시점의 키 상태 세대 번호이다.
+    key_generation: usize,
     focus: FocusHandle,
     provider: Provider,
     language: i18n::Language,
@@ -156,6 +201,8 @@ pub struct AgentPanel {
 
 /// 모든 새 워크스페이스에 패널 토글 액션을 등록한다. 패널은 앱의 기존 load 흐름에서 추가한다.
 pub fn init(cx: &mut App) {
+    // 제공자별 API 키 등록 여부를 미리 조회해 패널과 설정 화면이 바로 표시할 수 있게 한다.
+    credentials::init(cx);
     // 저장된 대화의 제목과 인덱스를 MCP가 조회할 수 있게 한다.
     don_tools::register_agent_history(cx, |workspace, cx| {
         if let Some(panel) = workspace.panel::<AgentPanel>(cx) {
@@ -325,6 +372,7 @@ impl AgentPanel {
             input,
             model,
             api_key,
+            key_generation: credentials::generation(cx),
             workspace,
             storage_key,
             client,
@@ -357,6 +405,19 @@ impl AgentPanel {
             input.editor.update(cx, |editor, cx| editor.set_masked(true, cx));
             input
         })
+    }
+
+    /// 선택한 제공자의 키가 기본 설정과 환경 변수 어디에도 없는지 확인한다.
+    /// 조회가 끝나기 전(`Unknown`)에는 프롬프트 입력란을 그대로 보여 준다.
+    fn needs_api_key(&self, cx: &App) -> bool {
+        credentials::key_source(self.provider, cx) == KeySource::Missing
+    }
+
+    /// 매 요청 직전에 열린 폴더·현재 파일 경로·탭 목록을 모아 시스템 안내문에 붙인다.
+    fn editor_state(workspace: &WeakEntity<Workspace>, cx: &App) -> Option<String> {
+        workspace
+            .upgrade()
+            .map(|workspace| don_tools::editor_state(workspace.read(cx), cx).to_string())
     }
 
     /// 새 대화에 현재 시각에서 얻은 식별자를 부여한다.
@@ -467,13 +528,15 @@ impl AgentPanel {
         if self.running {
             return;
         }
-        if let Some(provider) = config.provider {
-            if provider != self.provider {
-                self.provider = provider;
-                self.model
-                    .update(cx, |model, cx| model.set_text(provider.default_model(), window, cx));
-                self.api_key = Self::key_input(window, cx);
-            }
+        if let Some(provider) = config.provider
+            && provider != self.provider
+        {
+            self.provider = provider;
+            self.model
+                .update(cx, |model, cx| model.set_text(provider.default_model(), window, cx));
+            self.api_key = Self::key_input(window, cx);
+            // 다른 창이나 환경 변수에서 바뀐 키 상태를 다시 확인한다.
+            credentials::refresh(provider, cx);
         }
         if let Some(model) = config.model.as_deref().filter(|model| !model.trim().is_empty()) {
             self.model
@@ -487,6 +550,16 @@ impl AgentPanel {
     /// 입력을 사용자 메시지에 넣고 스트리밍과 공용 도구 실행을 반복한다.
     fn send(&mut self, _: &Send, window: &mut Window, cx: &mut Context<Self>) {
         if self.running {
+            return;
+        }
+        // 키 입력 화면에서는 보내기 단축키로 입력한 키를 저장하고, 비어 있으면 안내만 한다.
+        if self.needs_api_key(cx) {
+            if self.api_key.read(cx).is_empty(cx) {
+                self.status = Some(i18n::t!("agent.missing_key").into());
+                cx.notify();
+            } else {
+                self.save_key(window, cx);
+            }
             return;
         }
         let mut prompt = self.input.read(cx).text(cx);
@@ -513,34 +586,45 @@ impl AgentPanel {
         self.persist(cx);
         self.scroll.scroll_to_bottom();
         let provider = self.provider;
+        // 기본 설정의 API 서버 URL(공란이면 공식 주소)을 이번 응답 전체에 사용한다.
+        let api_url = AgentSettings::get_global(cx).api_url(provider).map(str::to_owned);
         let client = self.client.clone();
         let workspace = self.workspace.clone();
         self.task = Some(cx.spawn_in(window, async move |panel, cx| {
             let result: Result<()> = async {
-                let key = cx
-                    .background_spawn(async move { credentials::read(provider) })
-                    .await
-                    .ok_or_else(|| anyhow!(i18n::t!("agent.missing_key")))?;
+                let Some(key) = cx.background_spawn(async move { credentials::read(provider) }).await else {
+                    // 다른 곳에서 키가 지워졌다면 상태를 갱신해 키 입력란을 다시 보여 준다.
+                    cx.update(|_, cx| credentials::refresh(provider, cx)).ok();
+                    return Err(anyhow!(i18n::t!("agent.missing_key")));
+                };
                 // 최대 횟수 안에서 모델의 도구 호출과 결과 전송을 반복한다.
                 for _ in 0..MAX_TOOL_ROUNDS {
-                    let messages = panel.update(cx, |panel, cx| {
+                    // 도구가 파일을 열거나 탭을 바꿀 수 있으므로 매 요청마다 편집기 상태를 새로 읽는다.
+                    let (messages, context) = panel.update(cx, |panel, cx| {
                         let messages = panel.current.messages.clone();
+                        let context = Self::editor_state(&panel.workspace, cx);
                         panel.current.messages.push(Message::text("assistant", String::new()));
                         panel.rebuild_messages(cx);
-                        messages
+                        (messages, context)
                     })?;
                     let (sender, receiver) = smol::channel::bounded(32);
                     let request_client = client.clone();
                     let request_key = key.clone();
                     let request_model = model.clone();
+                    let request_url = api_url.clone();
                     let response = cx.background_spawn(async move {
+                        let tools = don_tools::definitions();
                         provider::stream_turn(
                             request_client,
-                            provider,
-                            &request_key,
-                            &request_model,
-                            &messages,
-                            &don_tools::definitions(),
+                            TurnRequest {
+                                provider,
+                                key: &request_key,
+                                api_url: request_url.as_deref(),
+                                model: &request_model,
+                                messages: &messages,
+                                tools: &tools,
+                                context: context.as_deref(),
+                            },
                             sender,
                         )
                         .await
@@ -610,21 +694,31 @@ impl AgentPanel {
         }));
     }
 
-    /// 저장할 키를 백그라운드로 넘기고 입력란과 실행 취소 기록은 즉시 없앤다.
+    /// 패널에서 입력한 키를 기본 설정(OS 자격 증명 저장소)에 바로 저장한다.
+    /// 저장에 성공하면 키 입력란이 사라지고 프롬프트 입력란으로 초점을 옮긴다.
     fn save_key(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         let key = self.api_key.read(cx).text(cx);
+        if key.trim().is_empty() {
+            self.status = Some(i18n::t!("agent.error.empty_key").into());
+            cx.notify();
+            return;
+        }
+        // 입력한 키는 즉시 화면에서 지우고 입력란을 새로 만들어 실행 취소 기록도 버린다.
         self.api_key = Self::key_input(window, cx);
-        let provider = self.provider;
-        cx.spawn(async move |panel, cx| {
-            let result = cx
-                .background_spawn(async move { credentials::save(provider, &key) })
-                .await;
+        let save = credentials::save(self.provider, key, cx);
+        cx.spawn_in(window, async move |panel, cx| {
+            let result = save.await;
             panel
-                .update(cx, |panel, cx| {
-                    panel.status = Some(match result {
-                        Ok(()) => i18n::t!("agent.key_saved").into(),
-                        Err(error) => i18n::t!("agent.error", error = error),
-                    });
+                .update_in(cx, |panel, window, cx| {
+                    match result {
+                        Ok(()) => {
+                            // 패널에서 저장한 결과이므로 세대 변경으로 이 안내 문구가 지워지지 않게 한다.
+                            panel.key_generation = credentials::generation(cx);
+                            panel.status = Some(i18n::t!("agent.key_saved").into());
+                            window.focus(&panel.focus, cx);
+                        }
+                        Err(error) => panel.status = Some(i18n::t!("agent.error", error = error)),
+                    }
                     cx.notify();
                 })
                 .ok();
@@ -632,22 +726,78 @@ impl AgentPanel {
         .detach();
     }
 
-    /// OS 자격 증명 저장소에서 선택한 제공자의 키만 삭제한다.
-    fn delete_key(&mut self, cx: &mut Context<Self>) {
-        let provider = self.provider;
-        cx.spawn(async move |panel, cx| {
-            let result = cx.background_spawn(async move { credentials::delete(provider) }).await;
-            panel
-                .update(cx, |panel, cx| {
-                    panel.status = Some(match result {
-                        Ok(()) => i18n::t!("agent.key_deleted").into(),
-                        Err(error) => i18n::t!("agent.error", error = error),
-                    });
-                    cx.notify();
-                })
-                .ok();
-        })
-        .detach();
+    /// 제공자 선택 콤보박스를 만든다. 실행 중에는 바꿀 수 없다.
+    fn render_provider_picker(&self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let panel = cx.weak_entity();
+        let current = self.provider;
+        let menu = ContextMenu::build(window, cx, move |mut menu, _, _| {
+            // 지원하는 제공자를 순서대로 항목으로 넣고 현재 선택에 체크 표시를 한다.
+            for provider in Provider::ALL {
+                let panel = panel.clone();
+                menu = menu.toggleable_entry(
+                    provider.name(),
+                    provider == current,
+                    IconPosition::End,
+                    None,
+                    move |window, cx| {
+                        panel
+                            .update(cx, |panel, cx| {
+                                panel.configure(
+                                    &Configure {
+                                        provider: Some(provider),
+                                        model: None,
+                                    },
+                                    window,
+                                    cx,
+                                );
+                            })
+                            .ok();
+                    },
+                );
+            }
+            menu
+        });
+        DropdownMenu::new("agent-provider", self.provider.name(), menu)
+            .style(DropdownStyle::Outlined)
+            .disabled(self.running)
+            .full_width(true)
+    }
+
+    /// 키가 없을 때 프롬프트 입력란 대신 보여 주는 API 키 입력 영역이다.
+    fn render_key_entry(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        v_flex()
+            .id("agent-key-entry")
+            .gap_1()
+            // 단일 줄 입력란에서 Enter를 누르면 키를 저장한다.
+            .on_action(cx.listener(|panel, _: &menu::Confirm, window, cx| panel.save_key(window, cx)))
+            .child(
+                Label::new(i18n::t!("agent.key_required", provider = self.provider.name()))
+                    .size(LabelSize::Small)
+                    .color(Color::Warning),
+            )
+            .child(self.api_key.clone())
+            .child(
+                h_flex()
+                    .justify_between()
+                    .child(
+                        Button::new("agent-open-settings", i18n::t!("agent.open_settings")).on_click(cx.listener(
+                            |panel, _, window, cx| {
+                                // 같은 제공자 항목이 있는 기본 설정 화면을 연다.
+                                window.dispatch_action(
+                                    Box::new(OpenSettingsAt {
+                                        path: format!("agent.{}.api_url", panel.provider.id()),
+                                    }),
+                                    cx,
+                                );
+                            },
+                        )),
+                    )
+                    .child(
+                        Button::new("agent-save-key", i18n::t!("agent.save_key"))
+                            .style(ButtonStyle::Filled)
+                            .on_click(cx.listener(|panel, _, window, cx| panel.save_key(window, cx))),
+                    ),
+            )
     }
 }
 
@@ -669,6 +819,17 @@ impl Render for AgentPanel {
                 });
             }
         }
+        // 설정 화면에서 키를 저장·삭제했다면 패널의 키 입력란도 비운 새 입력란으로 바꾸고,
+        // 이전 저장 결과처럼 더는 맞지 않는 상태 문구를 지운다.
+        let generation = credentials::generation(cx);
+        if self.key_generation != generation {
+            self.key_generation = generation;
+            self.api_key = Self::key_input(window, cx);
+            if !self.running {
+                self.status = None;
+            }
+        }
+        let needs_key = self.needs_api_key(cx);
         let colors = cx.theme().colors();
         let mut history = v_flex()
             .id("agent-history-list")
@@ -779,41 +940,13 @@ impl Render for AgentPanel {
                     ),
             )
             .child(
-                h_flex().gap_2().child(Label::new(i18n::t!("agent.provider"))).child(
-                    Button::new("agent-provider", self.provider.name())
-                        .disabled(self.running)
-                        .on_click(cx.listener(|panel, _, window, cx| {
-                            let provider = if panel.provider == Provider::OpenAi {
-                                Provider::Anthropic
-                            } else {
-                                Provider::OpenAi
-                            };
-                            panel.configure(
-                                &Configure {
-                                    provider: Some(provider),
-                                    model: None,
-                                },
-                                window,
-                                cx,
-                            );
-                        })),
-                ),
+                h_flex()
+                    .gap_2()
+                    .child(Label::new(i18n::t!("agent.provider")))
+                    .child(div().flex_1().child(self.render_provider_picker(window, cx))),
             )
             .child(Label::new(i18n::t!("agent.model")).size(LabelSize::Small))
             .child(self.model.clone())
-            .child(self.api_key.clone())
-            .child(
-                h_flex()
-                    .gap_2()
-                    .child(
-                        Button::new("agent-save-key", i18n::t!("agent.save_key"))
-                            .on_click(cx.listener(|panel, _, window, cx| panel.save_key(window, cx))),
-                    )
-                    .child(
-                        Button::new("agent-delete-key", i18n::t!("agent.delete_key"))
-                            .on_click(cx.listener(|panel, _, _, cx| panel.delete_key(cx))),
-                    ),
-            )
             .child(history)
             .child(
                 v_flex()
@@ -832,31 +965,38 @@ impl Render for AgentPanel {
             .when(self.attached.is_some(), |this| {
                 this.child(Label::new(i18n::t!("agent.context_label")).size(LabelSize::Small))
             })
-            .child(self.input.clone())
-            .child(
-                h_flex()
-                    .justify_between()
-                    .child(
-                        Button::new("agent-attach", i18n::t!("agent.attach"))
-                            .disabled(self.running)
-                            .on_click(cx.listener(|panel, _, _, cx| panel.attach(cx))),
-                    )
-                    .child(if self.running {
-                        Button::new("agent-stop", i18n::t!("agent.stop"))
-                            .on_click(cx.listener(|panel, _, window, cx| panel.stop(&Stop, window, cx)))
-                    } else {
-                        Button::new("agent-send", i18n::t!("agent.send"))
-                            .style(ButtonStyle::Filled)
-                            .on_click(cx.listener(|panel, _, window, cx| panel.send(&Send, window, cx)))
-                    }),
-            )
+            // 키가 없으면 프롬프트 입력란 자리에 키 입력란을, 있으면 프롬프트 입력란을 보여 준다.
+            .when(needs_key, |this| this.child(self.render_key_entry(cx)))
+            .when(!needs_key, |this| {
+                this.child(self.input.clone()).child(
+                    h_flex()
+                        .justify_between()
+                        .child(
+                            Button::new("agent-attach", i18n::t!("agent.attach"))
+                                .disabled(self.running)
+                                .on_click(cx.listener(|panel, _, _, cx| panel.attach(cx))),
+                        )
+                        .child(if self.running {
+                            Button::new("agent-stop", i18n::t!("agent.stop"))
+                                .on_click(cx.listener(|panel, _, window, cx| panel.stop(&Stop, window, cx)))
+                        } else {
+                            Button::new("agent-send", i18n::t!("agent.send"))
+                                .style(ButtonStyle::Filled)
+                                .on_click(cx.listener(|panel, _, window, cx| panel.send(&Send, window, cx)))
+                        }),
+                )
+            })
     }
 }
 
 impl Focusable for AgentPanel {
-    /// 패널을 열면 메시지 입력란으로 초점을 옮긴다.
-    fn focus_handle(&self, _: &App) -> FocusHandle {
-        self.focus.clone()
+    /// 패널을 열면 메시지 입력란(키가 없으면 API 키 입력란)으로 초점을 옮긴다.
+    fn focus_handle(&self, cx: &App) -> FocusHandle {
+        if self.needs_api_key(cx) {
+            self.api_key.focus_handle(cx)
+        } else {
+            self.focus.clone()
+        }
     }
 }
 
@@ -926,8 +1066,12 @@ impl Panel for AgentPanel {
     fn toggle_action(&self) -> Box<dyn Action> {
         Box::new(ToggleFocus)
     }
-    /// 처음 실행할 때 우측에 패널을 표시한다.
+    /// 프로그램을 실행할 때는 패널을 숨겨 두고, 도크 아이콘이나 단축키로 연다.
     fn starts_open(&self, _: &Window, _: &App) -> bool {
+        false
+    }
+    /// 지난 실행에서 열어 둔 채 종료했더라도 다음 실행 때는 숨긴 상태로 시작한다.
+    fn hidden_on_startup(&self) -> bool {
         true
     }
     /// 같은 도크에 여러 패널이 있을 때의 초기 선택 순위이다.

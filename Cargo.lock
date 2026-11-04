@@ -58,6 +58,7 @@ name = "agent_panel"
 version = "3.4.0"
 dependencies = [
  "anyhow",
+ "app_actions",
  "db",
  "don_tools",
  "editor",
@@ -68,9 +69,11 @@ dependencies = [
  "keyring",
  "log",
  "markdown",
+ "menu",
  "schemars",
  "serde",
  "serde_json",
+ "settings",
  "smol",
  "ui",
  "ui_input",
@@ -8929,6 +8932,7 @@ dependencies = [
 name = "settings_ui"
 version = "3.4.0"
 dependencies = [
+ "agent_panel",
  "anyhow",
  "app_actions",
  "bm25",
