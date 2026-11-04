@@ -16,6 +16,7 @@
 - **clippy 정리:** 이전부터 남아 있던 `don_tools` 1건과 `mcp_server` 5건을 정리해 `don_tools`·`mcp_server`·`agent_panel`·새 crate 4개(`don_charset`·`don_typst`·`typst_preview`·`encoding_selector`) 모두 `--no-deps` 경고 0건이다. 접을 수 있는 `if` 3건은 코드를 고쳤다. `mcp_server`의 Windows 보안 도구(`whoami`·`icacls`) 동기 실행 3건은 **구조를 바꾸지 않고 허용 사유를 코드에 명시**했다(`run_windows_tool`): MCP 서버를 사용자가 켤 때(기본값은 꺼짐) 한 번만 부르는 100ms 안팎의 짧은 명령이고, 시작을 비동기로 바꾸면 전송 시험·실사용 확인이 의존하는 "폴더 보호 후 토큰 파일 생성" 순서를 건드리기 때문이다.
 - **MCP 전송 테스트:** `don_protocol_tests` 전체(기본 14개·브릿지 4개·전송 6개·키링 1개)가 통과했고, 환경 변수 `DONEDITOR_TEST_WINDOWS_ACL=1`로 켜는 **Windows ACL 선택 테스트도 통과**해 이번 ACL 실행 코드 정리에 문제가 없음을 확인했다. 한 번 `active_limit_does_not_block_cancellation`가 "EOF 직후 잘린 JSON 한 줄"로 실패했으나(다른 작업이 CPU를 쓰는 중이었고 브릿지 코드는 바꾸지 않음) 같은 테스트를 8번 연속 실행해 모두 통과했다. 부하 상황에서 가끔 생기는 기존 테스트의 타이밍 경쟁으로 보이며 원인을 고치지는 않았다.
 - **`gram` 크레이트 테스트 35개 통과:** 액션 네임스페이스·기본 설정/테마/언어/키맵·메뉴 언어·파일 열기 요청(`--wait`·`--reuse`·SSH/Git URL 해석 포함)·열기/저장/분할/탭 복원·충돌 저장 등. 이번 세션이 바꾼 키맵 컨텍스트(`MarkdownPreview || TypstPreview`)와 새 네임스페이스(`encoding_selector`, `typst`)가 목록 검사를 통과했다. 처음에는 `test_action_namespaces`가 실패했는데, 원인은 **이전 단계(Agent 패널·MCP 도입)에서 기대 목록에 `agent_panel`·`mcp_server`를 넣지 않은 기존 결함**이어서 두 항목을 추가해 고쳤다.
+- **기존 기능 회귀 스모크 점검(R8, Windows 디버그 빌드, 격리 데이터 폴더 `target/gui-test-regress-fcf47f1e/`):** 작은 Git 프로젝트(Rust·Python·JSON·Markdown 파일, 수정 1건)를 열고 한국어 UI에서 확인했다 — 프로젝트 패널 트리·파일 아이콘, Rust 문법 강조·개요 경로(`src\main.rs › fn main`)·Git 줄 표시·인라인 blame(`tester, Just now`)·제목 표시줄 브랜치, **파일 찾기**(`Ctrl+P`), **버퍼 검색**(`Ctrl+F`, 일치 2건 `1/2`), **프로젝트 검색**(`Ctrl+Shift+F`, 멀티버퍼 결과), **터미널**(`Ctrl+\``, PowerShell에서 한글 `echo` 입출력 정상), **Git 패널**(`Ctrl+Shift+G`, 변경 1건 +1 −0, 한국어 버튼·커밋 목록), **설정 창**(`Ctrl+,`, 13개 페이지·에이전트 포함), **테마 선택**(`Ctrl+K Ctrl+T`), **명령 팔레트**(영문+한글 이름 병기), **내장 도움말**(`gram: open docs` → 한국어 `Don Editor 사용 안내`), **Agent 패널**(`Ctrl+Alt+A`로 우측에 열림, 제공자 콤보박스·모델 ID·키 없음 안내와 인라인 키 입력). 시작 시 Agent 패널이 숨겨져 있는 것도 다시 확인했다. [기능 인벤토리](FEATURE-INVENTORY.md)의 실행 확인 영역이 3개에서 **12개**로 늘었다(미확인 38개는 계속 완료 처리하지 않는다).
 - **배포 ZIP 참고:** 위 릴리스 ZIP은 커밋 `2e9ff1c` 기준이다. 이후 커밋(`d257aff` 인쇄 실행을 표준 비동기 명령으로, `97296d7`·이번 clippy 정리)은 동작을 바꾸지 않는 정리라 ZIP을 다시 만들지 않았다.
 
 ## 2026-11-05 Windows 릴리스 배포본 재생성과 실행 확인 (Markdown 미리보기·캐릭터셋·Typst 반영)
@@ -278,7 +279,7 @@
 2. `don_tools`·MCP의 GPUI 연결과 Agent UI의 타입/빌드 오류를 해결하고 변경 GUI crate 테스트·clippy를 실행한다. 추가한 설정 JSON 경로·한국어 Git 처리·커서 선택 단위 회귀 테스트도 실행 전이다.
 3. 실제 앱에서 편집 승인/거절·취소·오래된 변경안 거절, 설정·언어 전환, Agent 기본 위치·숨김·아이콘 복귀·기록 복원, 원본/자체 도움말을 확인한다. MCP의 모든 기능 제어 완전성은 검증 전이며 특정 대화 선택·기록 삭제·패널 이동의 JSON 액션도 보강 대상이다.
 4. OS 키 저장/삭제와 실제 OpenAI 또는 Claude 호출, Claude Desktop/Code 실제 앱 연결을 검증한다. 사용자 API 키는 이번 작업에서 읽거나 등록하지 않았다.
-5. 기능 인벤토리의 기존 실행 확인 **2개/미확인 48개**를 기준으로 회귀 확인한다. 신규 소스의 전체 기능·시각 검증이 완료됐다고 표시하지 않는다.
+5. 기능 인벤토리의 기존 실행 확인 **12개/미확인 38개**를 기준으로 회귀 확인한다. 신규 소스의 전체 기능·시각 검증이 완료됐다고 표시하지 않는다.
 6. 신규 코드로 Windows 최종 zip과 각 OS의 Linux/macOS tar.gz 생성·압축 해제·실행, 깨끗한 환경 설치 흐름·ARM64를 확인한다. WSL은 후반에 `CreateVm/ERROR_TIMEOUT`으로 시작에 실패해 추가 Linux 실행 검증을 하지 못했다. macOS 환경도 사용하지 않았다.
 
 빌드 환경 참고: 지정 1.99.1 툴체인의 자동 동기화 중 Windows 디렉터리 이름 변경/롤백 오류가 있었다. 설치된 `stable`의 rustc/cargo도 **1.99.1**임을 확인했다. 검사 시 `RUSTUP_TOOLCHAIN=stable`, `CARGO_BUILD_JOBS=1` 또는 `2`로 메모리를 제한했다. 컴파일 캐시는 보존한다.

@@ -46,19 +46,19 @@ AGENTS.md 의 "기존에 존재하던 기능은 최대한 포함한다"(R8)를 �
 | 편집 기본 | 다중 버퍼(Multibuffers) | `multi_buffer` | ✅ | [multibuffers](GramEditor-docs/docs/multibuffers.md) | ⬜ |  |
 | 편집 기본 | SuperTab | `editor` | ✅ | [supertab](GramEditor-docs/docs/supertab.md) | ⬜ |  |
 | 편집 기본 | 줄 이동 | `go_to_line` | ✅ | - | ⬜ |  |
-| 편집 기본 | 줄 끝(개행)·인코딩 선택 | `line_ending_selector`, `encoding_selector` | ✅ | - | ⬜ |  |
+| 편집 기본 | 줄 끝(개행)·인코딩 선택 | `line_ending_selector`, `encoding_selector` | ✅ | - | ✅ | 2026-11-05 확인: 인코딩 표시·선택 화면·다시 불러오기·저장 거절(줄 끝 선택은 미확인) |
 | 편집 기본 | 스니펫 | `snippet`, `snippet_provider`, `snippets_ui` | ✅ | [snippets](GramEditor-docs/docs/snippets.md) | ⬜ |  |
 | 탐색 | 탭 전환 | `tab_switcher` | ✅ | [tab-switcher](GramEditor-docs/docs/tab-switcher.md) | ⬜ |  |
-| 탐색 | 명령 팔레트 | `command_palette`, `command_palette_hooks` | ✅ | [command-palette](GramEditor-docs/docs/command-palette.md), [all-actions](GramEditor-docs/docs/all-actions.md) | ⬜ |  |
-| 탐색 | 파일 찾기 | `file_finder` | ✅ | - | ⬜ |  |
-| 탐색 | 프로젝트 패널 | `project_panel` | ✅ | - | ⬜ |  |
+| 탐색 | 명령 팔레트 | `command_palette`, `command_palette_hooks` | ✅ | [command-palette](GramEditor-docs/docs/command-palette.md), [all-actions](GramEditor-docs/docs/all-actions.md) | ✅ | 2026-11-05 확인: 열기·검색·실행(한국어/영어 이름 병기) |
+| 탐색 | 파일 찾기 | `file_finder` | ✅ | - | ✅ | 2026-11-05 확인: `lib` 검색 결과·새 파일 만들기 항목 |
+| 탐색 | 프로젝트 패널 | `project_panel` | ✅ | - | ✅ | 2026-11-05 확인: 폴더 트리·파일 아이콘·활성 파일 강조 |
 | 탐색 | 개요(Outline) 패널·개요 | `outline_panel`, `outline` | ✅ | [outline-panel](GramEditor-docs/docs/outline-panel.md) | ⬜ |  |
 | 탐색 | 심볼 검색 | `project_symbols` | ✅ | - | ⬜ |  |
-| 탐색 | 검색·치환 (버퍼/프로젝트) | `search` | ✅ | - | ⬜ |  |
+| 탐색 | 검색·치환 (버퍼/프로젝트) | `search` | ✅ | - | ✅ | 2026-11-05 확인: 버퍼 검색(일치 2건·1/2)·프로젝트 검색(멀티버퍼 결과). 치환은 미확인 |
 | 탐색 | 최근 프로젝트·파일 | `recent_projects`, `recent_files` | ✅ | - | ⬜ |  |
 | 탐색 | Which-key 도움말 | `which_key` | ✅ | - | ⬜ |  |
 | 탐색 | 일지(Journal) | `journal` | ✅ | - | ⬜ |  |
-| 언어/코드 지능 | 언어 지원·문법 강조(tree-sitter) | `languages`, `language`, `language_extension` | ✅ | [languages](GramEditor-docs/docs/languages.md), [configuring-languages](GramEditor-docs/docs/configuring-languages.md) | ⬜ | 원본 내장 15개 언어(2.1) 중 일부는 Phase 4에서 확인. `ini`·`kdl` 은 문법 미등록(원본 자체 이슈 후보) |
+| 언어/코드 지능 | 언어 지원·문법 강조(tree-sitter) | `languages`, `language`, `language_extension` | ✅ | [languages](GramEditor-docs/docs/languages.md), [configuring-languages](GramEditor-docs/docs/configuring-languages.md) | ✅ | 원본 내장 15개 언어(2.1) 중 일부는 Phase 4에서 확인. `ini`·`kdl` 은 문법 미등록(원본 자체 이슈 후보); 2026-11-05 확인: Rust·Markdown·Typst 문법 강조(전체 26개 언어는 미확인) |
 | 언어/코드 지능 | 언어 선택기·언어 도구 | `language_selector`, `language_tools` | ✅ | - | ⬜ |  |
 | 언어/코드 지능 | LSP(언어 서버) | `lsp` | ✅ | [language-servers](GramEditor-docs/docs/language-servers.md) | ⬜ | 언어 서버 자동 다운로드 동작은 별도 점검 필요(PROGRESS 리스크) |
 | 언어/코드 지능 | 자동 완성 | `editor`, `language` | ✅ | [completions](GramEditor-docs/docs/completions.md) | ⬜ |  |
@@ -73,9 +73,9 @@ AGENTS.md 의 "기존에 존재하던 기능은 최대한 포함한다"(R8)를 �
 | 개발 도구 | 원격 개발 (SSH / WSL) | `remote`, `remote_server` | ⚠ 일부 별도: remote_server | [remote-development](GramEditor-docs/docs/remote-development.md) | ⬜ | 원본 문서: Windows 는 원격 '클라이언트'로만 지원, 원격 '서버'는 미지원. `remote_server` 는 별도 바이너리(gram 의존 트리 밖) |
 | 편집 모드 | Vim 모드 | `vim`, `vim_mode_setting` | ✅ | [vim](GramEditor-docs/docs/vim.md) | ⬜ |  |
 | 편집 모드 | Helix 모드 | `vim` | ✅ | [helix](GramEditor-docs/docs/helix.md) | ⬜ |  |
-| 설정/외형 | 설정 파일·설정 UI·설정 프로필 | `settings`, `settings_ui`, `settings_profile_selector` | ✅ | [configuring-gram](GramEditor-docs/docs/configuring-gram.md), [environment](GramEditor-docs/docs/environment.md) | ⬜ |  |
+| 설정/외형 | 설정 파일·설정 UI·설정 프로필 | `settings`, `settings_ui`, `settings_profile_selector` | ✅ | [configuring-gram](GramEditor-docs/docs/configuring-gram.md), [environment](GramEditor-docs/docs/environment.md) | ✅ | 2026-11-05 확인: 설정 창이 한국어로 열리고 13개 페이지(에이전트 포함) 표시. 프로필은 미확인 |
 | 설정/외형 | 키맵·단축키 편집기 | `keymap_editor` | ✅ | [key-bindings](GramEditor-docs/docs/key-bindings.md) | ⬜ |  |
-| 설정/외형 | 테마 | `theme`, `theme_selector`, `theme_importer`, `theme_extension` | ⚠ 일부 별도: theme_importer | [themes](GramEditor-docs/docs/themes.md) | ⬜ |  |
+| 설정/외형 | 테마 | `theme`, `theme_selector`, `theme_importer`, `theme_extension` | ⚠ 일부 별도: theme_importer | [themes](GramEditor-docs/docs/themes.md) | ✅ | 2026-11-05 확인: 테마 선택 목록 표시 |
 | 설정/외형 | 아이콘 테마·파일 아이콘 | `file_icons` | ✅ | [icon-themes](GramEditor-docs/docs/icon-themes.md) | ⬜ |  |
 | 설정/외형 | 시각 사용자화 | `ui` | ✅ | [visual-customization](GramEditor-docs/docs/visual-customization.md) | ⬜ |  |
 | 확장/연동 | 확장 기능(Wasm) 설치·관리 | `extension`, `extension_host`, `extension_api`, `extensions_ui` | ⚠ 일부 별도: extension_api | [extensions](GramEditor-docs/docs/extensions.md) | ⬜ | 원본 README: 제한적 지원. 확장이 임의 실행 파일을 내려받을 수 있다는 경고 있음 |
@@ -84,7 +84,7 @@ AGENTS.md 의 "기존에 존재하던 기능은 최대한 포함한다"(R8)를 �
 | 뷰어 | SVG 미리보기 | `svg_preview` | ✅ | - | ⬜ |  |
 | 뷰어 | 이미지 뷰어 | `image_viewer` | ✅ | - | ⬜ |  |
 | 앱 | 명령줄(CLI) | `cli`, `install_cli` | ✅ | [command-line-interface](GramEditor-docs/docs/command-line-interface.md) | ⬜ | `cli` 실행 파일은 기본 빌드(`cargo build`) 대상이 아니라 `target\debug` 에 만들어지지 않음(확인함). 배포 zip 에 넣으려면 `-p cli` 별도 빌드 필요(Phase 3) |
-| 앱 | 앱 내 도움말(문서 뷰어) | `docs` | ✅ | [index](GramEditor-docs/docs/index.md) | ⬜ | 원본 문서를 `GramEditor-docs/docs` 에서 내장(`assets.rs` 경로 수정함). 표시 확인 필요 |
+| 앱 | 앱 내 도움말(문서 뷰어) | `docs` | ✅ | [index](GramEditor-docs/docs/index.md) | ✅ | 원본 문서를 `GramEditor-docs/docs` 에서 내장(`assets.rs` 경로 수정함). 표시 확인 필요; 2026-11-05 확인: `gram: open docs`로 한국어 `Don Editor 사용 안내` 표시(원본 도움말 열기·검색은 미확인) |
 | 앱 | 온보딩 | `onboarding` | ✅ | - | ⬜ |  |
 | 앱 | 제목 표시줄·알림·진행 표시 | `title_bar`, `notifications`, `activity_indicator` | ✅ | - | ⬜ |  |
 | 앱 | 충돌 보고 | `crashes` | ✅ | [troubleshooting](GramEditor-docs/docs/troubleshooting.md) | ⬜ |  |
@@ -92,7 +92,7 @@ AGENTS.md 의 "기존에 존재하던 기능은 최대한 포함한다"(R8)를 �
 | 개발용 | 인스펙터·프로파일러 | `inspector_ui`, `miniprofiler_ui` | ✅ | - | ⬜ | 개발자용 |
 | 개발용 | 컴포넌트 미리보기 | `component` | ✅ | - | ⬜ | 개발자용 |
 
-실행 확인 3개 / 미확인 47개. (2026-11-04 Markdown 미리보기 추가 확인)
+실행 확인 12개 / 미확인 38개. (2026-11-05 Markdown 미리보기와 스모크 점검 추가)
 
 ## 3. 기준선 메뉴 구조 (Windows, 2026-10-27 조사)
 
@@ -158,12 +158,12 @@ AGENTS.md 의 "기존에 존재하던 기능은 최대한 포함한다"(R8)를 �
 | R5 Windows zip 배포 | 별도 bat/ps1 호출 시 빌드 도구 검사·미설치 도구의 설치 여부 질의 후 zip 생성 | **구현·스크립트 검사 완료.** `package-zip.bat`, `script/package-zip.ps1`에 MCP 실행 파일·소스 동봉 등 후속 배포 요구 반영(`f1ba957`). 기존 Phase 3의 zip 생성·압축 해제 후 실행 기록은 당시 소스 기준 | 이번 신규 기능을 포함한 최종 Windows zip 생성·압축 해제·실행. 깨끗한 Windows에서 실제 도구 설치·설치 후 재검사 및 ARM64 검증 |
 | R6 D2Coding 기본 글꼴 | `assets/fonts`의 D2Coding을 기본 편집·UI 글꼴로 사용 | **구현 완료.** Phase 2 설정·TTC 로드 변경, Phase 5의 한글 렌더링 확인 기록 | D2Coding 적용 후 IME 입력 재확인 및 추가 시각 확인 |
 | R7 GPL-3.0·원저작 고지 | 원본 라이선스·저작권 고지 유지, 배포본에 라이선스·소스 입수 방법 포함 | **고지·배포 소스 동봉 및 자동 검사 구현.** GPL-3.0·GramEditor/Zed·제3자·D2Coding 고지 유지, 플랫폼별 배포 스크립트에 해당 소스 스냅샷 포함. 내부 매니페스트 143개 검사와 검사기 회귀 테스트 10개 통과(`2d7df76`). 원본 도움말을 보존하고 구분 안내·한국어 Don Editor 도움말 추가(`5fa69a6`) | 최종 실제 zip/tar.gz에서 고지·소스 스냅샷과 실행 파일 버전의 일치 확인. 앱의 라이선스·도움말 화면 확인 |
-| R8 기존 기능 보존 | 원본 GramEditor 기능 최대한 유지 | **지속 점검.** 1~6절의 원본 기능 목록·스모크 테스트 및 Phase별 회귀 기록 | 미확인 47개 영역은 확인되는 대로 갱신 |
+| R8 기존 기능 보존 | 원본 GramEditor 기능 최대한 유지 | **지속 점검.** 1~6절의 원본 기능 목록·스모크 테스트 및 Phase별 회귀 기록 | 미확인 38개 영역은 확인되는 대로 갱신 |
 | R9 Linux/macOS tar.gz 배포 | 별도 sh 호출 시 OS별 빌드 도구 검사·미설치 도구의 설치 여부 질의 후 tar.gz 생성 | **구현·모의 환경 자동 검증 완료(`f1ba957`).** `package-tar.sh`에 OS 감지·도구 선택 설치·재검사·릴리스 빌드·스테이징·소스/고지 동봉·tar.gz/SHA256 생성 추가. 패키징 테스트 14개 및 기존 도구 설치 테스트 19개 통과. Linux/macOS 명령은 가짜 도구로 검증 | 실제 Linux와 macOS 각각에서 필요한 도구 설치·릴리스 빌드·최종 tar.gz 생성·압축 해제·GUI 실행. 모의 스테이징 결과를 실제 OS 실행 확인으로 간주하지 않음 |
 
 ## 8. 추가·변경 요구사항 확인 목록
 
-구현·자동 검증과 실제 환경 확인을 나누어 기록한다. `[x]`의 범위는 각 문장에 적힌 구현 또는 테스트에 한정하며, 2절의 미확인 47개 영역을 대신하지 않는다.
+구현·자동 검증과 실제 환경 확인을 나누어 기록한다. `[x]`의 범위는 각 문장에 적힌 구현 또는 테스트에 한정하며, 2절의 미확인 38개 영역을 대신하지 않는다.
 
 ### 구현 및 자동 검증
 
