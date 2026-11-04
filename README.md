@@ -24,10 +24,13 @@ Gram Editor는 가벼움을 모토로 개발된 텍스트 편집기로, 이름�
 
 | 기능 | 내용 | 상태 |
 |------|------|------|
-| **AI Agent 사이드 패널** | OpenAI 또는 Anthropic API 키, 기본 우측 배치, 숨김·도크 아이콘으로 다시 표시, 스트리밍 응답, 컨텍스트 첨부, 도구 실행 승인, 대화 기록 | 초기 소스 구현. GUI 통합·실제 키 저장·제공자 연결은 미검증. [설정과 사용법](./docs/agent.md) |
-| **로컬 MCP 서버** | 루프백·토큰 인증 HTTP, `don-mcp` stdio 브릿지, 파일·편집·검색·설정·터미널 도구 및 범용 편집기 액션 | 프로토콜·전송과 도구 초기 구현. GUI 도구 실행과 모든 기능 제어의 완전성은 미검증. [연결 예시](./docs/mcp.md), [승인·데이터 보관](./docs/security.md) |
+| **AI Agent 사이드 패널** | OpenAI 또는 Anthropic API 키, 기본 우측 배치, 숨김·도크 아이콘으로 다시 표시, 스트리밍 응답, 컨텍스트 첨부, 도구 실행 승인, 대화 기록 | 구현됨. Windows 실제 창에서 패널 표시·숨김·키 입력 안내·제공자 선택을 확인했고, 실제 OpenAI/Claude API 호출은 미검증. [설정과 사용법](./docs/agent.md) |
+| **로컬 MCP 서버** | 루프백·토큰 인증 HTTP, `don-mcp` stdio 브릿지, 파일·편집·검색·설정·터미널 도구 및 범용 편집기 액션 | 구현됨. 공식 MCP SDK로 실제 앱에 연결해 승인 창을 거친 액션 실행(변환·PDF 저장·인코딩 다시 불러오기)을 확인했고, 모든 기능을 빠짐없이 제어하는지와 Claude Desktop/Code 실제 연결은 미검증. [연결 예시](./docs/mcp.md), [승인·데이터 보관](./docs/security.md) |
 | 한국어 UI | 메뉴·패널·탭·검색·대화상자·설정 본문·키맵·Git·디버거 등 주요 화면 한국어화. 설정 `"ui_language"`: `"auto"`(OS 언어) / `"ko"` / `"en"`. 명령 팔레트에서 한국어와 영어 이름을 함께 표시 | 적용됨. 원본 도움말 본문은 출처를 구분해 원문 보존 |
 | 기본 글꼴 | [D2Coding](./assets/fonts) 을 기본 글꼴로 사용 (편집기·UI 모두) | 적용됨 |
+| Markdown·Typst 미리보기 | Markdown(`.md`)과 Typst(`.typ`) 파일을 열면 같은 탭에서 미리보기로 먼저 보여 주고, 툴바의 `미리보기 \| 편집` 버튼으로 전환. Typst 컴파일러를 내장해 쪽 단위로 조판 | 구현됨 (Windows 실제 창 확인). [사용법](./docs/index.md) |
+| Markdown→Typst 변환, PDF 내보내기, 인쇄 | 파일 메뉴에서 Markdown을 Typst로 변환해 바로 저장하고, Markdown·Typst 문서를 PDF로 내보내거나 인쇄(Markdown은 메모리에서 Typst로 바꿔 처리하며 중간 파일은 저장하지 않음). 변환 규칙은 [md2typ](https://github.com/nervosys/md2typ) 참고, Typst는 [Apache-2.0](./assets/licenses/typst-LICENSE-APACHE) | 구현됨 (Windows 확인). 실제 프린터 출력·Linux/macOS는 미확인 |
+| 문자 인코딩 | 상태 표시줄에 현재 인코딩을 항상 표시하고, 눌러서 다른 인코딩으로 파일을 다시 불러옴(깨진 글자 복원·부분 복원용, 디스크는 바꾸지 않음). 저장은 선택된 인코딩으로 하고 표현할 수 없는 문자가 있으면 저장을 중단 | 구현됨 (Windows 실제 창 확인) |
 | 문법 강조 | 파일 확장자로 언어를 감지하여 기본 문법 강조. 대상 **26개**: Java, C, C++, SQL, C#, Rust, JavaScript(mjs·cjs 포함), TypeScript, Python, Ruby, JSON, JSON5, YAML(yml), Properties(`java.util.Properties` 호환), XML, HTML, XHTML, Markdown(md), Swift, Scala, R, Bat(Windows Batch), PowerShell, Sh(Unix Shell), Go, Dart. 이 중 15개는 원본에 내장되어 있고, **Java, C#, Ruby, JSON5, Properties, Swift, Scala, R, Bat, PowerShell, Dart 11개는 새로 추가** 샘플 파일은 [tests/samples/](./tests/samples) 에 있습니다. | 구현됨 (26개 감지·강조를 자동 테스트로 확인, 실제 창의 색상은 눈으로 미확인). 한계: `.xhtml` 의 `<?xml ?>` 선언 줄은 강조되지 않음 |
 | 플랫폼별 배포 스크립트 | 빌드 도구 검사·설치 질의 후 Windows zip 또는 Linux/macOS tar.gz와 SHA256 생성. 프로젝트 소스·원저작·제3자·글꼴 라이선스 동봉 | 구현됨. [사용법과 검증 범위](./docs/packaging.md), 실제 Unix 네이티브 실행과 깨끗한 환경 설치는 미확인 |
 | 빌드 도구 선택 설치 | Windows bat 및 Linux/macOS sh로 필요한 도구를 나열하고, 번호로 선택한 항목만 설치 ([사용법](#빌드-도구-선택-설치-windows--linux--macos)) | 구현됨 (모의 설치 테스트 통과, 실제 설치는 미검증) |
