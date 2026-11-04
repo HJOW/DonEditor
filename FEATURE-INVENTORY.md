@@ -178,8 +178,12 @@ AGENTS.md 의 "기존에 존재하던 기능은 최대한 포함한다"(R8)를 �
 - [x] R5·R9: 기존 도구 설치 스크립트 테스트 19개 통과. 도구 설치 테스트와 배포 압축 파일 테스트는 별도로 수행했다.
 - [x] R7: 내부 매니페스트 143개 라이선스 검사 및 검사기 회귀 테스트 10개 통과(`2d7df76`).
 - [x] R1·R7·R8: 한국어 Don Editor 도움말 추가, 원본 도움말 보존과 원본 문서 구분 안내 구현(`5fa69a6`).
+- [x] 추가 기능(2026-11-05, 사용자 요청): Markdown 미리보기/편집 전환(같은 탭, 열면 미리보기, `475437a`), 상태 표시줄 인코딩 표시·다른 인코딩으로 다시 불러오기·표현 불가 문자 저장 거절(`c29fe81`), Typst 쪽 미리보기·Markdown→Typst 변환·PDF 내보내기·인쇄(`4421531`). 단위 테스트: markdown_preview 40개, don_charset 9개, language 다시 불러오기 3개, worktree 저장 시험 3개, don_typst 17개, i18n 11개(1,824키) 통과.
 
 ### 실제 앱·API·OS 확인
+
+- [x] 추가 기능(2026-11-05) Windows 디버그 빌드 실제 창 확인: Markdown·Typst 파일을 파일 연결(더블클릭과 같은 Shell 열기, 실행 중/아닐 때)로 열면 미리보기로 시작, 미리보기↔편집 전환·저장·분할·세션 복원, 인코딩 표시·다시 불러오기(취소/확인, 실행 취소 기록 비움, 디스크 무변경)·표현 불가 문자 저장 거절·섞인 인코딩 부분 복원, Typst 오류 표시, 변환 저장 창, 중간 파일 없는 PDF 내보내기. 세부는 PROGRESS.md.
+- [ ] 추가 기능: 실제 프린터 출력 또는 PDF 뷰어가 `print` 동작을 지원하는 환경에서의 인쇄, Linux/macOS 인쇄(`lp`)·시스템 한글 글꼴·인코딩 선택 화면, 릴리스 빌드에서의 같은 흐름, (MCP `dispatch_action`으로 `typst::ConvertMarkdownToTypst`·`typst::ExportPdf`·`encoding_selector::ReloadWithEncoding` 실행은 2026-11-05 확인 완료. `typst::Print`·`markdown::TogglePreviewMode`·`typst::TogglePreviewMode`의 MCP 실행은 미확인.)
 
 - [ ] R1~R9: 이번 전체 변경 소스의 앱 통합 빌드·실행 및 변경 GUI crate 테스트 완료. 전체 `cargo check`는 사용자 일시 중지 요청에 맞춰 공용 의존성 컴파일 단계에서 중단했다.
 - [ ] R1: 설정·키맵·Git·디버거 등 후속 화면의 한국어 표시, 대화상자·툴팁의 잘림 및 실행 중 언어 전환을 실제 창에서 확인한다.
