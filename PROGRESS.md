@@ -11,6 +11,8 @@
 - Agent 대화 기록 선택·삭제와 패널 좌우 이동에 MCP 범용 액션을 추가했다. Windows 통합 `cargo check`에서 해당 crate가 통과했으며 실제 창과 MCP 클라이언트의 동작 검증은 남았다.
 - MCP에서 Agent 대화 제목·번호를 조회하는 `list_agent_conversations` 도구를 추가했다. 변경 후 Windows `cargo check -p gram -p mcp_server`, MCP 계약 테스트 23개 및 공식 Python MCP SDK의 HTTP/stdio 자동 협상·도구 33개 조회가 통과했다. 실제 편집기 GUI와의 통합 테스트는 남았다.
 - 2026-11-04 Windows 개발자 셸에서 `cargo check -p gram -p mcp_server`가 경고 없이 통과했다. 설정 가져오기·MCP 공개 API, Vim 상태 문자열·키맵 편집기·온보딩 테마·구문 트리의 번역 문자열 컴파일 오류를 수정했다. 실제 실행 파일 빌드·실행과 GUI 테스트는 별도 진행한다.
+- Windows에서 `cargo build -p gram -p cli -p mcp_server --bins`가 성공해 GUI·CLI·MCP 실행 파일을 만들었다(링커의 기존 Wasmtime `LNK4217` 경고 1건). 격리 데이터 폴더와 테스트 Rust 파일로 GUI가 실행돼 파일 창이 열리고 응답함을 확인했다. 공식 MCP Python SDK로 실제 앱에 stdio 연결해 도구 33개, 활성 버퍼, Agent 기록, 패널 이동 액션 조회를 검증했다.
+- Windows 화면 캡처는 창을 새로 선택해 재시도한 뒤에도 `window capture timed out`으로 실패했다. 따라서 실제 화면의 패널 조작 및 MCP 편집 승인·거절·취소 검증은 아직 완료하지 못했다. 테스트 앱·파일은 사용자 환경과 분리했다.
 - 현재 프로세스 환경에서 OpenAI/Anthropic API 키 환경 변수와 Claude Code 명령은 감지되지 않았다. 실제 계정 연결은 별도 검증 대상이다.
 - Windows 자격 증명 저장소는 별도 고유 테스트 항목과 가짜 값으로 저장·읽기·삭제를 검증했다. 이 검사는 keyring 백엔드 수준이며, 실제 API 키나 Agent 화면을 통한 조작은 검증하지 않았다.
 
