@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# [DonEditor] 내부 워크스페이스 라이선스 검사. 원본 check-licenses는 보존한다.
+set -euo pipefail
+
+# Python은 기존 설치를 사용하며 새 전역 도구를 설치하지 않는다.
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+if command -v python3 >/dev/null 2>&1; then
+    exec python3 "$script_dir/check_don_licenses.py" "$@"
+elif command -v python >/dev/null 2>&1; then
+    exec python "$script_dir/check_don_licenses.py" "$@"
+else
+    printf 'Python 3.8 이상이 필요합니다. 기존 Python 환경에서 script/check_don_licenses.py를 실행하세요.\n' >&2
+    exit 1
+fi

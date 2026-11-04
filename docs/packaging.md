@@ -40,3 +40,15 @@ Windows zip은 `source/DonEditor-<버전>-source.zip`, Unix tar.gz는 `source/Do
 `tests/test_package_tar.py`는 실제 tar/gzip/git/SHA256을 사용하고 설치 도구·컴파일러는 가짜 명령으로 대체한다. Linux/macOS 분기, 명시적 설치·거절·EOF·재검사·실패, `.app` 메타데이터, 실행 권한/심볼릭 링크, 소스 일치와 압축 해제 후 테스트 프로그램 실행을 검사한다. Windows의 `tests/test_package_zip.ps1`은 실제 zip 안의 MCP/라이선스/소스와 SHA256을 확인한다.
 
 이 검증은 실제 Linux/macOS GUI의 네이티브 빌드·실행, 깨끗한 PC에서의 도구 설치, ARM64, macOS 서명/공증을 대신하지 않는다. 해당 환경의 최종 릴리스 전에 실제 실행을 확인해야 한다.
+
+## 내부 워크스페이스 라이선스 검사
+
+```sh
+python script/check_don_licenses.py
+# Linux/macOS에서 사용할 수 있는 같은 검사 진입점
+bash script/check-don-licenses
+```
+
+Python 3.8 이상과 기존 Cargo를 사용하며 새 도구를 설치하지 않는다. `cargo metadata --no-deps --format-version 1 --locked --offline`으로 상속이 해결된 내부 워크스페이스 crate의 SPDX 선언을 읽고, 루트 GPL 전문과 GramEditor/Zed 원저작 고지가 보존됐는지 확인한다. 허용하는 선택지는 `GPL-3.0-only`, `GPL-3.0-or-later`, `MIT`, `Apache-2.0`이며 AND/OR·괄호를 지원한다. 허용 선택지로 충족되지 않는 선언이나 WITH 예외는 별도 검토가 필요하다. 저장한 metadata를 검사하려면 `--metadata <JSON 파일>`을 사용한다.
+
+**외부 Cargo 의존성 전체를 감사하는 도구는 아니다.** keyring 등 신규 의존성은 Cargo.lock의 정확한 소스 아카이브·SHA256, 패키지 license 선언과 LICENSE 전문을 별도로 확인해 `assets/licenses.md`와 `assets/licenses/`에 기록했다. 원본 `script/check-licenses`는 LICENSE 심볼릭 링크를 전제하는 기존 GramEditor 검사기로 보존하며 새 검증기와 구분한다.

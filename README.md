@@ -188,5 +188,6 @@ Don Editor 는 **GNU General Public License v3.0** ([LICENSE](./LICENSE)) 에 �
 - 라이선스 전문과 고지: [LICENSE](./LICENSE), [assets/licenses.md](./assets/licenses.md)
 - 원본 저작권: Copyright (C) 2026 The Gram Project (GramEditor), 그리고 Zed 및 각 의존성의 저작권자
 - 글꼴(D2Coding, Fira Sans, Myna, OpenMoji)과 그 밖의 서드파티 자료는 각자의 라이선스를 따릅니다. 글꼴별 고지는 [assets/fonts](./assets/fonts), API 키 저장용 keyring 등 의존성 고지는 [assets/licenses.md](./assets/licenses.md)와 [assets/licenses/](./assets/licenses/)에 있습니다.
+- 내부 워크스페이스 SPDX 선언·원본 GPL·원저작 고지는 `python script/check_don_licenses.py`로 검사합니다(Python 3.8+, 외부 Cargo 의존성 전체 감사는 제외). 자세한 범위는 [패키징 안내](./docs/packaging.md#내부-워크스페이스-라이선스-검사)를 참고하세요.
 
 이 프로젝트는 원본 소스와 의존성의 라이선스를 따르며, 원본 크레딧은 <https://gram-editor.com/credits> 에서 확인할 수 있습니다.
