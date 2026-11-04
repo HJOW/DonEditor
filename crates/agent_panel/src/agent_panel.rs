@@ -59,6 +59,8 @@ actions!(
         NewChat,
         /// 저장된 대화 기록을 표시한다.
         ShowHistory,
+        /// 저장된 대화 기록을 지운다.
+        ClearHistory,
     ]
 );
 
@@ -79,6 +81,32 @@ pub struct Configure {
     pub provider: Option<Provider>,
     #[serde(default)]
     pub model: Option<String>,
+}
+
+/// 기록 목록의 0부터 시작하는 번호로 이전 대화를 선택한다.
+#[derive(Clone, PartialEq, Deserialize, JsonSchema, Action)]
+#[action(namespace = agent_panel)]
+#[serde(deny_unknown_fields)]
+pub struct SelectConversation {
+    /// 대화 기록에 표시된 순서의 번호이다.
+    pub index: usize,
+}
+
+/// Agent 패널을 배치할 수 있는 도크 위치이다.
+#[derive(Clone, Copy, PartialEq, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum AgentDockPosition {
+    Left,
+    Right,
+}
+
+/// Agent 패널을 왼쪽이나 오른쪽 도크로 이동한다.
+#[derive(Clone, PartialEq, Deserialize, JsonSchema, Action)]
+#[action(namespace = agent_panel)]
+#[serde(deny_unknown_fields)]
+pub struct MovePanel {
+    /// 이동할 도크의 위치이다.
+    pub position: AgentDockPosition,
 }
 
 /// 대화 한 개의 제목과 공급자 중립적인 메시지 기록이다.
@@ -182,11 +210,54 @@ pub fn init(cx: &mut App) {
                 });
             }
         });
+        // 실행 중인 대화는 덮어쓰지 않고 기록만 명시적으로 선택한다.
+        workspace.register_action(|workspace, action: &SelectConversation, window, cx| {
+            if let Some(panel) = workspace.focus_panel::<AgentPanel>(window, cx) {
+                panel.update(cx, |panel, cx| {
+                    if !panel.running
+                        && let Some(conversation) = panel.conversations.get(action.index).cloned()
+                    {
+                        panel.current = conversation;
+                        panel.repair_interrupted_calls();
+                        panel.show_history = false;
+                        panel.rebuild_messages(cx);
+                    }
+                });
+            }
+        });
+        // GUI 버튼과 외부 액션이 같은 기록 삭제 동작을 사용한다.
+        workspace.register_action(|workspace, _: &ClearHistory, _, cx| {
+            if let Some(panel) = workspace.panel::<AgentPanel>(cx) {
+                panel.update(cx, |panel, cx| panel.clear_history(cx));
+            }
+        });
+        // 패널을 기존 도크 이동 경로로 옮겨 저장과 초점을 유지한다.
+        workspace.register_action(|workspace, action: &MovePanel, window, cx| {
+            if let Some(panel) = workspace.panel::<AgentPanel>(cx) {
+                panel.update(cx, |panel, cx| {
+                    let position = match action.position {
+                        AgentDockPosition::Left => DockPosition::Left,
+                        AgentDockPosition::Right => DockPosition::Right,
+                    };
+                    panel.set_position(position, window, cx);
+                });
+            }
+        });
     })
     .detach();
 }
 
 impl AgentPanel {
+    /// 응답 생성 중에는 기록을 지우지 않는다.
+    fn clear_history(&mut self, cx: &mut Context<Self>) {
+        if self.running {
+            return;
+        }
+        self.conversations.clear();
+        self.current = Self::empty_conversation();
+        self.rebuild_messages(cx);
+        self.persist(cx);
+    }
     /// 기존 패널과 같은 비동기 로딩 규약을 사용해 UI 생성 전에 DB를 읽는다.
     pub async fn load(workspace: WeakEntity<Workspace>, mut cx: AsyncWindowContext) -> Result<Entity<Self>> {
         let storage_key = workspace.read_with(&cx, |workspace, _| {
@@ -617,10 +688,7 @@ impl Render for AgentPanel {
                 Button::new("agent-clear-history", i18n::t!("agent.clear_history"))
                     .disabled(self.running)
                     .on_click(cx.listener(|panel, _, _, cx| {
-                        panel.conversations.clear();
-                        panel.current = Self::empty_conversation();
-                        panel.rebuild_messages(cx);
-                        panel.persist(cx);
+                        panel.clear_history(cx);
                     })),
             );
         }
