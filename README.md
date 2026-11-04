@@ -1,12 +1,19 @@
 # Don Editor
 
-Don Editor는 **AI Agent 패널과 로컬 MCP를 적극 도입하는 한국어 텍스트 편집기**입니다. [GramEditor](https://codeberg.org/GramEditor/gram)를 기반으로 하며, AI 기능을 제공하지 않는 원본과는 방향이 다른 독립 파생 프로젝트입니다. 개발에도 AI를 활용하며 원본의 AI 사용 금지·인간 기여 정책은 이 프로젝트에 적용되지 않습니다.
+Don Editor 는 한국 개발자를 위한 서브용 텍스트 편집기입니다.    
+[Gram Editor](https://codeberg.org/GramEditor/gram) 의 파생 프로젝트입니다.
+    
+Markdown (*.md) 파일을 불러오면 바로 문서 뷰로 보여줍니다.    
+Mermaid 서식의 도표 또한 지원됩니다.    
+물론 내용 편집 또한 가능합니다.    
+    
+Gram Editor 의 기능에 더해 한국어 UI, D2Coding 글꼴과 26개 언어의 기본 문법 강조를 제공합니다.     
+라이선스는 원본과 같은 GPL-3.0 계열이며 [LICENSE](LICENSE) 및 [Gram Editor 원저작 고지](./assets/licenses.md) 에서 내용을 보실 수 있습니다.
+     
+Don Editor 개발에는 AI 가 활용되었습니다. Gram Editor 의 AI 사용 금지·인간 기여 정책은 이 프로젝트에 적용되지 않습니다.
+Gram Editor 에 대해서는 [https://codeberg.org/GramEditor/gram](https://codeberg.org/GramEditor/gram) 에서 확인해 보세요.
 
-현재 Don Editor 버전은 **0.1.0**입니다. 원본 GramEditor 3.4.0을 기반으로 하지만 제품 버전은 독립적으로 관리합니다. 버전의 기준은 루트 `Cargo.toml`의 `[workspace.package]`입니다.
-
-기존 편집기 기능을 유지하면서 한국어 UI, 기본 D2Coding 글꼴과 26개 언어의 기본 문법 강조를 제공합니다. 라이선스는 원본과 같은 GPL-3.0 계열이며 [LICENSE](LICENSE)와 [원저작 고지](./assets/licenses.md)를 보존합니다.
-
-개발 버전입니다. 새 MCP·Agent 및 후속 한국어 UI는 초기 구현을 반영한 체크포인트이며, 전체 GUI 컴파일·실행 검증은 아직 완료하지 않았습니다. 구현·검증 범위는 [PROGRESS.md](./PROGRESS.md), 사용법은 [Don Editor 사용 안내](./docs/index.md)를 확인하세요. 실제 Linux/macOS 네이티브 배포 검증과 제공자 계정을 사용하는 API 연결 확인 등 환경별 검증이 남아 있습니다.
+사용법은 [Don Editor 사용 안내](./docs/index.md) 문서에서 확인해 보세요.
 
 ## 이름의 유래
 
