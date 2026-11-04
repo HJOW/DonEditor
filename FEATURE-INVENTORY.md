@@ -47,7 +47,7 @@ AGENTS.md 의 "기존에 존재하던 기능은 최대한 포함한다"(R8)를 �
 | 편집 기본 | SuperTab | `editor` | ✅ | [supertab](GramEditor-docs/docs/supertab.md) | ⬜ |  |
 | 편집 기본 | 줄 이동 | `go_to_line` | ✅ | - | ✅ | 2026-11-05 확인: 줄 이동 창에 3을 입력하면 "3번째 줄로 이동" 안내가 뜨고 커서가 3줄로 이동 |
 | 편집 기본 | 줄 끝(개행)·인코딩 선택 | `line_ending_selector`, `encoding_selector` | ✅ | - | ✅ | 2026-11-05 확인: 인코딩 표시·선택 화면·다시 불러오기·저장 거절, 줄 끝 선택 목록과 CRLF 선택 |
-| 편집 기본 | 스니펫 | `snippet`, `snippet_provider`, `snippets_ui` | ✅ | [snippets](GramEditor-docs/docs/snippets.md) | ⬜ |  |
+| 편집 기본 | 스니펫 | `snippet`, `snippet_provider`, `snippets_ui` | ✅ | [snippets](GramEditor-docs/docs/snippets.md) | ⬜ | 2026-11-05 `snippet` 단위 테스트 8개 통과(앱 실행 확인은 아직) |
 | 탐색 | 탭 전환 | `tab_switcher` | ✅ | [tab-switcher](GramEditor-docs/docs/tab-switcher.md) | ✅ | 2026-11-05 확인: Ctrl+Tab 으로 탭 전환(열린 탭 목록 표시) |
 | 탐색 | 명령 팔레트 | `command_palette`, `command_palette_hooks` | ✅ | [command-palette](GramEditor-docs/docs/command-palette.md), [all-actions](GramEditor-docs/docs/all-actions.md) | ✅ | 2026-11-05 확인: 열기·검색·실행(한국어/영어 이름 병기) |
 | 탐색 | 파일 찾기 | `file_finder` | ✅ | - | ✅ | 2026-11-05 확인: `lib` 검색 결과·새 파일 만들기 항목 |
@@ -71,8 +71,8 @@ AGENTS.md 의 "기존에 존재하던 기능은 최대한 포함한다"(R8)를 �
 | 개발 도구 | 디버거(DAP) | `dap`, `dap_adapters`, `debugger_ui`, `debugger_tools`, `debug_adapter_extension` | ✅ | [debugger](GramEditor-docs/docs/debugger.md) | ⬜ |  |
 | 개발 도구 | REPL / Jupyter | `repl` | ✅ | [repl](GramEditor-docs/docs/repl.md) | ⬜ |  |
 | 개발 도구 | 원격 개발 (SSH / WSL) | `remote`, `remote_server` | ⚠ 일부 별도: remote_server | [remote-development](GramEditor-docs/docs/remote-development.md) | ⬜ | 원본 문서: Windows 는 원격 '클라이언트'로만 지원, 원격 '서버'는 미지원. `remote_server` 는 별도 바이너리(gram 의존 트리 밖) |
-| 편집 모드 | Vim 모드 | `vim`, `vim_mode_setting` | ✅ | [vim](GramEditor-docs/docs/vim.md) | ⬜ |  |
-| 편집 모드 | Helix 모드 | `vim` | ✅ | [helix](GramEditor-docs/docs/helix.md) | ⬜ |  |
+| 편집 모드 | Vim 모드 | `vim`, `vim_mode_setting` | ✅ | [vim](GramEditor-docs/docs/vim.md) | ⬜ | 2026-11-05 `vim` 단위 테스트 167개 통과(이번 세션이 바꾼 `editor` 위에서 회귀 없음. 앱 실행 확인은 아직) |
+| 편집 모드 | Helix 모드 | `vim` | ✅ | [helix](GramEditor-docs/docs/helix.md) | ⬜ | 같은 `vim` crate의 단위 테스트 167개 통과(앱 실행 확인은 아직) |
 | 설정/외형 | 설정 파일·설정 UI·설정 프로필 | `settings`, `settings_ui`, `settings_profile_selector` | ✅ | [configuring-gram](GramEditor-docs/docs/configuring-gram.md), [environment](GramEditor-docs/docs/environment.md) | ✅ | 2026-11-05 확인: 설정 창이 한국어로 열리고 13개 페이지(에이전트 포함) 표시. 프로필은 미확인 |
 | 설정/외형 | 키맵·단축키 편집기 | `keymap_editor` | ✅ | [key-bindings](GramEditor-docs/docs/key-bindings.md) | ✅ | 2026-11-05 확인: 메뉴의 "키맵 열기"로 단축키 편집기 탭이 한국어 열 제목(작업·인자·키 입력·컨텍스트·출처)과 함께 열림. 단축키 수정·저장은 미확인 |
 | 설정/외형 | 테마 | `theme`, `theme_selector`, `theme_importer`, `theme_extension` | ⚠ 일부 별도: theme_importer | [themes](GramEditor-docs/docs/themes.md) | ✅ | 2026-11-05 확인: 테마 선택 목록 표시 |
