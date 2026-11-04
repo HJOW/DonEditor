@@ -2,6 +2,8 @@
 
 Don Editor는 GramEditor를 기반으로 한국어 UI, D2Coding 기본 글꼴, 로컬 MCP와 AI Agent 패널을 제공하는 텍스트 편집기입니다. **AI 기능을 적극적으로 도입**하며, 원본 GramEditor의 AI 사용 금지 정책은 이 프로젝트에 적용되지 않습니다.
 
+현재 Don Editor 버전은 **0.1.0**이며, 기반이 된 GramEditor 3.4.0과 별도로 관리합니다.
+
 ## 시작하기
 
 1. [설치와 기본 설정](installation.md)에서 배포본을 실행하고 파일이나 프로젝트를 엽니다.

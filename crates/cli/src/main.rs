@@ -681,13 +681,8 @@ mod linux {
                 } else {
                     format!("{} ", *release_channel::RELEASE_CHANNEL_NAME)
                 },
-                match option_env!("GRAM_COMMIT_NAME") {
-                    Some(commit_name) => format!("{commit_name} "),
-                    None => match option_env!("RELEASE_VERSION") {
-                        Some(version) => format!("{version} "),
-                        None => "".to_string(),
-                    },
-                },
+                // 원본 Git 태그 대신 Don Editor 제품 버전을 표시한다.
+                format!("{} ", env!("CARGO_PKG_VERSION")),
                 match option_env!("GRAM_COMMIT_SHA") {
                     Some(commit_sha) => format!("({commit_sha}) "),
                     None => "".to_string(),
@@ -912,13 +907,8 @@ mod windows {
                 } else {
                     format!("{} ", *release_channel::RELEASE_CHANNEL_NAME)
                 },
-                match option_env!("GRAM_COMMIT_NAME") {
-                    Some(commit_name) => format!("{commit_name} "),
-                    None => match option_env!("RELEASE_VERSION") {
-                        Some(version) => format!("{version} "),
-                        None => "".to_string(),
-                    },
-                },
+                // 원본 Git 태그 대신 Don Editor 제품 버전을 표시한다.
+                format!("{} ", env!("CARGO_PKG_VERSION")),
                 match option_env!("GRAM_COMMIT_SHA") {
                     Some(commit_sha) => format!("({commit_sha}) "),
                     None => "".to_string(),
@@ -1149,13 +1139,8 @@ mod mac_os {
         fn version(&self) -> String {
             match self {
                 Self::App { plist, .. } => plist.bundle_short_version_string.clone(),
-                Self::LocalPath { .. } => match option_env!("GRAM_COMMIT_NAME") {
-                    Some(commit_name) => format!("{commit_name} "),
-                    None => match option_env!("RELEASE_VERSION") {
-                        Some(version) => format!("{version} "),
-                        None => "<development>".to_string(),
-                    },
-                },
+                // 로컬 빌드도 독립적인 제품 버전을 사용한다.
+                Self::LocalPath { .. } => env!("CARGO_PKG_VERSION").to_string(),
             }
         }
 

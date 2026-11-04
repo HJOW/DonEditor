@@ -41,6 +41,9 @@ $DryRun = $false
 try {
     New-Item -ItemType Directory -Path $RepoRoot | Out-Null
     Write-TestFile 'LICENSE' 'GPL-3.0 test'
+    # 배포 파일명이 제품의 워크스페이스 버전을 사용하는지 확인한다.
+    Write-TestFile 'Cargo.toml' "[workspace.package]`nversion = `"0.1.0`"`n"
+    Assert-Package ((Get-WorkspaceVersion) -eq '0.1.0') '워크스페이스 제품 버전 불일치'
     Write-TestFile 'README.md' 'Don Editor test'
     Write-TestFile 'assets\licenses.md' 'GramEditor/Zed notices'
     Write-TestFile 'assets\licenses\MIT' 'MIT test'
@@ -58,19 +61,19 @@ try {
     Write-TestFile 'target\debug\doneditor.exe' 'test GUI binary'
     Write-TestFile 'target\debug\cli.exe' 'test CLI binary'
     Write-TestFile 'target\debug\don-mcp.exe' 'test MCP binary'
-    $packageDir = Join-Path $OutDir 'staging\DonEditor-3.4.0-windows-x86_64-debug'
-    $count = New-PackageDirectory $packageDir '3.4.0' 'stable' (Join-Path $RepoRoot 'target\debug')
+    $packageDir = Join-Path $OutDir 'staging\DonEditor-0.1.0-windows-x86_64-debug'
+    $count = New-PackageDirectory $packageDir '0.1.0' 'stable' (Join-Path $RepoRoot 'target\debug')
     Assert-Package ($count -ge 10) '배포 파일 수가 예상보다 적음'
     Assert-Package (Test-Path (Join-Path $packageDir 'bin\don-mcp.exe')) 'MCP stdio 브릿지 누락'
     Assert-Package (Test-Path (Join-Path $packageDir 'licenses\D2Coding-LICENSE')) '글꼴 라이선스 누락'
-    $sourceArchive = Join-Path $packageDir 'source\DonEditor-3.4.0-source.zip'
+    $sourceArchive = Join-Path $packageDir 'source\DonEditor-0.1.0-source.zip'
     $archive = [System.IO.Compression.ZipFile]::OpenRead($sourceArchive)
     try {
         $names = @($archive.Entries | ForEach-Object { $_.FullName })
-        Assert-Package ($names -contains 'DonEditor-3.4.0-source/새 소스.rs') '미커밋 한글 파일명 누락'
-        Assert-Package (-not ($names -contains 'DonEditor-3.4.0-source/.env')) 'gitignore 비밀 파일 포함됨'
+        Assert-Package ($names -contains 'DonEditor-0.1.0-source/새 소스.rs') '미커밋 한글 파일명 누락'
+        Assert-Package (-not ($names -contains 'DonEditor-0.1.0-source/.env')) 'gitignore 비밀 파일 포함됨'
         Assert-Package (@($names | Where-Object { $_ -match '/(target|dist)/' }).Count -eq 0) '빌드/출력 폴더가 소스에 포함됨'
-        $entry = $archive.GetEntry('DonEditor-3.4.0-source/tracked.rs')
+        $entry = $archive.GetEntry('DonEditor-0.1.0-source/tracked.rs')
         $reader = New-Object System.IO.StreamReader ($entry.Open())
         try { Assert-Package ($reader.ReadToEnd() -eq '// 수정된 한국어 소스') '미커밋 수정 내용 불일치' }
         finally { $reader.Dispose() }
@@ -91,14 +94,14 @@ try {
     try {
         $names = @($archive.Entries | ForEach-Object { $_.FullName })
         Assert-Package (@($names | Where-Object { $_.Contains('\') }).Count -eq 0) 'zip 항목에 역슬래시가 있음'
-        Assert-Package (@($names | Where-Object { $_.EndsWith('/source/DonEditor-3.4.0-source.zip') }).Count -eq 1) '배포본에 소스 zip이 없음'
+        Assert-Package (@($names | Where-Object { $_.EndsWith('/source/DonEditor-0.1.0-source.zip') }).Count -eq 1) '배포본에 소스 zip이 없음'
         Assert-Package (@($names | Where-Object { $_.EndsWith('/bin/don-mcp.exe') }).Count -eq 1) '배포본에 MCP가 없음'
     } finally { $archive.Dispose() }
 
     # 필수 MCP 바이너리가 없을 때는 부분 배포본을 만들지 않는다.
     Remove-Item -LiteralPath (Join-Path $RepoRoot 'target\debug\don-mcp.exe')
     $missingFailed = $false
-    try { New-PackageDirectory (Join-Path $OutDir 'missing') '3.4.0' 'stable' (Join-Path $RepoRoot 'target\debug') | Out-Null }
+    try { New-PackageDirectory (Join-Path $OutDir 'missing') '0.1.0' 'stable' (Join-Path $RepoRoot 'target\debug') | Out-Null }
     catch { $missingFailed = $_.Exception.Message -like '*don-mcp.exe*' }
     Assert-Package $missingFailed 'MCP 누락을 허용함'
 

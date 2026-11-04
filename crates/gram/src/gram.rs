@@ -1033,10 +1033,8 @@ fn open_about(cx: &mut App) {
 
     impl AboutWindow {
         fn new(cx: &mut Context<Self>) -> Self {
-            let version = match option_env!("GRAM_COMMIT_NAME") {
-                Some(commit_name) => commit_name,
-                None => env!("CARGO_PKG_VERSION"),
-            };
+            // 원본 Git 태그와 관계없이 Don Editor의 제품 버전을 표시한다.
+            let version = env!("CARGO_PKG_VERSION");
 
             let debug = if cfg!(debug_assertions) { "(debug)" } else { "" };
             // [DonEditor] 정보 대화상자의 제목에 표시되는 제품 이름

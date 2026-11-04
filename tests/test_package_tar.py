@@ -53,7 +53,7 @@ class PackageTarTests(unittest.TestCase):
         (self.bin / "cargo").write_text(FAKE_CARGO)
         (self.bin / "cargo").chmod(0o755)
         self.environment.update(TEST_PACKAGES_READY="1", TEST_COMMANDS_READY="1", TEST_RUSTUP_READY="1", TEST_TOOLCHAIN_READY="1")
-        self.write("Cargo.toml", '[workspace.package]\nversion = "3.4.0"\n')
+        self.write("Cargo.toml", '[workspace.package]\nversion = "0.1.0"\n')
         self.write("crates/gram/RELEASE_CHANNEL", "stable\n")
         self.write("LICENSE", "GPL-3.0 test\n")
         self.write("README.md", "Don Editor test\n")
@@ -86,7 +86,7 @@ class PackageTarTests(unittest.TestCase):
     # 생성된 tar.gz를 실제로 풀고 체크섬과 라이선스 파일을 확인한다.
     def unpack(self, os_name="linux", suffix="", out_dir=None):
         output = out_dir or self.root / "dist"
-        name = f"DonEditor-3.4.0-{os_name}-x86_64{suffix}"
+        name = f"DonEditor-0.1.0-{os_name}-x86_64{suffix}"
         archive = output / (name + ".tar.gz")
         digest = hashlib.sha256(archive.read_bytes()).hexdigest()
         self.assertEqual((output / (name + ".tar.gz.sha256")).read_text(), f"{digest} *{name}.tar.gz\n")
@@ -95,7 +95,7 @@ class PackageTarTests(unittest.TestCase):
         with tarfile.open(archive) as bundle:
             bundle.extractall(extraction, filter="fully_trusted")
         package = extraction / name
-        for path in ("LICENSE", "licenses.md", "licenses/MIT", "licenses/D2Coding-LICENSE", "SOURCE.txt", "source/DonEditor-3.4.0-source.tar.gz", "bin/don-mcp"):
+        for path in ("LICENSE", "licenses.md", "licenses/MIT", "licenses/D2Coding-LICENSE", "SOURCE.txt", "source/DonEditor-0.1.0-source.tar.gz", "bin/don-mcp"):
             self.assertTrue((package / path).is_file(), path)
         self.assertFalse(list(output.glob(".doneditor-package.*")))
         return package
@@ -121,8 +121,8 @@ class PackageTarTests(unittest.TestCase):
         result, _ = self.run_package()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         package = self.unpack()
-        with tarfile.open(package / "source/DonEditor-3.4.0-source.tar.gz") as source:
-            prefix = "DonEditor-3.4.0-source/"
+        with tarfile.open(package / "source/DonEditor-0.1.0-source.tar.gz") as source:
+            prefix = "DonEditor-0.1.0-source/"
             self.assertEqual(source.extractfile(prefix + "tracked.rs").read().decode(), "// 수정된 한국어 소스\n")
             self.assertEqual(source.extractfile(prefix + "new source.rs").read().decode(), "// 새 소스\n")
             self.assertNotIn(prefix + ".env", source.getnames())
@@ -140,7 +140,7 @@ class PackageTarTests(unittest.TestCase):
         self.assertEqual(plist["CFBundleDisplayName"], "Don Editor")
         self.assertEqual(plist["CFBundleExecutable"], "gram")
         self.assertEqual(plist["CFBundleIdentifier"], "app.doneditor.DonEditor")
-        self.assertEqual(plist["CFBundleShortVersionString"], "3.4.0")
+        self.assertEqual(plist["CFBundleShortVersionString"], "0.1.0")
         self.assertIn("CFBundleDocumentTypes", plist)
         self.assertTrue((package / "bin/doneditor").is_symlink())
         self.assertTrue((contents / "MacOS/remote_server").is_file())

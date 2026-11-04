@@ -246,13 +246,8 @@ pub fn main() {
     util::increase_open_file_limit().log_err();
 
     let app_version = AppVersion::load(env!("CARGO_PKG_VERSION"));
-    let version_name = match option_env!("GRAM_COMMIT_NAME") {
-        Some(commit_name) => commit_name.to_string(),
-        None => match option_env!("RELEASE_VERSION") {
-            Some(version) => format!("{version} "),
-            None => String::new(),
-        },
-    };
+    // 빌드에 포함된 원본 태그 대신 독립적인 제품 버전을 사용한다.
+    let version_name = format!("{} ", env!("CARGO_PKG_VERSION"));
     let app_commit_sha = option_env!("GRAM_COMMIT_SHA").map(|commit_sha| AppCommitSha::new(commit_sha.to_string()));
 
     if args.system_specs {

@@ -1,5 +1,12 @@
 # Don Editor 진행 상황
 
+## 2026-11-04 Don Editor 제품 버전 독립
+
+- 사용자 요청으로 Don Editor 워크스페이스 버전을 GramEditor 기반 버전 `3.4.0`에서 독립 제품 버전 `0.1.0`으로 변경했다. Cargo.lock의 내부 워크스페이스 패키지 139개를 갱신했고 외부 의존성 및 독립 `zed_extension_api` 버전 `0.7.0`은 유지했다.
+- 정보 창·시작 로그·CLI는 원본 Git 태그보다 제품 버전을 표시한다. MCP 서버 정보와 Windows/Unix 패키지 버전도 워크스페이스 값을 사용한다. README·자체 도움말·패키징 문서와 패키징 테스트 예시를 갱신했다. 원본 GramEditor 문서, 원본 기준 버전 및 과거 `3.4.0` 배포·분석 이력은 보존한다.
+- Windows에서 `cargo check -p gram -p cli -p mcp_server --offline`, `cargo metadata --locked --offline`, 변경 Rust 파일의 `rustfmt --check`, Windows ZIP 테스트가 통과했다. `cargo build -p cli --bin cli --offline` 후 실제 CLI `--version`이 `Don Editor 0.1.0`을 출력했다. Linux/macOS 실행 테스트는 이전 사용자 지시에 따라 생략했다.
+- 기존 `3.4.0` 배포 ZIP과 GUI 실행 파일은 변경하지 않았다. 이번에는 새 GUI 실행 파일이나 `0.1.0` 배포본을 빌드하지 않았으므로, 그 파일을 실제로 쓰려면 별도 빌드·패키징이 필요하다.
+
 ## 2026-11-04 Windows 실행 파일 기능별 용량 조사
 
 - 사용자 요청으로 배포 EXE와 일치하는 릴리스 PDB의 섹션 기여 정보를 Microsoft DIA로 분석해 [Windows 기능별 용량 보고서](WINDOWS-SIZE-REPORT.md)를 작성했다. 내장 문법 분석기 객체 46.12 MiB와 SQL 파서 10.61 MiB 등을 확인했으며, 직접 기여량과 기능 제거 시 실제 절감량의 차이·필수 언어 제약을 문서에 명시했다.
