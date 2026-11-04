@@ -4120,10 +4120,11 @@ impl OutlinePanel {
         cx: &mut Context<Self>,
     ) -> impl IntoElement {
         let contents = if self.cached_entries.is_empty() {
+            // [DonEditor] 빈 상태 안내 문구도 현재 UI 언어로 보여 준다
             let header = if query.is_some() {
-                "No matches for query"
+                i18n::t!("outline.no_matches")
             } else {
-                "No outlines available"
+                i18n::t!("outline.empty")
             };
 
             v_flex()
@@ -4148,7 +4149,7 @@ impl OutlinePanel {
                         DockPosition::Bottom => window.keystroke_text_for(&workspace::ToggleBottomDock),
                         DockPosition::Right => window.keystroke_text_for(&workspace::ToggleRightDock),
                     };
-                    Label::new(format!("Toggle Panel With {keystroke}")).color(Color::Muted)
+                    Label::new(i18n::t_with("outline.toggle_hint", &[("keystroke", keystroke)])).color(Color::Muted)
                 }))
         } else {
             let list_contents = {
