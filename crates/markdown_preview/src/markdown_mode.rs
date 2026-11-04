@@ -76,7 +76,7 @@ fn is_markdown_file_with_content(editor: &Editor, cx: &App) -> bool {
         return false;
     };
     let buffer = buffer.read(cx);
-    buffer.file().is_some() && buffer.len() > 0 && is_markdown_editor(editor, cx)
+    buffer.file().is_some() && !buffer.is_empty() && is_markdown_editor(editor, cx)
 }
 
 /// 단일 버퍼 전체 편집기이고, 그 버퍼가 Markdown 이면 `true`.

@@ -678,21 +678,20 @@ mod linux {
 
     impl InstalledApp for App {
         fn gram_version_string(&self) -> String {
-            format!(
-                "Don Editor {}{}{}– {}",
-                if *release_channel::RELEASE_CHANNEL_NAME == "stable" {
-                    "".to_string()
-                } else {
-                    format!("{} ", *release_channel::RELEASE_CHANNEL_NAME)
-                },
-                // 원본 Git 태그 대신 Don Editor 제품 버전을 표시한다.
-                format!("{} ", env!("CARGO_PKG_VERSION")),
-                match option_env!("GRAM_COMMIT_SHA") {
-                    Some(commit_sha) => format!("({commit_sha}) "),
-                    None => "".to_string(),
-                },
-                self.0.display(),
-            )
+            // 안정(stable) 채널이 아니면 채널 이름을 덧붙인다
+            let channel = if *release_channel::RELEASE_CHANNEL_NAME == "stable" {
+                String::new()
+            } else {
+                format!("{} ", *release_channel::RELEASE_CHANNEL_NAME)
+            };
+            // 원본 Git 태그 대신 Don Editor 제품 버전을 표시한다.
+            let version = env!("CARGO_PKG_VERSION");
+            // 빌드한 커밋이 있으면 함께 표시한다
+            let commit = match option_env!("GRAM_COMMIT_SHA") {
+                Some(commit_sha) => format!("({commit_sha}) "),
+                None => String::new(),
+            };
+            format!("Don Editor {channel}{version} {commit}– {}", self.0.display())
         }
 
         fn launch(&self, ipc_url: String, user_data_dir: Option<&str>) -> anyhow::Result<()> {
@@ -904,21 +903,20 @@ mod windows {
 
     impl InstalledApp for App {
         fn gram_version_string(&self) -> String {
-            format!(
-                "Don Editor {}{}{}– {}",
-                if *release_channel::RELEASE_CHANNEL_NAME == "stable" {
-                    "".to_string()
-                } else {
-                    format!("{} ", *release_channel::RELEASE_CHANNEL_NAME)
-                },
-                // 원본 Git 태그 대신 Don Editor 제품 버전을 표시한다.
-                format!("{} ", env!("CARGO_PKG_VERSION")),
-                match option_env!("GRAM_COMMIT_SHA") {
-                    Some(commit_sha) => format!("({commit_sha}) "),
-                    None => "".to_string(),
-                },
-                self.0.display(),
-            )
+            // 안정(stable) 채널이 아니면 채널 이름을 덧붙인다
+            let channel = if *release_channel::RELEASE_CHANNEL_NAME == "stable" {
+                String::new()
+            } else {
+                format!("{} ", *release_channel::RELEASE_CHANNEL_NAME)
+            };
+            // 원본 Git 태그 대신 Don Editor 제품 버전을 표시한다.
+            let version = env!("CARGO_PKG_VERSION");
+            // 빌드한 커밋이 있으면 함께 표시한다
+            let commit = match option_env!("GRAM_COMMIT_SHA") {
+                Some(commit_sha) => format!("({commit_sha}) "),
+                None => String::new(),
+            };
+            format!("Don Editor {channel}{version} {commit}– {}", self.0.display())
         }
 
         fn launch(&self, ipc_url: String, user_data_dir: Option<&str>) -> anyhow::Result<()> {
