@@ -9,7 +9,6 @@ GramEditor 을 클론 및 커스텀하여
 
 [D:\Workspace\git\GramEditor](https://codeberg.org/GramEditor/gram)
 소스코드 위치 (HJOW-Athlon) : H:\Workspace\git\GramEditor 
-소스코드 위치 (vm-debian-codex) : /home/hjow/Workspaces/git/gram
 
 # 추가 요구사항
 
