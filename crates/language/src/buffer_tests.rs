@@ -3,7 +3,7 @@ use crate::Buffer;
 use clock::ReplicaId;
 use collections::BTreeMap;
 use futures::FutureExt as _;
-use gpui::{App, AppContext as _, BorrowAppContext, Entity};
+use gpui::{App, AppContext as _, BorrowAppContext, Entity, Task};
 use gpui::{HighlightStyle, TestAppContext};
 use indoc::indoc;
 use proto::deserialize_operation;
@@ -20,6 +20,7 @@ use std::{
 };
 use syntax_map::TreeSitterOptions;
 use text::network::Network;
+use util::paths::PathStyle;
 use text::{BufferId, LineEnding};
 use text::{Point, ToPoint};
 use theme::ActiveTheme;
@@ -3987,4 +3988,156 @@ fn test_random_chunk_bitmaps(cx: &mut App, mut rng: StdRng) {
             }
         }
     }
+}
+
+// [DonEditor] 다른 인코딩으로 다시 불러오기(Buffer::reload_with_encoding) 시험
+
+/// 디스크 바이트를 그대로 돌려주는 시험용 로컬 파일
+struct BytesFile {
+    bytes: Vec<u8>,
+    path: Arc<RelPath>,
+}
+
+impl File for BytesFile {
+    fn as_local(&self) -> Option<&dyn LocalFile> {
+        Some(self)
+    }
+
+    fn disk_state(&self) -> DiskState {
+        DiskState::Present {
+            mtime: fs::MTime::from_seconds_and_nanos(1, 0),
+            size: self.bytes.len() as u64,
+        }
+    }
+
+    fn path(&self) -> &Arc<RelPath> {
+        &self.path
+    }
+
+    fn full_path(&self, _: &App) -> PathBuf {
+        PathBuf::from("test.txt")
+    }
+
+    fn path_style(&self, _: &App) -> PathStyle {
+        PathStyle::local()
+    }
+
+    fn file_name<'a>(&'a self, _: &'a App) -> &'a str {
+        "test.txt"
+    }
+
+    fn worktree_id(&self, _: &App) -> WorktreeId {
+        WorktreeId::from_usize(0)
+    }
+
+    fn to_proto(&self, _: &App) -> rpc::proto::File {
+        unimplemented!()
+    }
+
+    fn is_private(&self) -> bool {
+        false
+    }
+}
+
+impl LocalFile for BytesFile {
+    fn abs_path(&self, _: &App) -> PathBuf {
+        PathBuf::from("/test.txt")
+    }
+
+    fn load(&self, _: &App) -> Task<Result<String>> {
+        unimplemented!()
+    }
+
+    fn load_bytes(&self, _: &App) -> Task<Result<Vec<u8>>> {
+        Task::ready(Ok(self.bytes.clone()))
+    }
+}
+
+/// 디스크의 바이트를 지정한 인코딩으로 읽은 글자로 이미 열려 있는 시험용 버퍼를 만든다.
+fn buffer_opened_as(bytes: &[u8], opened_with: &'static encoding_rs::Encoding, cx: &mut TestAppContext) -> Entity<Buffer> {
+    let decoded = don_charset::decode_forced(bytes, opened_with);
+    let file: Arc<dyn File> = Arc::new(BytesFile {
+        bytes: bytes.to_vec(),
+        path: RelPath::empty().into(),
+    });
+    cx.new(|_| {
+        let text_buffer = text::Buffer::new(ReplicaId::LOCAL, BufferId::new(1).unwrap(), decoded.text);
+        let mut buffer = Buffer::build(text_buffer, Some(file), Capability::ReadWrite);
+        buffer.set_encoding(opened_with);
+        buffer.set_has_bom(decoded.has_bom);
+        buffer
+    })
+}
+
+/// 깨져 보이는 파일을 올바른 인코딩으로 다시 불러오면 글자가 바로잡히고, 저장하지 않은 변경은 버려지며,
+/// 실행 취소 기록이 비고, 변경 없음 상태가 되는지 확인한다.
+#[gpui::test]
+async fn test_reload_with_encoding_fixes_garbled_text_and_resets_history(cx: &mut TestAppContext) {
+    let disk_bytes = encoding_rs::EUC_KR.encode("한글 테스트\n").0.into_owned();
+    // 자동 감지가 UTF-8 로 잘못 판단해 글자가 깨진 상태로 열렸다고 가정한다
+    let buffer = buffer_opened_as(&disk_bytes, encoding_rs::UTF_8, cx);
+    assert!(buffer.read_with(cx, |buffer, _| buffer.text().contains('\u{FFFD}')));
+
+    // 사용자가 그 위에 글을 더 적은 상태: 저장하지 않은 변경과 실행 취소 기록이 있다
+    buffer.update(cx, |buffer, cx| buffer.edit([(0..0, "XX")], None, cx));
+    assert!(buffer.read_with(cx, |buffer, _| buffer.is_dirty()));
+
+    let had_errors = buffer
+        .update(cx, |buffer, cx| buffer.reload_with_encoding(encoding_rs::EUC_KR, cx))
+        .await
+        .unwrap();
+    assert!(!had_errors);
+
+    buffer.read_with(cx, |buffer, _| {
+        // 디스크의 글자 그대로이고 편집 내용(XX)은 버려졌다
+        assert_eq!(buffer.text(), "한글 테스트\n");
+        assert_eq!(buffer.encoding(), encoding_rs::EUC_KR);
+        assert!(!buffer.has_bom());
+        // 파일을 새로 연 것과 같은 상태: 변경 없음, 충돌 없음
+        assert!(!buffer.is_dirty());
+        assert!(!buffer.has_conflict());
+    });
+    // 실행 취소 기록이 비어 있어서 다시 불러오기 전 내용으로 돌아갈 수 없다
+    assert!(buffer.update(cx, |buffer, cx| buffer.undo(cx)).is_none());
+}
+
+/// 강제로 읽을 때 해독할 수 없는 바이트는 오류로 막지 않고 대체 문자로 보여 주며 `true` 로 알린다.
+/// 그리고 BOM 이 지정한 인코딩과 같은 종류이면 글자에서 빼고 기록해, 저장할 때 다시 붙는다.
+#[gpui::test]
+async fn test_reload_with_encoding_reports_errors_and_tracks_bom(cx: &mut TestAppContext) {
+    let euc_kr_bytes = encoding_rs::EUC_KR.encode("한글\n").0.into_owned();
+    let buffer = buffer_opened_as(&euc_kr_bytes, encoding_rs::EUC_KR, cx);
+
+    // EUC-KR 바이트를 UTF-8 로 강제로 읽으면 일부를 해독할 수 없다
+    let had_errors = buffer
+        .update(cx, |buffer, cx| buffer.reload_with_encoding(encoding_rs::UTF_8, cx))
+        .await
+        .unwrap();
+    assert!(had_errors);
+    assert!(buffer.read_with(cx, |buffer, _| buffer.text().contains('\u{FFFD}')));
+
+    // UTF-8 BOM 이 붙은 파일을 UTF-8 로 읽으면 BOM 은 글자에 들어가지 않고 has_bom 으로 기록된다
+    let bom_bytes = [&[0xEF, 0xBB, 0xBF][..], "가나\n".as_bytes()].concat();
+    let buffer = buffer_opened_as(&bom_bytes, encoding_rs::EUC_KR, cx);
+    let had_errors = buffer
+        .update(cx, |buffer, cx| buffer.reload_with_encoding(encoding_rs::UTF_8, cx))
+        .await
+        .unwrap();
+    assert!(!had_errors);
+    buffer.read_with(cx, |buffer, _| {
+        assert_eq!(buffer.text(), "가나\n");
+        assert!(buffer.has_bom());
+        assert_eq!(buffer.encoding(), encoding_rs::UTF_8);
+    });
+}
+
+/// 디스크에 저장된 파일이 아닌 버퍼(제목 없는 새 파일)는 다시 불러올 수 없고 오류를 돌려준다.
+#[gpui::test]
+async fn test_reload_with_encoding_requires_a_local_file(cx: &mut TestAppContext) {
+    let buffer = cx.new(|cx| Buffer::local("abc", cx));
+    let result = buffer
+        .update(cx, |buffer, cx| buffer.reload_with_encoding(encoding_rs::EUC_KR, cx))
+        .await;
+    assert!(result.is_err());
+    assert_eq!(buffer.read_with(cx, |buffer, _| buffer.text()), "abc");
 }

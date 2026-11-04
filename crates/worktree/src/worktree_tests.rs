@@ -2591,3 +2591,72 @@ async fn test_write_file_encoding(cx: &mut gpui::TestAppContext) {
         );
     }
 }
+
+// [DonEditor] 대상 인코딩으로 표현할 수 없는 문자가 있으면 글자를 바꿔 쓰지 않고 저장을 중단하는지 확인한다.
+#[gpui::test]
+async fn test_write_file_refuses_characters_the_encoding_cannot_represent(cx: &mut gpui::TestAppContext) {
+    init_test(cx);
+    let fs = FakeFs::new(cx.executor());
+
+    let root_path = if cfg!(windows) {
+        Path::new("C:\\root")
+    } else {
+        Path::new("/root")
+    };
+    fs.create_dir(root_path).await.unwrap();
+
+    let worktree = Worktree::local(
+        root_path,
+        true,
+        fs.clone(),
+        Default::default(),
+        true,
+        &mut cx.to_async(),
+    )
+    .await
+    .unwrap();
+
+    let file_path = root_path.join("euckr.txt");
+    // 디스크에 이미 있는 원래 내용(EUC-KR 바이트). 저장이 거절되면 이 내용이 그대로여야 한다.
+    let original_bytes = encoding_rs::EUC_KR.encode("원래 내용\n").0.into_owned();
+    fs.insert_file(&file_path, original_bytes.clone()).await;
+    let rel_path = RelPath::new(Path::new("euckr.txt"), PathStyle::local())
+        .unwrap()
+        .to_arc();
+
+    // 이모지는 EUC-KR 로 표현할 수 없으므로 저장이 오류로 끝나고, 파일은 바뀌지 않는다
+    let error = worktree
+        .update(cx, |tree, cx| {
+            tree.write_file(
+                rel_path.clone(),
+                text::Rope::from("한글 😀\n"),
+                text::LineEnding::Unix,
+                encoding_rs::EUC_KR,
+                false,
+                cx,
+            )
+        })
+        .await
+        .expect_err("표현할 수 없는 문자가 있으면 저장이 실패해야 한다");
+    assert!(error.to_string().contains('😀'), "{error}");
+    assert_eq!(fs.load_bytes(&file_path).await.unwrap(), original_bytes);
+
+    // 표현할 수 있는 한글만 있으면 EUC-KR 바이트로 저장된다 (CRLF 줄 끝 포함)
+    worktree
+        .update(cx, |tree, cx| {
+            tree.write_file(
+                rel_path,
+                text::Rope::from("한글\n"),
+                text::LineEnding::Windows,
+                encoding_rs::EUC_KR,
+                false,
+                cx,
+            )
+        })
+        .await
+        .unwrap();
+    assert_eq!(
+        fs.load_bytes(&file_path).await.unwrap(),
+        encoding_rs::EUC_KR.encode("한글\r\n").0.into_owned()
+    );
+}

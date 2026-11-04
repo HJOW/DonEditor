@@ -5,6 +5,7 @@ resolver = "2"
 members = [
   "tooling/don_protocol_tests",
   "crates/don_tools",
+  "crates/don_charset",
   "crates/mcp_server",
   "crates/agent_panel",
   "crates/activity_indicator",
@@ -163,6 +164,7 @@ publish = false
 
 [workspace.dependencies]
 don_tools = { path = "crates/don_tools" }
+don_charset = { path = "crates/don_charset" }
 mcp_server = { path = "crates/mcp_server" }
 agent_panel = { path = "crates/agent_panel" }
 activity_indicator = { path = "crates/activity_indicator" }

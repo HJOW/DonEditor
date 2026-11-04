@@ -545,6 +545,8 @@ pub fn main() {
         journal::init(app_state.clone(), cx);
         language_selector::init(cx);
         line_ending_selector::init(cx);
+        // [DonEditor] 상태 표시줄 인코딩을 눌러 다른 인코딩으로 다시 불러오는 선택 화면과 액션
+        encoding_selector::init(cx);
         toolchain_selector::init(cx);
         theme_selector::init(cx);
         settings_profile_selector::init(cx);

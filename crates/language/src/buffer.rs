@@ -1479,6 +1479,55 @@ impl Buffer {
         rx
     }
 
+    /// [DonEditor] 디스크의 파일을 지정한 인코딩으로 **강제로** 다시 해독해 버퍼 내용을 바꾼다.
+    ///
+    /// 파일을 이미 연 뒤 글자가 깨져 보일 때 다른 인코딩으로 다시 읽는 용도다.
+    /// - 자동 감지 결과나 BOM 과 관계없이 지정한 인코딩으로 읽는다 (`don_charset::decode_forced`).
+    /// - 저장하지 않은 변경은 버려진다. 호출하는 쪽이 사용자 확인을 받아야 한다.
+    /// - 파일을 다시 불러온 것과 같게, 실행 취소·다시 실행 기록을 비우고 저장된 상태(변경 없음)로 표시한다.
+    /// - **디스크의 파일은 건드리지 않는다.** 저장은 사용자가 직접 할 때만 일어난다.
+    /// - 이후 저장은 여기서 지정한 인코딩과 BOM 여부를 따른다.
+    ///
+    /// 해독할 수 없는 바이트가 있어 대체 문자(U+FFFD)가 들어갔으면 `true` 를 돌려준다(오류로 막지는 않는다).
+    pub fn reload_with_encoding(&mut self, encoding: &'static Encoding, cx: &Context<Self>) -> Task<Result<bool>> {
+        let Some(file) = self.file.as_ref().and_then(|file| file.as_local()) else {
+            return Task::ready(Err(anyhow::anyhow!("the buffer has no local file to reload")));
+        };
+        let mtime = file.disk_state().mtime();
+        let load_bytes_task = file.load_bytes(cx);
+        cx.spawn(async move |this, cx| {
+            let bytes = load_bytes_task.await?;
+            let decoded = don_charset::decode_forced(&bytes, encoding);
+            let has_bom = decoded.has_bom;
+            let had_errors = decoded.had_errors;
+            // 커서·스크롤 위치를 최대한 유지하도록 전체 교체 대신 차이만 적용한다
+            let diff = this.update(cx, |this, cx| this.diff(decoded.text.clone(), cx))?.await;
+            this.update(cx, |this, cx| {
+                if this.version() == diff.base_version {
+                    this.apply_diff(diff, cx);
+                } else {
+                    // 기다리는 사이 내용이 또 바뀌었다면 차이를 그대로 쓸 수 없으므로 전체를 바꾼다
+                    let mut text = decoded.text;
+                    let line_ending = LineEnding::detect(&text);
+                    LineEnding::normalize(&mut text);
+                    this.start_transaction();
+                    this.text.set_line_ending(line_ending);
+                    let len = this.len();
+                    this.edit([(0..len, text)], None, cx);
+                    this.end_transaction(cx);
+                }
+                // 이전 내용으로 되돌아갈 수 없게 기록을 비우고, 디스크와 같은 상태로 표시한다
+                this.finalize_last_transaction();
+                this.text.clear_history();
+                this.encoding = encoding;
+                this.has_bom = has_bom;
+                this.has_conflict = false;
+                this.did_reload(this.version(), this.line_ending(), mtime, cx);
+                had_errors
+            })
+        })
+    }
+
     /// This method is called to signal that the buffer has been reloaded.
     pub fn did_reload(
         &mut self,

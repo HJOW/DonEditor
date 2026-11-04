@@ -1255,7 +1255,9 @@
     // Whether to show active line endings button in the status bar.
     "line_endings_button": false,
     // Control when to show the active encoding in the status bar.
-    "active_encoding_button": "non_utf8",
+    // [DonEditor] 기본값을 "enabled" 로 바꿔 UTF-8 파일에서도 인코딩을 항상 보여 준다.
+    // Options: "enabled" (always), "non_utf8" (hide plain UTF-8 without BOM), "disabled"
+    "active_encoding_button": "enabled",
     // Show the status bar at the top or bottom of the window.
     "position": "bottom",
     // Status bar icon size. "default" or "large".

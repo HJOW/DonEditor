@@ -394,6 +394,13 @@ impl History {
         &self.redo_stack[redo_stack_start_len..]
     }
 
+    /// [DonEditor] 실행 취소·다시 실행 기록을 모두 비운다.
+    fn clear(&mut self) {
+        assert_eq!(self.transaction_depth, 0);
+        self.undo_stack.clear();
+        self.redo_stack.clear();
+    }
+
     fn forget(&mut self, transaction_id: TransactionId) -> Option<Transaction> {
         assert_eq!(self.transaction_depth, 0);
         if let Some(entry_ix) = self
@@ -1426,6 +1433,12 @@ impl Buffer {
 
     pub fn forget_transaction(&mut self, transaction_id: TransactionId) -> Option<Transaction> {
         self.history.forget(transaction_id)
+    }
+
+    /// [DonEditor] 실행 취소·다시 실행 기록을 모두 비운다. 파일을 다른 인코딩으로 다시 불러올 때처럼
+    /// 이전 내용으로 되돌릴 수 없어야 하는 경우에 쓴다. 열려 있는 변경 묶음이 없을 때만 호출해야 한다.
+    pub fn clear_history(&mut self) {
+        self.history.clear();
     }
 
     pub fn get_transaction(&self, transaction_id: TransactionId) -> Option<&Transaction> {

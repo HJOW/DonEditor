@@ -4308,6 +4308,8 @@ mod tests {
                 "diagnostics",
                 "docs_search",
                 "editor",
+                // [DonEditor] 인코딩 선택·다시 불러오기 액션
+                "encoding_selector",
                 "file_finder",
                 "git",
                 "git_graph",

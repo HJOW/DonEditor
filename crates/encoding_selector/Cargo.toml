@@ -12,11 +12,20 @@ path = "src/encoding_selector.rs"
 test = false
 
 [dependencies]
+anyhow.workspace = true
+# [DonEditor] 인코딩 목록·이름 해석
+don_charset.workspace = true
 editor.workspace = true
 encoding_rs.workspace = true
+fuzzy.workspace = true
 gpui.workspace = true
 i18n.workspace = true
+language.workspace = true
+picker.workspace = true
+schemars.workspace = true
+serde.workspace = true
 ui.workspace = true
+util.workspace = true
 workspace.workspace = true
 
 [lints]

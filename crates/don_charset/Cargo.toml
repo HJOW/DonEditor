@@ -1,0 +1,16 @@
+[package]
+name = "don_charset"
+version.workspace = true
+edition.workspace = true
+license = "GPL-3.0-or-later"
+publish = false
+
+[lib]
+path = "src/don_charset.rs"
+doctest = false
+
+[dependencies]
+encoding_rs.workspace = true
+
+[lints]
+workspace = true

@@ -2328,6 +2328,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "don_charset"
+version = "0.1.0"
+dependencies = [
+ "encoding_rs",
+]
+
+[[package]]
 name = "don_protocol_tests"
 version = "0.1.0"
 dependencies = [
@@ -2510,11 +2517,19 @@ dependencies = [
 name = "encoding_selector"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
+ "don_charset",
  "editor",
  "encoding_rs",
+ "fuzzy",
  "gpui",
  "i18n",
+ "language",
+ "picker",
+ "schemars",
+ "serde",
  "ui",
+ "util",
  "workspace",
 ]
 
@@ -4874,6 +4889,7 @@ dependencies = [
  "clock",
  "collections",
  "ctor",
+ "don_charset",
  "ec4rs",
  "encoding_rs",
  "fs",
@@ -13061,12 +13077,14 @@ dependencies = [
  "chardetng",
  "clock",
  "collections",
+ "don_charset",
  "encoding_rs",
  "fs",
  "futures",
  "fuzzy",
  "git",
  "gpui",
+ "i18n",
  "ignore",
  "language",
  "log",

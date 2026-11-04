@@ -1507,43 +1507,18 @@ impl LocalWorktree {
                     LineEnding::Windows => text_string.replace('\n', "\r\n"),
                 };
 
-                // Create the byte vector manually for UTF-16 encodings because encoding_rs encodes to UTF-8 by default (per WHATWG standards),
-                //  which is not what we want for saving files.
-                let bytes = if encoding == encoding_rs::UTF_16BE {
-                    let mut data = Vec::with_capacity(normalized_text.len() * 2 + 2);
-                    if has_bom {
-                        data.extend_from_slice(&[0xFE, 0xFF]); // BOM
-                    }
-                    let utf16be_bytes = normalized_text.encode_utf16().flat_map(|u| u.to_be_bytes());
-                    data.extend(utf16be_bytes);
-                    data.into()
-                } else if encoding == encoding_rs::UTF_16LE {
-                    let mut data = Vec::with_capacity(normalized_text.len() * 2 + 2);
-                    if has_bom {
-                        data.extend_from_slice(&[0xFF, 0xFE]); // BOM
-                    }
-                    let utf16le_bytes = normalized_text.encode_utf16().flat_map(|u| u.to_le_bytes());
-                    data.extend(utf16le_bytes);
-                    data.into()
-                } else {
-                    // For other encodings (Shift-JIS, UTF-8 with BOM, etc.), delegate to encoding_rs.
-                    let bom_bytes = if has_bom {
-                        if encoding == encoding_rs::UTF_8 {
-                            vec![0xEF, 0xBB, 0xBF]
-                        } else {
-                            vec![]
-                        }
-                    } else {
-                        vec![]
-                    };
-                    let (cow, _, _) = encoding.encode(&normalized_text);
-                    if !bom_bytes.is_empty() {
-                        let mut bytes = bom_bytes;
-                        bytes.extend_from_slice(&cow);
-                        bytes.into()
-                    } else {
-                        cow
-                    }
+                // [DonEditor] 인코딩 변환은 don_charset 에서 한다. encoding_rs 의 기본 동작은 대상 인코딩으로 표현할 수 없는 문자를
+                // `&#128512;` 같은 HTML 숫자 참조로 조용히 바꿔 써서 저장 중에 내용이 달라지므로, 그런 문자가 있으면 저장하지 않고 알린다.
+                let bytes = match don_charset::encode_checked(&normalized_text, encoding, has_bom) {
+                    Ok(bytes) => bytes,
+                    Err(unmappable) => anyhow::bail!(i18n::t_with(
+                        "worktree.error.unmappable_character",
+                        &[
+                            ("character", unmappable.character.to_string()),
+                            ("line", unmappable.line.to_string()),
+                            ("encoding", encoding.name().to_string()),
+                        ]
+                    )),
                 };
 
                 fs.write(&abs_path, &bytes).await
