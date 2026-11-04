@@ -32,7 +32,7 @@ Linux에서는 tar.gz를 풀고 `bin/doneditor`를 실행합니다. 빌드한 �
 | macOS | `~/.config/doneditor` | `~/Library/Application Support/DonEditor` |
 | Linux | `$XDG_CONFIG_HOME/doneditor` 또는 `~/.config/doneditor` | `$XDG_DATA_HOME/doneditor` 또는 `~/.local/share/doneditor` |
 
-정확한 설정 파일은 앱의 설정 파일 열기 메뉴를 사용하면 찾을 수 있습니다. `--user-data-dir <경로>`로 실행하면 설정과 데이터를 해당 폴더에 격리합니다. 프로젝트 안의 `.gram/` 설정은 원본과 호환되도록 유지합니다. API 키는 이 설정 파일에 적지 않고 [Agent 패널](agent.md)의 키 저장 기능을 사용합니다.
+정확한 설정 파일은 앱의 설정 파일 열기 메뉴를 사용하면 찾을 수 있습니다. `--user-data-dir <경로>`로 실행하면 설정과 데이터를 해당 폴더에 격리합니다. 프로젝트 안의 `.gram/` 설정은 원본과 호환되도록 유지합니다. API 키는 이 설정 파일에 적지 않고 설정 > 에이전트의 키 저장 기능을 사용합니다([Agent 패널](agent.md) 참고). 같은 페이지의 API 서버 URL만 사용자 설정 파일의 `agent` 항목에 저장됩니다.
 
 ## 소스에서 빌드
 

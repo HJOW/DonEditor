@@ -22,7 +22,7 @@
   - 설정 화면 **에이전트** 페이지에서 제공자별 API 키(마스킹·키 저장·키 삭제·출처 표시)와 API 서버 URL(공식 주소 placeholder)이 보이고, `API` 검색으로도 찾을 수 있다. 처음에는 버튼·상태 문구가 오른쪽으로 넘쳐 잘려 입력란·버튼·상태를 세로로 쌓는 고정 너비 배치로 고쳤다. 환경 변수 `ANTHROPIC_API_KEY`로 실행하면 "환경 변수 ANTHROPIC_API_KEY의 키를 사용 중"으로 표시되고 키 삭제는 비활성이다.
   - 설정 화면에서 URL을 입력하면 사용자 `settings.jsonc`의 `agent.anthropic.api_url`에 저장된다. 원격 `http://example.com`은 네트워크 요청 없이 "API 서버 URL이 올바르지 않습니다" 오류로 거절됐다. 루프백 캡처 서버(`http://127.0.0.1:18765`, 401 응답)로 바꾸면 실제 요청이 `/v1/messages`로 도착했고 `x-api-key` 헤더와 도구 33개, 시스템 안내문의 편집기 상태(열린 폴더 `proj`, 단일 파일의 상위 폴더, 활성 파일 경로, 탭 목록)를 확인했다. 외부 API 서버로는 어떤 요청도 보내지 않았다.
   - **자격 증명 정리:** 저장·삭제 확인을 위해 처음에 `DonEditor.Agent` 항목이 없음을 `cmdkey`로 확인한 뒤 가짜 값만 사용했다. 테스트 입력이 키 입력란에 들어가 OpenAI 가짜 키가 한 번 더 저장된 일이 있어 즉시 `cmdkey /delete`로 지웠고, 종료 시 `DonEditor.Agent` 항목이 하나도 남지 않았음을 확인했다. 실제 사용자 키는 읽거나 저장하지 않았다.
-- **남은 확인:** 유효한 키로 실제 OpenAI/Claude 호출(이전 사용자 지시에 따라 생략), macOS/Linux의 키 저장소·화면, 릴리스 빌드에서의 같은 흐름 확인이 남았다. 테스트 데이터는 `target/gui-test-agent-802d0ebc/`에 남겨 두었다. 이번 변경은 아직 Git 커밋하지 않았다.
+- **남은 확인:** 유효한 키로 실제 OpenAI/Claude 호출(이전 사용자 지시에 따라 생략), macOS/Linux의 키 저장소·화면, 릴리스 빌드에서의 같은 흐름 확인이 남았다. 테스트 데이터는 `target/gui-test-agent-802d0ebc/`에 남겨 두었다. 이 변경은 사용자가 커밋 `a2ad462`(에이전트 패널 관련)로 반영했다.
 
 ## 2026-11-04 재개 후 일시 중지 체크포인트
 
@@ -106,8 +106,9 @@ cargo test -p don_protocol_tests --offline --target-dir target/i18n-check
 
 ### 이전 단계별 기록 (아래의 대기·미구현 표시는 당시 기준이며, 위 진행 기록으로 순차 갱신)
 
-- 최종 갱신: 2026-11-04
-- 현재 단계: **Phase 5(한국어 UI) 1차 구현 완료 — 기반(`crates/i18n`·`ui_language` 설정)과 주요 UI(메뉴·패널·탭·컨텍스트 메뉴·검색·상태바·대화상자·명령 팔레트·설정 화면의 언어 선택)를 한글화, 자동 테스트 통과. 설정 화면 본문·키맵 편집기·Git 패널·디버거 등은 아직 영어(Phase 5 "남은 것" 참고). 디버그 빌드를 실제로 실행해 창을 캡처해 한국어 메뉴·우클릭 메뉴가 정상 표시됨을 확인했다(확인 범위는 Phase 5 "실제 화면 확인" 참고)**. Phase 4·3·2 의 사용자 확인·결정 요청도 그대로 남아 있음 → 다음 후보는 Phase 5 2차(남은 화면), Phase 6 (MCP), Phase 3 후속(Linux/macOS tar.gz 배포)
+- 최종 갱신: 2026-11-04 (체크 항목 최신화)
+- **2026-11-04 현재 상태 요약:** Phase 0~5는 완료 또는 1차 완료, Phase 6(MCP)·Phase 7(Agent 패널)은 구현과 Windows 실제 실행 검증을 대부분 마쳤다(각 절 체크 항목 참고). 남은 것은 실제 Claude Desktop/Code 연결, 유효한 키를 쓰는 실제 API 호출(사용자 지시로 생략), Phase 8 통합 회귀·릴리스 배포본 검증, Linux/macOS 실제 OS 검증, 사용자 결정 사항이다. 아래 '현재 단계' 문구는 2026-10-28 당시 기록이다.
+- (2026-10-28 기록) 현재 단계: **Phase 5(한국어 UI) 1차 구현 완료 — 기반(`crates/i18n`·`ui_language` 설정)과 주요 UI(메뉴·패널·탭·컨텍스트 메뉴·검색·상태바·대화상자·명령 팔레트·설정 화면의 언어 선택)를 한글화, 자동 테스트 통과. 설정 화면 본문·키맵 편집기·Git 패널·디버거 등은 아직 영어(Phase 5 "남은 것" 참고). 디버그 빌드를 실제로 실행해 창을 캡처해 한국어 메뉴·우클릭 메뉴가 정상 표시됨을 확인했다(확인 범위는 Phase 5 "실제 화면 확인" 참고)**. Phase 4·3·2 의 사용자 확인·결정 요청도 그대로 남아 있음 → 다음 후보는 Phase 5 2차(남은 화면), Phase 6 (MCP), Phase 3 후속(Linux/macOS tar.gz 배포)
 - Phase 1 완료 ✅ (디버그·릴리스 빌드와 실행, GUI 확인, 기능 인벤토리, 기준선 태그 `gram-baseline-3.4.0`)
 - Phase 2 구현·검증 완료 ✅, 사용자 시각 확인 대기 (식별자·경로·실행 파일명·표시 이름·글꼴·라이선스 고지 적용, 원본 빌드와 동시 실행 검증)
 - Phase 3·4 구현·검증 완료 ✅ (2026-10-27), Phase 5 1차 구현 완료 (2026-10-28). **현재 저장소에는 Phase 5 소스(`crates/i18n/`·`assets/locales/` 등)가 커밋 `f061f14` 에 포함되어 있다. 이전의 "Phase 5 미커밋" 안내를 정정한다.** 아래 과거 작업 기록의 커밋 번호·검증 결과는 당시 환경 기준으로 보존한다.
@@ -484,7 +485,7 @@ DonEditor/
 - [x] `.gitignore` 정리 (원본에 `**/target` 이미 포함, `/dist/` 추가)
 - [x] 빌드 도구 설치 확인 → rustup/cargo, CMake 4.4.4, MSVC 14.51(VS 2026), Windows SDK 10.0.26100 확인. Spectre 라이브러리만 미설치
 - [x] **수정 없이** Windows 디버그/릴리스 빌드 성공 및 실행 확인 (최우선 리스크 해소) — **디버그·릴리스 빌드 모두 성공, 실행 확인 완료(2026-10-27).** (1차 디버그 빌드는 Spectre 완화 라이브러리 미설치로 실패(종료 코드 101)했으나 설치 후 성공 — 아래 항목 참고) ※ 컴파일 시작 전(의존성 내려받는 단계)에 원본 문서 이동에 따른 `assets.rs` 경로 1줄 변경이 반영되어 **완전한 무수정 빌드는 아님** (2.2 참고. 빌드에 영향을 주는 변경은 이 경로뿐)
-- [ ] 빌드 실패 시 원인·해결 방법을 이 문서에 기록
+- [x] 빌드 실패 시 원인·해결 방법을 이 문서에 기록 (2026-10-27, 아래 원인·조치·재빌드 결과)
   - **원인 (확인됨):** 약 537개 crate 컴파일까지 진행된 뒤 `msvc_spectre_libs v0.1.3` 의 build script 가 `No spectre-mitigated libs were found` 로 패닉. 다른 컴파일 오류는 없었음(error 1건). 의존 경로: `gram → languages → pet*`(Microsoft python-environment-tools, git 의존성)이 `msvc_spectre_libs` 의 `error` feature 를 켬. 이 crate 는 `cl.exe` 위치 기준 `lib\spectre\x64` 폴더를 찾으며, 사용 중인 VS Community 2026 (18.11, `C:\Program Files\Microsoft Visual Studio\18\Insiders`, MSVC 14.51) 에는 해당 폴더가 없음. 설치된 어떤 VS 인스턴스(2017/2019/2022 BuildTools/2026)에도 Spectre 컴포넌트가 없음
   - **조치 결과 (2026-10-27):** 사용자 승인 후 해결안 A 수행. VS Installer `setup.exe modify --installPath "C:\Program Files\Microsoft Visual Studio\18\Insiders" --add Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre --passive --norestart` 를 관리자 권한(UAC)으로 실행 → 종료 코드 0, 약 5분 30초 소요, `…\MSVC\14.51.36231\lib\spectre\x64` 생성 및 `vswhere -requires` 로 컴포넌트 인식 확인. 1차 시도는 **경로 공백을 따옴표 없이 넘겨(`Start-Process -ArgumentList` 배열) `installPath` 가 `C:\Program` 으로 잘려 종료 코드 1로 실패**했음(시스템 변경 없음). → Phase 3 배포 스크립트에서 설치 명령을 만들 때 경로·인자 따옴표 처리를 주의할 것
   - **재빌드 결과 (2026-10-27):** 설치 후 `cargo build` 재실행 → **성공** (오류 0, 경고 0, 7분 22초, 이어서 321개 crate 컴파일). 산출물 `target/debug/gram.exe` 약 200MB, `target/` 약 14GB. 앱 실행 확인 결과는 아래 항목 참고
@@ -513,8 +514,8 @@ DonEditor/
 - [x] 원본 문서를 [GramEditor-docs/](GramEditor-docs/) 로 분리 보관하고 우리 문서(README.md, PROGRESS.md)의 원본 설명 단락에 링크 연결 (2026-10-27, 2.2 참고)
 - [x] README 에 "AI 적극 도입이 원본과의 가장 큰 차이"임을 반영 (2026-10-27): 소개 문단, 기능 표(AI 기능 최상단), "원본과 달라지는 점", 문서 안내
 - [x] 원본의 **AI 금지·인간 기여 정책 문서**(`CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `docs/index.md`, `docs/mission.md`, `docs/HUMAN-CONTRIBUTION-POLICY-2-UP.md`, `docs/migrate/*`)는 Don Editor 방향(AI 적극 도입)과 충돌하므로, 수정하지 않고 [GramEditor-docs/](GramEditor-docs/) 로 분리하여 "원본 프로젝트의 정책"임을 README 에 명시 (2026-10-27)
-- [ ] **앱 내 도움말 처리:** 현재 앱 내 도움말(`gram://docs/...`)이 원본 문서(AI 금지 문구 포함)를 그대로 표시한다. R8(기존 기능 보존)에 따라 도움말 기능 자체와 원본 문서는 **유지**하고, Don Editor 자체 도움말(한국어)을 추가하며 원본 문서임을 구분 표시하는 방향으로 검토한다. 구체 방식은 사용자와 협의 (Phase 5 한국어 UI 와 함께 검토)
-- [ ] Don Editor 자체 기여 안내·행동 강령이 필요한지 사용자와 협의 (필요 없으면 생략. 프로젝트 정책 결정이므로 임의로 작성하지 않는다)
+- [x] **앱 내 도움말 처리:** — **구현 완료(`5fa69a6`, 2026-11-04).** 원본 문서와 도움말 기능은 유지하고, 한국어 자체 도움말 `docs/`(index·installation·agent·mcp·security·packaging)를 추가했으며 원본 문서를 열 때 출처 안내를 표시하고 검색에도 통합했다. 2026-11-04 Agent 설정 변경에 맞춰 `agent.md`·`security.md`·`installation.md`를 갱신했다. 이하 원래 계획: 현재 앱 내 도움말(`gram://docs/...`)이 원본 문서(AI 금지 문구 포함)를 그대로 표시한다. R8(기존 기능 보존)에 따라 도움말 기능 자체와 원본 문서는 **유지**하고, Don Editor 자체 도움말(한국어)을 추가하며 원본 문서임을 구분 표시하는 방향으로 검토한다. 구체 방식은 사용자와 협의 (Phase 5 한국어 UI 와 함께 검토)
+- [ ] Don Editor 자체 기여 안내·행동 강령이 필요한지 사용자와 협의 (필요 없으면 생략. 프로젝트 정책 결정이므로 임의로 작성하지 않는다) — **사용자 결정 대기.** 2026-11-04까지 새로 제정하지 않았다
 - [x] 앱 내부에 "AI 없음"을 알리는 문구가 있는지 점검 (2026-10-27) — Rust·JSONC·JSON·TOML 의 문자열 리터럴과 기본 설정을 검색한 결과 **해당 문구 없음**(검색에 걸린 것은 테스트용 샘플 문자열 1건). 다만 앱 내 도움말이 표시하는 원본 문서(`GramEditor-docs/docs`)에는 있음(위 "앱 내 도움말 처리" 항목)
 - [x] **실행 파일명 변경** (2026-10-27): `crates/gram/Cargo.toml` 의 `[[bin]]` 이름 `gram` → **`doneditor`** (`doneditor.exe`). 대문자 `DonEditor` 는 rustc 의 crate 이름 규칙(snake_case) 경고를 일으켜 소문자로 함. 라이브러리 crate 이름은 `gram` 그대로(대규모 리네이밍 지양 원칙)
   - **`autobins = false` 추가가 필수였다:** `[[bin]]` 이름을 바꾸자 Cargo 가 `src/main.rs`(라이브러리 루트)를 `gram` 바이너리로 자동 발견해 경고가 났다(원본은 [[bin]] 이름이 같아 우연히 가려져 있었음). `autobins = false` 로 해결, 경고 0건 확인
@@ -523,7 +524,7 @@ DonEditor/
 - [x] **기본 글꼴 D2Coding 적용** (2026-10-27, 3.8 참고) — 코드 적용·빌드·실행 완료. `.ttc` 로드 경로 수정, 기본 설정 변경, 라이선스 고지 추가. **화면에서 실제로 D2Coding 으로 보이는지는 사용자 시각 확인 대기**
 - [x] **라이선스 고지 정리** (2026-10-27, 3.9 참고) — `assets/licenses.md`: Don Editor 가 Gram(→Zed)의 수정본임을 밝히되 **원본 "Copyright (C) 2026 The Gram Project" 표기와 GPL 본문은 그대로 유지**, "Bundled fonts" 절 추가, `assets/fonts/D2Coding-LICENSE` 추가. README 는 앞서 반영 완료
   - **남은 TODO:** `licenses.md` 의 "full source code … from codeberg.org/GramEditor/gram" 문구는 원본 Gram 을 가리킨다. 이를 "Don Editor 의 소스는 배포자에게서 받을 수 있다"로 바꿔 두었으나, **배포 시 Don Editor 소스를 어디에 공개할지(저장소 주소 또는 소스 동봉)** 를 정해 구체적으로 적어야 한다(GPL 의무). 수정본 저작권자 표기도 필요하면 사용자가 결정
-- [ ] **'Gram' 문자열 잔여 백로그:** Phase 5 에서 화면에 보이는 것 중 설정 화면 설명문 8건·에디터 안내문·시작 화면·시스템 정보 등을 "Don Editor"로 바꿨다. 남은 것은 식별자·호환성 때문에 의도적으로 두었거나(테마 이름 `Gram (Default)`, `gram://` 스킴, 사용자 에이전트, 키맵 컨텍스트 `Gram Keybind Context`, DAP 클라이언트 이름) Linux 전용(`install_cli` 안내), 내부 오류 메시지·개발용 문구다. 재조사 명령: `grep -rIn '"[^"]*\bGram\b[^"]*"' crates --include=*.rs`
+- [ ] **'Gram' 문자열 잔여 백로그 (진행형 백로그, 의도적으로 남긴 항목 포함):** Phase 5 에서 화면에 보이는 것 중 설정 화면 설명문 8건·에디터 안내문·시작 화면·시스템 정보 등을 "Don Editor"로 바꿨다. 남은 것은 식별자·호환성 때문에 의도적으로 두었거나(테마 이름 `Gram (Default)`, `gram://` 스킴, 사용자 에이전트, 키맵 컨텍스트 `Gram Keybind Context`, DAP 클라이언트 이름) Linux 전용(`install_cli` 안내), 내부 오류 메시지·개발용 문구다. 재조사 명령: `grep -rIn '"[^"]*\bGram\b[^"]*"' crates --include=*.rs`
 - **완료 기준 점검:** ① 원본 Gram 과 동시 실행해도 설정이 섞이지 않음 — **충족(검증함)** ② 기본 글꼴이 D2Coding 으로 표시됨 — **사용자 시각 확인 필요**. 나머지 협의 항목(앱 내 도움말 처리, 자체 기여 안내 필요 여부)은 Phase 2 를 막지 않는 별도 결정 사항
 
 ### Phase 3. Windows 배포 zip 스크립트 (R5, 조기 작성 → 이후 Phase마다 패키징 검증) ✅
@@ -658,30 +659,32 @@ DonEditor/
 - Windows 에서 `cmd`/`bash` 를 거치는 스크립트는 백슬래시가 깨질 수 있어 도구 스크립트는 파일로 저장해 실행했다
 
 ### Phase 6. 공용 도구 레지스트리 + 로컬 MCP 서버
-- [ ] `crates/don_tools` 도구 정의 구조 및 1차 도구(파일/편집/검색/범용 액션) 구현
-- [ ] `crates/mcp_server` Streamable HTTP 서버 구현 (루프백, 토큰)
-- [ ] `don-mcp.exe` stdio 브릿지 구현
-- [ ] 승인 대화상자(파괴적 동작) 및 MCP 켜기/끄기 메뉴·설정 추가
-- [ ] 나머지 도구(UI, 설정, 터미널, 진단, 리소스) 구현
-- [ ] Claude Desktop / Claude Code 등 MCP 클라이언트 연결 설정 예시 문서화 및 실제 연결 테스트
-- 완료 기준: 외부 MCP 클라이언트에서 파일 열기·편집·저장·검색·패널 토글·임의 액션 실행 가능
+- [x] `crates/don_tools` 도구 정의 구조 및 1차 도구(파일/편집/검색/범용 액션) 구현 — `8de5f9e`. 현재 도구 33개(`list_agent_conversations` 포함)
+- [x] `crates/mcp_server` Streamable HTTP 서버 구현 (루프백, 토큰) — 루프백·Bearer·Host/Origin 검사, 세션·취소, 크기 제한. 실제 TCP 계약 테스트 통과
+- [x] `don-mcp.exe` stdio 브릿지 구현 — `10efaee`(병렬 중계·요청/EOF 취소). Windows 배포 zip의 `bin\don-mcp.exe`로 동봉
+- [x] 승인 대화상자(파괴적 동작) 및 MCP 켜기/끄기 메뉴·설정 추가 — 보기 메뉴의 MCP 켜기/끄기·연결 정보, 설정 `mcp_server.enabled/port`(기본 비활성). 승인·거절·취소의 실제 화면 조작 검증은 남음
+- [x] 나머지 도구(UI, 설정, 터미널, 진단, 리소스) 구현 — 설정 조회/변경(2026-11-04부터 `agent` 항목 변경 거절), 터미널 실행(승인), 진단·개요, 패널 토글, 리소스 3개
+- [ ] Claude Desktop / Claude Code 등 MCP 클라이언트 연결 설정 예시 문서화 및 실제 연결 테스트 — **문서화 완료(`docs/mcp.md`), 공식 Python MCP SDK로 실제 앱 HTTP·stdio 연결 검증 완료. Claude Desktop/Code 실제 앱 연결은 미검증**
+- 완료 기준: 외부 MCP 클라이언트에서 파일 열기·편집·저장·검색·패널 토글·임의 액션 실행 가능 — **SDK 기준 도구 조회·호출은 확인, GUI 승인을 거치는 편집·저장의 실제 화면 확인과 Claude 앱 연결이 남음**
 
 ### Phase 7. Agent 사이드 패널
-- [ ] `crates/agent_panel` 패널 골격 (우측 기본 배치, 토글 액션, 메뉴)
-- [ ] 패널 숨김 및 숨긴 상태에서도 접근 가능한 별도 아이콘 구현, 아이콘 클릭으로 다시 표시
-- [ ] `LlmProvider` 트레이트 + Anthropic / OpenAI 구현 (스트리밍)
-- [ ] API Key 입력·저장(자격 증명 관리자)·환경 변수 폴백
-- [ ] 채팅 UI, 컨텍스트 첨부, 중단, 오류 처리
-- [ ] `don_tools` 연동 도구 호출 + 편집 diff 미리보기/승인
-- [ ] 대화 기록 저장/불러오기
-- 완료 기준: Claude/OpenAI 키 중 하나만 등록해도 기본 우측 패널에서 대화하고, 현재 파일을 수정하도록 지시하면 승인 후 반영됨. 패널을 숨긴 뒤에도 화면 내 별도 아이콘을 클릭해 다시 표시할 수 있음
+- [x] `crates/agent_panel` 패널 골격 (우측 기본 배치, 토글 액션, 메뉴) — `2b5390a`. 2026-11-04 실제 화면 확인(우측 표시, `Ctrl+Alt+A`)
+- [x] 패널 숨김 및 숨긴 상태에서도 접근 가능한 별도 아이콘 구현, 아이콘 클릭으로 다시 표시 — 2026-11-04 실제 화면 확인
+- [x] **(2026-11-04 사용자 요청)** 프로그램 실행 시 항상 숨긴 상태로 시작(이전에 열어 둔 상태 포함) — 실제 화면 확인
+- [x] **(2026-11-04 사용자 요청)** 제공자 선택을 콤보박스로 변경(`Provider::ALL`, 이후 Google·OpenCode·LM Studio 추가 예정) — 실제 화면 확인
+- [x] `LlmProvider` 트레이트 + Anthropic / OpenAI 구현 (스트리밍) — 계약 테스트 13개 통과, 루프백 캡처 서버로 실제 요청 형식 확인. 유효한 키의 실제 API 호출은 사용자 지시로 생략
+- [x] API Key 입력·저장(자격 증명 관리자)·환경 변수 폴백 — **2026-11-04 사용자 요청으로 변경:** 기본 설정(설정 > 에이전트)에서 제공자별 키·API 서버 URL(공란이면 기본값) 입력, 키 없을 때만 패널에 인라인 키 입력. 저장·삭제·즉시 반영·환경 변수 표시를 실제 화면에서 확인
+- [x] 채팅 UI, 컨텍스트 첨부, 중단, 오류 처리 — 2026-11-04부터 요청마다 열린 폴더·현재 파일·탭 경로 자동 첨부. 메시지 표시·URL 오류 표시는 실제 화면 확인, 중단 버튼은 실제 응답 스트림이 없어 화면 확인 못 함
+- [x] `don_tools` 연동 도구 호출 + 편집 diff 미리보기/승인 — 구현·컴파일 완료, 요청에 도구 33개 포함 확인. 실제 모델이 도구를 호출해 승인창을 거치는 흐름은 미검증(실제 API 호출 생략)
+- [x] 대화 기록 저장/불러오기 — 워크스페이스별 최근 20개, MCP `list_agent_conversations`·`SelectConversation`·`ClearHistory`. 재실행 시 제공자 선택 복원은 확인, 기록 목록의 화면 조작은 미확인
+- 완료 기준: Claude/OpenAI 키 중 하나만 등록해도 기본 우측 패널에서 대화하고, 현재 파일을 수정하도록 지시하면 승인 후 반영됨. 패널을 숨긴 뒤에도 화면 내 별도 아이콘을 클릭해 다시 표시할 수 있음 — **아이콘 복귀·키 등록 흐름은 충족. 실제 모델과의 대화·승인 후 편집 반영은 실제 API 호출 생략으로 미확인**
 
 ### Phase 8. 통합 테스트 · 문서화 · 릴리스
 - [ ] 전체 기능 회귀 테스트 ([기능 인벤토리](FEATURE-INVENTORY.md) 기준 기존 기능 R8 + 신규 요구사항 R1~R7·R9, Agent 패널 숨김·아이콘으로 다시 표시 포함)
-- [ ] `cargo test` (변경 crate 위주), `cargo clippy` 경고 정리
-- [ ] 사용자 문서(한국어): 설치, Agent 설정, MCP 연결 방법
-- [ ] Windows 배포 스크립트로 최종 zip 생성 및 압축 해제 실행 확인
-- [ ] Linux/macOS 배포 스크립트로 각 OS의 최종 tar.gz 생성 및 압축 해제 실행 확인, 빌드 도구 검사·설치 질의 흐름 점검
+- [ ] `cargo test` (변경 crate 위주), `cargo clippy` 경고 정리 — **일부 완료:** i18n 11개·공급자 계약 13개·MCP 계약 테스트 통과, `agent_panel`·`settings_ui` clippy 경고 0건. 남은 경고: `don_tools` 1건(`dispatch_action` 포커스 `if` 병합), `mcp_server` 5건(Windows ACL 동기 `Command::output` 3건 포함), 기존 `prettier` 1건. GUI crate 테스트(`settings_ui`·`workspace` 등) 전체 실행은 미수행
+- [x] 사용자 문서(한국어): 설치, Agent 설정, MCP 연결 방법 — `docs/installation.md`·`agent.md`·`mcp.md`·`security.md`·`packaging.md`(`5fa69a6`), 2026-11-04 Agent 설정 변경 반영
+- [ ] Windows 배포 스크립트로 최종 zip 생성 및 압축 해제 실행 확인 — **디버그 ZIP 생성·해시·구성 검증 완료(`a970b6f`), 신규 코드의 릴리스 ZIP 생성과 압축 해제 후 실행은 미수행**
+- [ ] Linux/macOS 배포 스크립트로 각 OS의 최종 tar.gz 생성 및 압축 해제 실행 확인, 빌드 도구 검사·설치 질의 흐름 점검 — **모의 검증만 완료, 실제 OS 검증은 이번 목표에서 건너뜀(사용자 지시)**
 - 완료 기준: Windows zip과 Linux/macOS tar.gz를 각 대상 OS에서 압축 해제 후 실행 가능, R1~R9의 모든 요구사항 동작 확인
 
 ---
@@ -749,6 +752,8 @@ DonEditor/
 | 2026-10-28 | Phase 5 실제 화면 확인: 디버그 빌드(5분 53초)를 격리 폴더로 실행해 ko/en/auto 를 창 캡처로 확인 — 한국어 메뉴 막대·앱 메뉴·파일 메뉴·에디터/탭 우클릭 메뉴 정상, 영어는 원본과 동일, D2Coding 한글 렌더링 정상. (실수: 첫 시도에서 설정 JSON 의 따옴표가 자식 PowerShell 인자 전달 중 사라져 ko/en 이 모두 auto 로 동작 — 알림 문구로 알아채고 스크립트가 설정 파일을 직접 만들게 고쳐 재확인. 또 `LP` 라는 함수 이름이 PowerShell 별칭 `Out-Printer` 와 충돌해 클릭이 실패했으나 인쇄는 일어나지 않았고 이름을 바꿔 재실행) |
 | 2026-11-04 | **AGENTS.md 변경 문서 반영:** 변경 커밋 `ab97a9a`를 확인해 R4(Agent 패널 숨김·별도 아이콘으로 다시 표시), R5(Windows zip), 신규 R9(Linux/macOS sh 기반 tar.gz·빌드 도구 검사·미설치 시 설치 질의)를 요구사항·설계·목표 구조·Phase 3 후속/7/8·다음 작업에 반영. FEATURE-INVENTORY.md에 R1~R9 상태표 및 신규 요구사항 확인 목록 추가. HJOW-Athlon의 원본 H: 경로와 현재 Phase 5 커밋 상태도 정정. 두 Markdown 문서의 diff·요구사항 정합성을 검토했으며, 앱 소스 변경·빌드·설치는 수행하지 않음 |
 | 2026-11-04 | **Phase 3(R5·R9 배포 스크립트) Linux 재검증:** `package-tar.sh`·`install-build-tools.sh` 구문 검사, `test_package_tar.py` 14개·`test_install_build_tools.py` 19개 통과, `--check-only`(종료 코드 1)·EOF/`0` 취소(빌드 전 중단·종료 코드 1·`dist/` 미생성) 확인, `package-zip.bat` ASCII·`package-zip.ps1` BOM·CRLF 확인. Phase 3 후속 절을 "미구현"에서 "스크립트 구현·모의 검증 완료, 실제 OS 빌드·실행 미검증"으로 정정. 실제 릴리스 빌드·tar.gz 생성·실행, 시스템 패키지 설치, macOS·ARM64 검증은 수행하지 않음(Phase 3 후속 "Linux 검증 결과" 참고). 앱 소스 변경 없음 |
+| 2026-11-04 | **Phase 6·7 구현·검증:** 공용 도구 33개·로컬 MCP(HTTP/stdio, 세션 취소)·Agent 패널 초기 구현(`8de5f9e`·`10efaee`·`2b5390a` 이후 후속 커밋). Windows 전체 빌드·격리 실행, 공식 Python MCP SDK로 실제 앱 연결 검증. 실제 API 호출 검증은 사용자 지시로 생략 (상단 체크포인트 참고) |
+| 2026-11-04 | **Agent 패널 수정(사용자 요청):** 시작 시 숨김, 제공자 콤보박스, 설정 > 에이전트의 제공자별 API 키(OS 자격 증명 저장소)·API 서버 URL, 키 없을 때 인라인 키 입력, 요청별 폴더·파일 경로 자동 첨부. Windows 실제 화면 검증 후 커밋 `a2ad462`. 이어서 PROGRESS.md 체크 항목과 한국어 도움말(`docs/agent.md` 등)을 최신화 |
 
 ---
 
@@ -762,5 +767,6 @@ DonEditor/
 6. ~~README.md 에 AGENTS.md 변경(26개 언어, R8) 반영~~ — 완료 (2026-10-27)
 7. ~~Phase 4 (문법 강조 26개)~~ — 구현·검증 완료 (2026-10-27). **남은 것:** 실제 창에서 색상 눈으로 확인(`tests/samples/` 의 파일을 열어 보면 됨), XHTML 처리 결정(Phase 4 "알려진 한계"). (변경분은 커밋 `78320a1` 에 포함됨) 빌드 크기 기준값(이후 비교용): 릴리스 `doneditor.exe` 170,434,048 바이트, zip 55.1MB
 8. ~~Phase 5 1차 (한국어 UI)~~ — 완료 (2026-10-28, 현재 저장소의 `f061f14`에 소스 포함). **남은 것:** 대화상자·툴팁·검색 바·명령 팔레트 이중 이름·언어 전환의 실제 화면 확인(메뉴·우클릭 메뉴는 확인함), Phase 5 2차·3차(설정 화면 본문 구조 변경, 키맵 편집기, Git 패널, 디버거 등 — Phase 5 "남은 것"). **다음 후보는 Phase 5 2차, Phase 6 (공용 도구 + 로컬 MCP 서버), Phase 3 후속(R9)**이다. 병행 가능한 사용자 결정: 상단 "사용자 결정·확인 요청 (Phase 2)" 5건. 특히 5번(소스 공개 위치)은 `SOURCE.txt` 의 "소스 저장소" 항목과 `assets/licenses.md` 에 들어갈 내용이므로 배포 전에 필요
-9. **Phase 7 (Agent 패널, R4)** — 기본 우측 배치·OpenAI/Claude API Key 연동과 함께, 패널 숨김 및 화면 내 별도 아이콘 클릭으로 다시 표시하는 흐름을 구현·검증한다.
+9. ~~**Phase 6·7 (MCP, Agent 패널)** 구현~~ — 구현 및 Windows 실제 실행 검증 대부분 완료 (2026-11-04, Phase 6·7 체크 항목 참고). **남은 것:** Claude Desktop/Code 실제 연결, MCP 편집 승인·거절·취소의 화면 조작, Agent 중단·기록 목록 화면 조작, 실제 API 호출(사용자 지시로 생략)
 10. ~~AGENTS.md 최신 요구사항을 PROGRESS.md·FEATURE-INVENTORY.md에 반영~~ — 완료 (2026-11-04). 새 요구사항의 구현 완료를 뜻하지 않으며, R4는 후속 작업으로 남아 있다. R9는 스크립트 구현·모의 검증까지 완료이며 실제 OS 빌드·실행 검증이 남는다.
+11. **Phase 8** — 남은 clippy 경고(`don_tools` 1, `mcp_server` 5) 정리, GUI crate 테스트 실행, 신규 코드 릴리스 ZIP 생성·압축 해제·실행, 기능 인벤토리 미확인 항목 회귀 확인
