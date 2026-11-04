@@ -4544,6 +4544,56 @@ mod tests {
         }
     }
 
+    // [DonEditor] 기본 키맵의 `app_menu::OpenApplicationMenu` 인자(열 메뉴 이름)가 실제 메뉴 이름과 같은지 확인한다.
+    // 제품 이름을 바꾸면서 키맵 인자가 옛 이름("Gram")으로 남아 F10 이 아무 메뉴도 못 여는 문제를 막는다.
+    #[gpui::test]
+    fn test_keymap_application_menu_names_exist(cx: &mut TestAppContext) {
+        // 이 동작을 쓰는 기본 키맵 파일들
+        const KEYMAPS: [(&str, &str); 3] = [
+            (
+                "default-windows.jsonc",
+                include_str!("../../../assets/keymaps/default-windows.jsonc"),
+            ),
+            (
+                "default-linux.jsonc",
+                include_str!("../../../assets/keymaps/default-linux.jsonc"),
+            ),
+            (
+                "linux/minimal.jsonc",
+                include_str!("../../../assets/keymaps/linux/minimal.jsonc"),
+            ),
+        ];
+        // 두 표시 언어 모두에서 같은 이름이어야 키 하나로 어느 언어에서나 열린다
+        let (english, korean) = cx.update(|cx| {
+            // 메뉴 목록에서 최상위 메뉴 이름만 꺼낸다
+            fn top_level_names(menus: &[gpui::Menu]) -> Vec<String> {
+                menus.iter().map(|menu| menu.name.to_string()).collect()
+            }
+            let english_menus = i18n::with_language(i18n::Language::English, || app_menus(cx));
+            let korean_menus = i18n::with_language(i18n::Language::Korean, || app_menus(cx));
+            (top_level_names(&english_menus), top_level_names(&korean_menus))
+        });
+        const MARKER: &str = "\"app_menu::OpenApplicationMenu\", \"";
+        let mut checked = 0;
+        for (file, contents) in KEYMAPS {
+            // 줄마다 인자(따옴표 사이 이름)를 꺼내 메뉴 이름 목록과 비교한다
+            for line in contents.lines() {
+                let Some(start) = line.find(MARKER) else {
+                    continue;
+                };
+                let rest = &line[start + MARKER.len()..];
+                let name = &rest[..rest.find('"').expect("메뉴 이름 따옴표가 닫혀야 한다")];
+                assert!(
+                    english.iter().any(|menu| menu == name) && korean.iter().any(|menu| menu == name),
+                    "{file}: 키맵이 여는 메뉴 \"{name}\" 이(가) 실제 메뉴 이름({english:?} / {korean:?})에 없다"
+                );
+                checked += 1;
+            }
+        }
+        // 키맵에서 바인딩이 사라져 검사가 빈 채로 통과하는 일을 막는다
+        assert!(checked >= 3, "OpenApplicationMenu 바인딩 {checked}개만 확인했다");
+    }
+
     // [DonEditor] 요구사항 R1: 한국어 메뉴. 표시 언어를 이 스레드에서만 바꿔(i18n::with_language) 다른 테스트에 영향을 주지 않는다.
     #[gpui::test]
     fn test_app_menus_follow_the_display_language(cx: &mut TestAppContext) {

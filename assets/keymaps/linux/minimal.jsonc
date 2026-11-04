@@ -209,7 +209,7 @@
       "shift-save": "workspace::SaveAs",
       "new": "workspace::NewFile",
       "shift-new": "workspace::NewWindow",
-      "f10": ["app_menu::OpenApplicationMenu", "Gram"],
+      "f10": ["app_menu::OpenApplicationMenu", "Don Editor"],
       "shift-find": "pane::DeploySearch",
       "f1": "command_palette::Toggle",
       "alt-save": "workspace::SaveAll",

@@ -1,6 +1,6 @@
 {
   "$schema": "gram://schemas/settings",
-  // The name of the Gram theme to use for the UI.
+  // The name of the Don Editor theme to use for the UI.
   //
   // `mode` is one of:
   // - "system": Use the theme that corresponds to the system's appearance
@@ -126,9 +126,9 @@
   "hover_popover_enabled": true,
   // Time to wait in milliseconds before showing the informational hover box.
   "hover_popover_delay": 300,
-  // Whether to confirm before quitting Gram.
+  // Whether to confirm before quitting Don Editor.
   "confirm_quit": false,
-  // Whether to restore last closed project when fresh Gram instance is opened
+  // Whether to restore last closed project when fresh Don Editor instance is opened
   // May take 4 values:
   //  1. Open the Launchpad / Welcome screen
   //         "restore_on_startup": "launchpad"
@@ -185,13 +185,13 @@
   //
   // Default: true
   "zoomed_padding": true,
-  // What draws Gram's window decorations (titlebar):
+  // What draws Don Editor's window decorations (titlebar):
   // 1. Client application draws its own window decorations
   //    "client"
   // 2. Display server draws the window decorations. Not supported by GNOME Wayland.
   //    "server"
   //
-  // This requires restarting Gram for changes to take effect.
+  // This requires restarting Don Editor for changes to take effect.
   //
   // Default: "client"
   "window_decorations": "client",
@@ -205,12 +205,12 @@
   "option_as_alt": "only_left",
 
   // Whether to use the system provided dialogs for Open and Save As.
-  // When set to false, Gram will use the built-in keyboard-first pickers.
+  // When set to false, Don Editor will use the built-in keyboard-first pickers.
   "use_system_path_prompts": true,
   // Whether to use the system provided dialogs for prompts, such as confirmation
   // prompts.
-  // When set to false, Gram will use its built-in prompts. Note that on Linux,
-  // this option is ignored and Gram will always use the built-in prompts.
+  // When set to false, Don Editor will use its built-in prompts. Note that on Linux,
+  // this option is ignored and Don Editor will always use the built-in prompts.
   "use_system_prompts": true,
   // Whether the cursor blinks in the editor.
   "cursor_blink": true,
@@ -373,11 +373,11 @@
   "use_on_type_format": true,
   // Whether to automatically add matching closing characters when typing
   // opening parenthesis, bracket, brace, single or double quote characters.
-  // For example, when you type '(', Gram will add a closing ) at the correct position.
+  // For example, when you type '(', Don Editor will add a closing ) at the correct position.
   "use_autoclose": true,
   // Whether to automatically surround selected text when typing opening parenthesis,
   // bracket, brace, single or double quote characters.
-  // For example, when you select text and type '(', Gram will surround the text with ().
+  // For example, when you select text and type '(', Don Editor will surround the text with ().
   "use_auto_surround": true,
   // Whether indentation should be adjusted based on the context whilst typing.
   "auto_indent": true,
@@ -888,7 +888,7 @@
   //
   // 1. Never automatically save:
   //     "autosave": "off",
-  // 2. Save when changing focus away from the Gram window:
+  // 2. Save when changing focus away from the Don Editor window:
   //     "autosave": "on_window_change",
   // 3. Save when changing focus away from a specific buffer:
   //     "autosave": "on_focus_change",
@@ -1011,11 +1011,11 @@
     // Whether to show the git status in the file finder.
     "git_status": true,
     // Whether to use gitignored files when searching.
-    // Only the file Gram had indexed will be used, not necessary all the gitignored files.
+    // Only the file Don Editor had indexed will be used, not necessary all the gitignored files.
     //
     // Can accept 3 values:
     //   * "all": Use all gitignored files
-    //   * "indexed": Use only the files Gram had indexed
+    //   * "indexed": Use only the files Don Editor had indexed
     //   * "smart": Be smart and search for ignored when called from a gitignored worktree
     "include_ignored": "smart",
   },
@@ -1032,7 +1032,7 @@
   "format_on_save": "on",
   // How to perform a buffer format. This setting can take multiple values:
   //
-  // 1. Default. Format files using Gram's Prettier integration (if applicable),
+  // 1. Default. Format files using Don Editor's Prettier integration (if applicable),
   //    or falling back to formatting via language server:
   //     "formatter": "auto"
   // 2. Format code using the current language server:
@@ -1046,7 +1046,7 @@
   //         "arguments": ["--stdin-filepath", "{buffer_path}"]
   //       }
   //     }
-  // 5. Format code using Gram's Prettier integration:
+  // 5. Format code using Don Editor's Prettier integration:
   //     "formatter": "prettier"
   // 6. Format code using a code action
   //     "formatter": {"code_action": "source.fixAll.eslint"}
@@ -1102,7 +1102,7 @@
     "button": true,
     // Whether to show warnings or not by default.
     "include_warnings": true,
-    // Settings for using LSP pull diagnostics mechanism in Gram.
+    // Settings for using LSP pull diagnostics mechanism in Don Editor.
     "lsp_pull_diagnostics": {
       // Whether to pull for diagnostics or not.
       "enabled": true,
@@ -1129,7 +1129,7 @@
       "max_severity": null,
     },
   },
-  // Files or globs of files that will be excluded by Gram entirely. They will be skipped during file
+  // Files or globs of files that will be excluded by Don Editor entirely. They will be skipped during file
   // scans, file searches, and not be displayed in the project file tree. Takes precedence over `file_scan_inclusions`.
   "file_scan_exclusions": [
     "**/.git",
@@ -1143,9 +1143,9 @@
     "**/.classpath",
     "**/.settings",
   ],
-  // Files or globs of files that will be included by Gram, even when ignored by git. This is useful
+  // Files or globs of files that will be included by Don Editor, even when ignored by git. This is useful
   // for files that are not tracked by git, but are still important to your project. Note that globs
-  // that are overly broad can slow down Gram's file scanning. `file_scan_exclusions` takes
+  // that are overly broad can slow down Don Editor's file scanning. `file_scan_exclusions` takes
   // precedence over these inclusions.
   "file_scan_inclusions": [".env*"],
   // Globs to match files that will be considered "hidden". These files can be hidden from the
@@ -1497,13 +1497,13 @@
   "tasks": {
     "variables": {},
     "enabled": true,
-    // Use LSP tasks over Gram language extension ones.
+    // Use LSP tasks over Don Editor language extension ones.
     // If no LSP tasks are returned due to error/timeout or regular execution,
-    // Gram language extension tasks will be used instead.
+    // Don Editor language extension tasks will be used instead.
     //
-    // Other Gram tasks will still be shown:
-    // * Gram task from either of the task config file
-    // * Gram task from history (e.g. one-off task was spawned before)
+    // Other Don Editor tasks will still be shown:
+    // * Don Editor task from either of the task config file
+    // * Don Editor task from history (e.g. one-off task was spawned before)
     //
     // Default: true
     "prefer_lsp": true,
@@ -1527,15 +1527,15 @@
   // Settings for which version of Node.js and NPM to use when installing
   // language servers.
   //
-  // Note: changing this setting currently requires restarting Gram.
+  // Note: changing this setting currently requires restarting Don Editor.
   "node": {
-    // By default, Gram will look for `node` and `npm` on your `$PATH`, and use the
+    // By default, Don Editor will look for `node` and `npm` on your `$PATH`, and use the
     // existing executables if their version is recent enough. Set this to `true`
-    // to prevent this, and force Gram to always download and install its own
+    // to prevent this, and force Don Editor to always download and install its own
     // version of Node.
     "ignore_system_version": false,
     // You can also specify alternative paths to Node and NPM. If you specify
-    // `path`, but not `npm_path`, Gram will assume that `npm` is located at
+    // `path`, but not `npm_path`, Don Editor will assume that `npm` is located at
     // `${path}/../npm`.
     "path": null,
     "npm_path": null,
@@ -1583,7 +1583,7 @@
     // When LSP servers give an `InsertReplaceEdit` completion, they provides two ranges: `insert` and `replace`. Usually, `insert`
     // contains the word prefix before your cursor and `replace` contains the whole word.
     //
-    // Effectively, this setting just changes whether Gram will use the received range for `insert` or `replace`, so the results may
+    // Effectively, this setting just changes whether Don Editor will use the received range for `insert` or `replace`, so the results may
     // differ depending on the underlying LSP server.
     //
     // Possible values:
@@ -1836,7 +1836,7 @@
     // Default: true
     "restore_unsaved_buffers": true,
   },
-  // Gram's Prettier integration settings.
+  // Don Editor's Prettier integration settings.
   // Allows to enable/disable formatting with Prettier
   // and configure default Prettier, used when no project-level Prettier installation is found.
   "prettier": {
@@ -1864,7 +1864,7 @@
     // "rust-analyzer": {
     //     // A special flag for rust-analyzer integration, to use server-provided tasks
     //     enable_lsp_tasks": true,
-    //     // These initialization options are merged into Gram's defaults
+    //     // These initialization options are merged into Don Editor's defaults
     //     "initialization_options": {
     //         "check": {
     //             "command": "clippy" // rust-analyzer.check.command (default: "check")
@@ -1926,13 +1926,13 @@
     // Delay in milliseconds before showing the which-key popup.
     "delay_ms": 500,
   },
-  // Settings overrides to use when using Gram Stable.
-  // Mostly useful for developers who are managing multiple instances of Gram.
+  // Settings overrides to use when using Don Editor Stable.
+  // Mostly useful for developers who are managing multiple instances of Don Editor.
   "stable": {
     // "theme": "Andromeda"
   },
-  // Settings overrides to use when using Gram Dev.
-  // Mostly useful for developers who are managing multiple instances of Gram.
+  // Settings overrides to use when using Don Editor Dev.
+  // Mostly useful for developers who are managing multiple instances of Don Editor.
   "dev": {
     // "theme": "Andromeda"
   },
@@ -1960,7 +1960,7 @@
   // Supported URI scheme: `http`, `https`, `socks4`, `socks4a`, `socks5`,
   // `socks5h`. `http` will be used when no scheme is specified.
   //
-  // By default no proxy will be used, or Gram will try get proxy settings from
+  // By default no proxy will be used, or Don Editor will try get proxy settings from
   // environment variables. If certain hosts should not be proxied,
   // set the `no_proxy` environment variable and provide a comma-separated list.
   //
@@ -1978,7 +1978,7 @@
   "command_aliases": {},
   // ssh_connections is an array of ssh connections.
   // You can configure these from `project: Open Remote` in the command palette.
-  // Gram's ssh support will pull configuration from your ~/.ssh too.
+  // Don Editor's ssh support will pull configuration from your ~/.ssh too.
   // Examples:
   // [
   //   {

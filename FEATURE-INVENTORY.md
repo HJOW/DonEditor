@@ -5,7 +5,7 @@
 
 AGENTS.md 의 "기존에 존재하던 기능은 최대한 포함한다"(R8)를 지키기 위해, 원본 GramEditor 의 기능을 목록으로 만들고 **우리 변경으로 깨지지 않았는지** 확인하는 기준으로 쓴다.
 
-1~6절은 원본 기능 보존 기준이며, Don Editor의 추가 요구사항과 확인 항목은 7~8절에서 관리한다. 이번에는 실제 구현과 자동 검증 결과를 반영했다. **새 소스 전체의 앱 통합 빌드·GUI 실행 검증은 아직 완료하지 않았다.** 기존 50개 영역의 실행 확인 수는 20개(2026-11-05 두 차례 스모크 점검 반영)이며, 미확인 30개 영역은 완료 처리하지 않는다.
+1~6절은 원본 기능 보존 기준이며, Don Editor의 추가 요구사항과 확인 항목은 7~8절에서 관리한다. 이번에는 실제 구현과 자동 검증 결과를 반영했다. **새 소스 전체의 앱 통합 빌드·GUI 실행 검증은 아직 완료하지 않았다.** 기존 50개 영역의 실행 확인 수는 22개(2026-11-05 스모크 점검 반영)이며, 미확인 28개 영역은 완료 처리하지 않는다.
 
 ## 읽는 법
 
@@ -43,7 +43,7 @@ AGENTS.md 의 "기존에 존재하던 기능은 최대한 포함한다"(R8)를 �
 |------|------|-----------|-----------|-----------|-----------|------|
 | 편집 기본 | 텍스트 편집·선택·되돌리기 | `editor`, `text`, `rope` | ✅ | [multibuffers](GramEditor-docs/docs/multibuffers.md) | ✅ | 파일 열기·편집·저장, 화면 렌더링 — 사용자 확인(2026-10-27) |
 | 편집 기본 | 한글 입력(IME) | `editor`, `gpui` | ✅ | - | ✅ | 사용자 확인(2026-10-27, 원본 글꼴 기준). **D2Coding 적용(Phase 2) 후 재확인 필요** |
-| 편집 기본 | 다중 버퍼(Multibuffers) | `multi_buffer` | ✅ | [multibuffers](GramEditor-docs/docs/multibuffers.md) | ⬜ |  |
+| 편집 기본 | 다중 버퍼(Multibuffers) | `multi_buffer` | ✅ | [multibuffers](GramEditor-docs/docs/multibuffers.md) | ✅ | 2026-11-05 확인: 프로젝트 검색(`Ctrl+Shift+F`) 결과가 여러 파일의 발췌를 하나의 다중 버퍼 탭으로 보여 줌. 진단·참조 찾기 등 다른 진입점은 미확인 |
 | 편집 기본 | SuperTab | `editor` | ✅ | [supertab](GramEditor-docs/docs/supertab.md) | ⬜ |  |
 | 편집 기본 | 줄 이동 | `go_to_line` | ✅ | - | ✅ | 2026-11-05 확인: 줄 이동 창에 3을 입력하면 "3번째 줄로 이동" 안내가 뜨고 커서가 3줄로 이동 |
 | 편집 기본 | 줄 끝(개행)·인코딩 선택 | `line_ending_selector`, `encoding_selector` | ✅ | - | ✅ | 2026-11-05 확인: 인코딩 표시·선택 화면·다시 불러오기·저장 거절, 줄 끝 선택 목록과 CRLF 선택 |
@@ -76,7 +76,7 @@ AGENTS.md 의 "기존에 존재하던 기능은 최대한 포함한다"(R8)를 �
 | 설정/외형 | 설정 파일·설정 UI·설정 프로필 | `settings`, `settings_ui`, `settings_profile_selector` | ✅ | [configuring-gram](GramEditor-docs/docs/configuring-gram.md), [environment](GramEditor-docs/docs/environment.md) | ✅ | 2026-11-05 확인: 설정 창이 한국어로 열리고 13개 페이지(에이전트 포함) 표시. 프로필은 미확인 |
 | 설정/외형 | 키맵·단축키 편집기 | `keymap_editor` | ✅ | [key-bindings](GramEditor-docs/docs/key-bindings.md) | ✅ | 2026-11-05 확인: 메뉴의 "키맵 열기"로 단축키 편집기 탭이 한국어 열 제목(작업·인자·키 입력·컨텍스트·출처)과 함께 열림. 단축키 수정·저장은 미확인 |
 | 설정/외형 | 테마 | `theme`, `theme_selector`, `theme_importer`, `theme_extension` | ⚠ 일부 별도: theme_importer | [themes](GramEditor-docs/docs/themes.md) | ✅ | 2026-11-05 확인: 테마 선택 목록 표시 |
-| 설정/외형 | 아이콘 테마·파일 아이콘 | `file_icons` | ✅ | [icon-themes](GramEditor-docs/docs/icon-themes.md) | ⬜ |  |
+| 설정/외형 | 아이콘 테마·파일 아이콘 | `file_icons` | ✅ | [icon-themes](GramEditor-docs/docs/icon-themes.md) | ✅ | 2026-11-05 확인: 프로젝트 패널의 폴더·파일 종류별 아이콘(기본 아이콘 테마). 아이콘 테마 바꾸기는 미확인 |
 | 설정/외형 | 시각 사용자화 | `ui` | ✅ | [visual-customization](GramEditor-docs/docs/visual-customization.md) | ⬜ |  |
 | 확장/연동 | 확장 기능(Wasm) 설치·관리 | `extension`, `extension_host`, `extension_api`, `extensions_ui` | ⚠ 일부 별도: extension_api | [extensions](GramEditor-docs/docs/extensions.md) | ⬜ | 원본 README: 제한적 지원. 확장이 임의 실행 파일을 내려받을 수 있다는 경고 있음 |
 | 확장/연동 | Zed 설정 가져오기(마이그레이션) | `migrator` | ✅ | [zed](GramEditor-docs/docs/migrate/zed.md), [vs-code](GramEditor-docs/docs/migrate/vs-code.md) | ⬜ |  |
@@ -92,7 +92,7 @@ AGENTS.md 의 "기존에 존재하던 기능은 최대한 포함한다"(R8)를 �
 | 개발용 | 인스펙터·프로파일러 | `inspector_ui`, `miniprofiler_ui` | ✅ | - | ⬜ | 개발자용 |
 | 개발용 | 컴포넌트 미리보기 | `component` | ✅ | - | ⬜ | 개발자용 |
 
-실행 확인 20개 / 미확인 30개. (2026-11-05 Markdown 미리보기와 스모크 점검 두 차례 추가)
+실행 확인 22개 / 미확인 28개. (2026-11-05 Markdown 미리보기와 스모크 점검 추가)
 
 ## 3. 기준선 메뉴 구조 (Windows, 2026-10-27 조사)
 
@@ -158,12 +158,12 @@ AGENTS.md 의 "기존에 존재하던 기능은 최대한 포함한다"(R8)를 �
 | R5 Windows zip 배포 | 별도 bat/ps1 호출 시 빌드 도구 검사·미설치 도구의 설치 여부 질의 후 zip 생성 | **구현·스크립트 검사 완료.** `package-zip.bat`, `script/package-zip.ps1`에 MCP 실행 파일·소스 동봉 등 후속 배포 요구 반영(`f1ba957`). 기존 Phase 3의 zip 생성·압축 해제 후 실행 기록은 당시 소스 기준 | 이번 신규 기능을 포함한 최종 Windows zip 생성·압축 해제·실행. 깨끗한 Windows에서 실제 도구 설치·설치 후 재검사 및 ARM64 검증 |
 | R6 D2Coding 기본 글꼴 | `assets/fonts`의 D2Coding을 기본 편집·UI 글꼴로 사용 | **구현 완료.** Phase 2 설정·TTC 로드 변경, Phase 5의 한글 렌더링 확인 기록 | D2Coding 적용 후 IME 입력 재확인 및 추가 시각 확인 |
 | R7 GPL-3.0·원저작 고지 | 원본 라이선스·저작권 고지 유지, 배포본에 라이선스·소스 입수 방법 포함 | **고지·배포 소스 동봉 및 자동 검사 구현.** GPL-3.0·GramEditor/Zed·제3자·D2Coding 고지 유지, 플랫폼별 배포 스크립트에 해당 소스 스냅샷 포함. 내부 매니페스트 143개 검사와 검사기 회귀 테스트 10개 통과(`2d7df76`). 원본 도움말을 보존하고 구분 안내·한국어 Don Editor 도움말 추가(`5fa69a6`) | 최종 실제 zip/tar.gz에서 고지·소스 스냅샷과 실행 파일 버전의 일치 확인. 앱의 라이선스·도움말 화면 확인 |
-| R8 기존 기능 보존 | 원본 GramEditor 기능 최대한 유지 | **지속 점검.** 1~6절의 원본 기능 목록·스모크 테스트 및 Phase별 회귀 기록 | 미확인 30개 영역은 확인되는 대로 갱신 |
+| R8 기존 기능 보존 | 원본 GramEditor 기능 최대한 유지 | **지속 점검.** 1~6절의 원본 기능 목록·스모크 테스트 및 Phase별 회귀 기록 | 미확인 28개 영역은 확인되는 대로 갱신 |
 | R9 Linux/macOS tar.gz 배포 | 별도 sh 호출 시 OS별 빌드 도구 검사·미설치 도구의 설치 여부 질의 후 tar.gz 생성 | **구현·모의 환경 자동 검증 완료(`f1ba957`).** `package-tar.sh`에 OS 감지·도구 선택 설치·재검사·릴리스 빌드·스테이징·소스/고지 동봉·tar.gz/SHA256 생성 추가. 패키징 테스트 14개 및 기존 도구 설치 테스트 19개 통과. Linux/macOS 명령은 가짜 도구로 검증 | 실제 Linux와 macOS 각각에서 필요한 도구 설치·릴리스 빌드·최종 tar.gz 생성·압축 해제·GUI 실행. 모의 스테이징 결과를 실제 OS 실행 확인으로 간주하지 않음 |
 
 ## 8. 추가·변경 요구사항 확인 목록
 
-구현·자동 검증과 실제 환경 확인을 나누어 기록한다. `[x]`의 범위는 각 문장에 적힌 구현 또는 테스트에 한정하며, 2절의 미확인 30개 영역을 대신하지 않는다.
+구현·자동 검증과 실제 환경 확인을 나누어 기록한다. `[x]`의 범위는 각 문장에 적힌 구현 또는 테스트에 한정하며, 2절의 미확인 28개 영역을 대신하지 않는다.
 
 ### 구현 및 자동 검증
 

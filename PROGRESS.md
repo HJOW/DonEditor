@@ -19,7 +19,7 @@
 - 사용자 결정 대기: Don Editor 자체 기여 안내·행동 강령 필요 여부, 배포 시 Don Editor 소스의 공개 위치(현재는 배포본에 수정 소스를 동봉), `README.md` 보호 단락 내용 갱신이 필요하면 사용자 요청 후에만.
 - 사용자 지시로 제외: Linux/macOS 직접 실행·tar.gz 실물 검증, 실제 OpenAI/Claude API 호출 검증(유료·키 필요), Claude Desktop/Code 실제 연결(외부 클라이언트의 API 호출이 따름).
 - 이 환경에서 불가: 깨끗한 Windows/ARM64 설치 검증, 실제 프린터 출력과 PDF 뷰어 `print` 동작 확인(기본 프린터가 가상 프린터), 탐색기 UI에서 `.md`를 연결 프로그램으로 직접 지정하는 수동 확인.
-- 계속 진행형: 기능 인벤토리의 미확인 영역(실행 확인 20개/미확인 30개), 'Gram' 문자열 잔여 백로그.
+- 계속 진행형: 기능 인벤토리의 미확인 영역(실행 확인 22개/미확인 28개), 'Gram' 문자열 잔여 백로그.
 - 알려진 경미한 문제: ① 이번 세션의 릴리스 ZIP은 커밋 `2e9ff1c` 기준(이후 변경은 동작 불변 정리), ② 상태 표시줄 `Failed to load environment variables`(콘솔 로그상 `H:` 드라이브에서 PowerShell 환경 로드 실패 — 이 PC의 환경 문제로 보이며 이전부터 있던 메시지), ③ MCP 승인 창의 일부 요소가 화면 가운데 위쪽에 뭉쳐 보이는 레이아웃(기능은 동작), ④ `don_protocol_tests`의 브릿지 취소 테스트가 부하에서 가끔 실패하는 타이밍 경쟁(8회 연속 통과로 확인).
 
 ## 2026-11-05 회귀 테스트·clippy 정리 (사용자 목표 진행)
@@ -32,6 +32,10 @@
 - **기존 기능 회귀 스모크 점검 2차(R8, 같은 디버그 빌드·같은 격리 폴더):** **이미지 뷰어**(160x100 PNG를 열면 이미지와 크기·확대 정보 표시), **SVG**(`.svg`를 열면 편집기와 함께 `Preview pic.svg` 미리보기 탭), **탭 전환**(`Ctrl+Tab`), **줄 이동**(3을 입력하면 "3번째 줄로 이동" 안내와 함께 3줄로 이동), **언어 선택기**(상태 표시줄 언어 이름 클릭 → 언어 목록), **줄 끝 선택기**(CRLF 선택), **개요 패널**(Rust 파일에서 `fn main` 항목), **최근 프로젝트**(`Ctrl+R` 선택 창과 원격/로컬 폴더 열기 단축키가 열림 — 격리 데이터라 기록이 비어 있어 항목을 골라 여는 동작은 못 봄), **키맵 편집기**(메뉴 "키맵 열기" → 한국어 열 제목의 단축키 표). 명령 팔레트의 `keymap editor: open`은 이 화면을 열지 않았다(메뉴 경로는 동작). 기능 인벤토리 실행 확인 영역이 12개에서 **20개**(미확인 30개)로 늘었다. 확인 도중 개요 패널의 빈 상태 안내가 영어(`No outlines available`, `Toggle Panel With ctrl-B`)로 남아 있는 것을 발견했다.
 - **개요 패널 빈 상태 안내 한국어화:** 위에서 발견한 문구 3개(`No outlines available`·`No matches for query`·`Toggle Panel With {keystroke}`)를 i18n 키 `outline.empty`·`outline.no_matches`·`outline.toggle_hint`로 옮기고 한국어 문구("표시할 개요가 없습니다" 등)를 추가했다(카탈로그 1,824 → 1,827키). `cargo check -p outline_panel` 경고 0, i18n 테스트 11개 통과, rustfmt 통과. **고친 뒤의 화면은 다시 실행해 보지 않았다**(코드·카탈로그 검증까지만).
 - **CLI 도움말의 Gram 표기 정리:** `doneditor --help`가 기본 데이터 폴더를 `%LOCALAPPDATA%\Gram`(macOS `Application Support/Gram`, Linux `$XDG_DATA_HOME/gram`)으로 안내했으나 실제 폴더는 `DonEditor`(crates/paths)라 사용자를 오도했다. 데이터 폴더 안내와 `paths`·`--version`·`--completions` 예시·`--foreground`·`--gram`·`--wsl`·`--uninstall` 설명의 제품명/명령 이름을 Don Editor·`doneditor`로 바꿨다(`--gram` 플래그 이름과 내부 오류 문구는 호환성 때문에 유지). `cargo build -p cli` 성공, `--help` 출력으로 확인.
+- **F10 메뉴 단축키가 동작하지 않던 회귀 수정:** 기본 키맵의 `f10` 바인딩이 열 메뉴 이름을 옛 이름 `"Gram"`으로 넘기는데, 제품 이름 변경(Phase 5)으로 메뉴 이름은 `Don Editor`가 되었고 제목 표시줄은 `메뉴 이름 == 인자`로 찾기 때문에 F10을 눌러도 아무 메뉴도 열리지 않았다(키맵 편집기 화면의 `app menu: open application menu "Gram" F10` 줄에서 발견). `default-windows.jsonc`·`default-linux.jsonc`·`linux/minimal.jsonc`의 인자를 `"Don Editor"`로 바로잡았고, 같은 문제가 다시 생기지 않도록 `gram` 테스트 `test_keymap_application_menu_names_exist`(기본 키맵의 `OpenApplicationMenu` 인자가 영·한 두 언어의 실제 메뉴 이름에 있는지 검사)를 추가했다. `cargo test -p gram --lib`가 **36개 모두 통과**했다(기존 35개 + 신규 1개, 수정한 기본 설정·키맵 파싱 테스트 포함). 화면에서 F10이 실제로 메뉴를 여는지는 이 시점에 PC가 잠금 화면이라 눈으로 확인하지 못했다.
+- **사용자가 직접 보는 파일의 제품명 정리:** 새 사용자 설정/키맵 파일을 만들 때 그대로 기록되는 `initial_user_settings.jsonc`·`initial.jsonc`의 첫머리 안내("Gram settings" 등)와, "기본 설정 열기"에서 보이는 `default.jsonc` 주석 37줄의 `Gram`을 `Don Editor`로 바꿨다. 글꼴 식별자(`.GramMono`·`.GramSans`)·아이콘 테마 이름 `Gram (Default)`·문서 링크(`gram://docs/...`)·명령 팔레트 이름(`gram: open ...`)은 실제 동작과 맞추기 위해 그대로 둔다.
+- **`editor` crate 테스트:** 이번 세션이 `Editor`에 대체 화면 슬롯(`alternate_view`)과 렌더링 분기를 추가했으므로 `cargo test -p editor --lib --offline`로 회귀를 확인했다 — **475개 통과, 실패 0, 무시 5**.
+- **GUI 점검 중단 사유:** 이 시점부터 PC가 잠금 화면(`LogonUI` 실행 중, 화면 캡처가 "The handle is invalid"로 실패)이라 앱 창을 만들 수 없어 추가 GUI 회귀 점검(Vim·Helix·작업 실행·자동 완성 등)과 `Failed to load environment variables` 원인 진단(앱 로그 수집)은 하지 못했다. 앱을 직접 실행해 확인한 명령줄(`--printenv`를 PowerShell에서 H: 경로·`\?\H:` 경로·C: 경로로 실행)은 모두 정상이라 PowerShell 호출 자체의 문제는 아니며, 앱 안에서만 실패하는 원인은 로그가 필요하다.
 - **배포 ZIP 참고:** 위 릴리스 ZIP은 커밋 `2e9ff1c` 기준이다. 이후 커밋(`d257aff` 인쇄 실행을 표준 비동기 명령으로, `97296d7`·이번 clippy 정리)은 동작을 바꾸지 않는 정리라 ZIP을 다시 만들지 않았다.
 
 ## 2026-11-05 Windows 릴리스 배포본 재생성과 실행 확인 (Markdown 미리보기·캐릭터셋·Typst 반영)
@@ -294,7 +298,7 @@
 2. `don_tools`·MCP의 GPUI 연결과 Agent UI의 타입/빌드 오류를 해결하고 변경 GUI crate 테스트·clippy를 실행한다. 추가한 설정 JSON 경로·한국어 Git 처리·커서 선택 단위 회귀 테스트도 실행 전이다.
 3. 실제 앱에서 편집 승인/거절·취소·오래된 변경안 거절, 설정·언어 전환, Agent 기본 위치·숨김·아이콘 복귀·기록 복원, 원본/자체 도움말을 확인한다. MCP의 모든 기능 제어 완전성은 검증 전이며 특정 대화 선택·기록 삭제·패널 이동의 JSON 액션도 보강 대상이다.
 4. OS 키 저장/삭제와 실제 OpenAI 또는 Claude 호출, Claude Desktop/Code 실제 앱 연결을 검증한다. 사용자 API 키는 이번 작업에서 읽거나 등록하지 않았다.
-5. 기능 인벤토리의 기존 실행 확인 **20개/미확인 30개**(2026-11-05 갱신)를 기준으로 회귀 확인한다. 신규 소스의 전체 기능·시각 검증이 완료됐다고 표시하지 않는다.
+5. 기능 인벤토리의 기존 실행 확인 **22개/미확인 28개**(2026-11-05 갱신)를 기준으로 회귀 확인한다. 신규 소스의 전체 기능·시각 검증이 완료됐다고 표시하지 않는다.
 6. 신규 코드로 Windows 최종 zip과 각 OS의 Linux/macOS tar.gz 생성·압축 해제·실행, 깨끗한 환경 설치 흐름·ARM64를 확인한다. WSL은 후반에 `CreateVm/ERROR_TIMEOUT`으로 시작에 실패해 추가 Linux 실행 검증을 하지 못했다. macOS 환경도 사용하지 않았다.
 
 빌드 환경 참고: 지정 1.99.1 툴체인의 자동 동기화 중 Windows 디렉터리 이름 변경/롤백 오류가 있었다. 설치된 `stable`의 rustc/cargo도 **1.99.1**임을 확인했다. 검사 시 `RUSTUP_TOOLCHAIN=stable`, `CARGO_BUILD_JOBS=1` 또는 `2`로 메모리를 제한했다. 컴파일 캐시는 보존한다.
@@ -886,7 +890,7 @@ DonEditor/
 
 ### Phase 8. 통합 테스트 · 문서화 · 릴리스
 - [ ] 전체 기능 회귀 테스트 ([기능 인벤토리](FEATURE-INVENTORY.md) 기준 기존 기능 R8 + 신규 요구사항 R1~R7·R9, Agent 패널 숨김·아이콘으로 다시 표시 포함)
-- [ ] `cargo test` (변경 crate 위주), `cargo clippy` 경고 정리 — **일부 완료:** i18n 11개·공급자 계약 13개·MCP 계약 테스트 통과, `agent_panel`·`settings_ui` clippy 경고 0건. 남은 경고: `don_tools` 1건(`dispatch_action` 포커스 `if` 병합), `mcp_server` 5건(Windows ACL 동기 `Command::output` 3건 포함), 기존 `prettier` 1건. GUI crate 테스트(`settings_ui`·`workspace` 등) 전체 실행은 미수행
+- [ ] `cargo test` (변경 crate 위주), `cargo clippy` 경고 정리 — **대부분 완료(2026-11-05):** 변경 crate 테스트 text 24·language 99·worktree 26·editor 475·gram 36·markdown_preview 40·don_charset 9·don_typst 17·i18n 11·MCP 전송 25개 통과, `don_tools`·`mcp_server`·`agent_panel`·`settings_ui`·새 crate 4개 clippy 경고 0건(이전에 남았던 `don_tools` 1건·`mcp_server` 5건은 정리함). **남은 것:** 원본에 있던 `prettier` clippy 1건(손대지 않음), `settings_ui`·`workspace` 등 나머지 GUI crate 테스트 전체 실행
 - [x] 사용자 문서(한국어): 설치, Agent 설정, MCP 연결 방법 — `docs/installation.md`·`agent.md`·`mcp.md`·`security.md`·`packaging.md`(`5fa69a6`), 2026-11-04 Agent 설정 변경 반영
 - [x] Windows 배포 스크립트로 릴리스 zip 생성 및 압축 해제 실행 확인 — **2026-11-04 x86_64 릴리스 ZIP·SHA-256·구성 확인 및 격리 데이터로 GUI 기동 확인. 전체 기능 회귀와 깨끗한 설치 환경·ARM64는 별도 미검증**
 - [ ] Linux/macOS 배포 스크립트로 각 OS의 최종 tar.gz 생성 및 압축 해제 실행 확인, 빌드 도구 검사·설치 질의 흐름 점검 — **모의 검증만 완료, 실제 OS 검증은 이번 목표에서 건너뜀(사용자 지시)**

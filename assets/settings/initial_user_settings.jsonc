@@ -1,9 +1,9 @@
-// Gram settings
+// Don Editor settings
 //
-// For information on how to configure Gram, see the Gram
+// For information on how to configure Don Editor, see the Don Editor
 // documentation: gram://docs/configuring-gram
 //
-// To see all of Gram's default settings without changing your
+// To see all of Don Editor's default settings without changing your
 // custom settings, run `gram: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
