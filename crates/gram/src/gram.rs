@@ -4296,6 +4296,8 @@ mod tests {
             let expected_namespaces = vec![
                 "action",
                 "activity_indicator",
+                // [DonEditor] Agent 사이드 패널과 로컬 MCP 서버의 액션 네임스페이스
+                "agent_panel",
                 "app_actions",
                 #[cfg(not(target_os = "macos"))]
                 "app_menu",
@@ -4330,6 +4332,7 @@ mod tests {
                 "lsp",
                 "lsp_tool",
                 "markdown",
+                "mcp_server",
                 "menu",
                 "notebook",
                 "onboarding",
