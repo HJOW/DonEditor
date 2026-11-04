@@ -1,5 +1,10 @@
 # Don Editor 진행 상황
 
+## 2026-11-04 Windows 실행 파일 기능별 용량 조사
+
+- 사용자 요청으로 배포 EXE와 일치하는 릴리스 PDB의 섹션 기여 정보를 Microsoft DIA로 분석해 [Windows 기능별 용량 보고서](WINDOWS-SIZE-REPORT.md)를 작성했다. 내장 문법 분석기 객체 46.12 MiB와 SQL 파서 10.61 MiB 등을 확인했으며, 직접 기여량과 기능 제거 시 실제 절감량의 차이·필수 언어 제약을 문서에 명시했다.
+- 분석 도구와 원본 기여 목록은 `target/dia-report-tool/`에 두었다. 프로그램 소스와 기존 배포본은 변경하지 않았고, 기능을 제거한 실험 빌드는 수행하지 않았다.
+
 ## 2026-11-04 Windows 릴리스 배포본 생성
 
 - 사용자 요청으로 Windows x86_64 릴리스 배포본을 별도 폴더에 생성하고 그대로 보존했다. `script/package-zip.ps1 -Yes -OutDir dist/windows-20261104-172637` 실행 시 빌드 도구 점검 및 `cargo build --locked --package gram --package cli --package mcp_server --release`가 성공했다. 기존 Wasmtime 관련 `LNK4217` 링커 경고가 나왔다.
