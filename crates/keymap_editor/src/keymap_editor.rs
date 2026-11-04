@@ -2828,7 +2828,8 @@ impl ActionArgumentsEditor {
                 let (buffer, backup_temp_dir) =
                     Self::create_temp_buffer(temp_dir, file_name.clone(), project.clone(), fs, cx)
                         .await
-                        .context(concat!(
+                        .context(format!(
+                            "{}{}",
                             i18n::t!("ui.text.failed_to_create_temporary_buffer_for_action_arguments"),
                             i18n::t!("ui.text.auto_complete_will_not_work")
                         ))?;

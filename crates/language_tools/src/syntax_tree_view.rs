@@ -471,7 +471,8 @@ impl Render for SyntaxTreeView {
                             "ui.text.current_editor_has_no_associated_language"
                         )))
                         .child(
-                            Label::new(concat!(
+                            Label::new(format!(
+                                "{} {}",
                                 i18n::t!("ui.text.try_assigning_a_language_or"),
                                 i18n::t!("ui.text.switching_to_a_different_buffer")
                             ))

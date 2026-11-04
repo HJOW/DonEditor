@@ -5,7 +5,7 @@ pub mod sessions;
 pub mod transport;
 
 use anyhow::Result;
-use gpui::{App, AppContext as _, Global, PromptLevel, actions};
+use gpui::{App, Global, PromptLevel, actions};
 use serde_json::Value;
 use settings::{RegisterSetting, Settings, SettingsContent, SettingsStore};
 use std::{

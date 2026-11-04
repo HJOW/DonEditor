@@ -58,8 +58,8 @@ impl Display for Mode {
             Mode::Insert => write!(f, "INSERT"),
             Mode::Replace => write!(f, "REPLACE"),
             Mode::Visual => write!(f, "VISUAL"),
-            Mode::VisualLine => write!(f, i18n::t!("ui.text.visual_line")),
-            Mode::VisualBlock => write!(f, i18n::t!("ui.text.visual_block")),
+            Mode::VisualLine => write!(f, "{}", i18n::t!("ui.text.visual_line")),
+            Mode::VisualBlock => write!(f, "{}", i18n::t!("ui.text.visual_block")),
             Mode::HelixNormal => write!(f, "NORMAL"),
             Mode::HelixSelect => write!(f, "SELECT"),
         }

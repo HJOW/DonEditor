@@ -58,12 +58,13 @@ fn render_theme_section(tab_index: &mut isize, cx: &mut App) -> impl IntoElement
                             ThemeAppearanceMode::System,
                         ]
                         .map(|mode| {
-                            const MODE_NAMES: [SharedString; 3] = [
-                                SharedString::new_static(i18n::t!("ui.text.light")),
-                                SharedString::new_static(i18n::t!("ui.text.dark")),
-                                SharedString::new_static(i18n::t!("ui.text.system")),
-                            ];
-                            ToggleButtonSimple::new(MODE_NAMES[mode as usize].clone(), move |_, _, cx| {
+                            // 언어 변경을 반영하도록 표시 문자열을 화면을 그릴 때 가져온다.
+                            let mode_name = match mode {
+                                ThemeAppearanceMode::Light => i18n::t!("ui.text.light"),
+                                ThemeAppearanceMode::Dark => i18n::t!("ui.text.dark"),
+                                ThemeAppearanceMode::System => i18n::t!("ui.text.system"),
+                            };
+                            ToggleButtonSimple::new(mode_name, move |_, _, cx| {
                                 write_mode_change(mode, cx);
                             })
                         }),
