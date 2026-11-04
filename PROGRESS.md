@@ -890,7 +890,7 @@ DonEditor/
 
 ### Phase 8. 통합 테스트 · 문서화 · 릴리스
 - [ ] 전체 기능 회귀 테스트 ([기능 인벤토리](FEATURE-INVENTORY.md) 기준 기존 기능 R8 + 신규 요구사항 R1~R7·R9, Agent 패널 숨김·아이콘으로 다시 표시 포함)
-- [ ] `cargo test` (변경 crate 위주), `cargo clippy` 경고 정리 — **대부분 완료(2026-11-05):** 변경 crate 테스트 text 24·language 99·worktree 26·editor 475·gram 36·markdown_preview 40·don_charset 9·don_typst 17·i18n 11·MCP 전송 25개 통과, `don_tools`·`mcp_server`·`agent_panel`·`settings_ui`·새 crate 4개 clippy 경고 0건(이전에 남았던 `don_tools` 1건·`mcp_server` 5건은 정리함). **남은 것:** 원본에 있던 `prettier` clippy 1건(손대지 않음), `settings_ui`·`workspace` 등 나머지 GUI crate 테스트 전체 실행
+- [ ] `cargo test` (변경 crate 위주), `cargo clippy` 경고 정리 — **대부분 완료(2026-11-05):** 변경 crate 테스트 text 24·language 99·worktree 26·editor 475·gram 36·markdown_preview 40·don_charset 9·don_typst 17·i18n 11·MCP 전송 25개 통과, `don_tools`·`mcp_server`·`agent_panel`·`settings_ui`·새 crate 4개 clippy 경고 0건(이전에 남았던 `don_tools` 1건·`mcp_server` 5건은 정리함). `workspace` 132개·`settings_ui` 7개도 통과(2026-11-05). **남은 것:** 원본에 있던 `prettier` clippy 1건(손대지 않음), 그 밖의 GUI crate(`project`·`project_panel`·`search` 등) 테스트 전체 실행
 - [x] 사용자 문서(한국어): 설치, Agent 설정, MCP 연결 방법 — `docs/installation.md`·`agent.md`·`mcp.md`·`security.md`·`packaging.md`(`5fa69a6`), 2026-11-04 Agent 설정 변경 반영
 - [x] Windows 배포 스크립트로 릴리스 zip 생성 및 압축 해제 실행 확인 — **2026-11-04 x86_64 릴리스 ZIP·SHA-256·구성 확인 및 격리 데이터로 GUI 기동 확인. 전체 기능 회귀와 깨끗한 설치 환경·ARM64는 별도 미검증**
 - [ ] Linux/macOS 배포 스크립트로 각 OS의 최종 tar.gz 생성 및 압축 해제 실행 확인, 빌드 도구 검사·설치 질의 흐름 점검 — **모의 검증만 완료, 실제 OS 검증은 이번 목표에서 건너뜀(사용자 지시)**
