@@ -76,7 +76,10 @@ struct Args {
     // [DonEditor] 실제 기본 데이터 폴더(crates/paths)와 같은 이름으로 안내한다
     #[cfg_attr(target_os = "macos", doc = "`~/Library/Application Support/DonEditor`.")]
     #[cfg_attr(target_os = "windows", doc = "`%LOCALAPPDATA%\\DonEditor`.")]
-    #[cfg_attr(not(any(target_os = "windows", target_os = "macos")), doc = "`$XDG_DATA_HOME/doneditor`.")]
+    #[cfg_attr(
+        not(any(target_os = "windows", target_os = "macos")),
+        doc = "`$XDG_DATA_HOME/doneditor`."
+    )]
     #[arg(long, value_name = "DIR")]
     user_data_dir: Option<String>,
     /// The paths to open in Don Editor (space-separated).
