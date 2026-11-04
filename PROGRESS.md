@@ -14,6 +14,7 @@
 - Windows에서 `cargo build -p gram -p cli -p mcp_server --bins`가 성공해 GUI·CLI·MCP 실행 파일을 만들었다(링커의 기존 Wasmtime `LNK4217` 경고 1건). 격리 데이터 폴더와 테스트 Rust 파일로 GUI가 실행돼 파일 창이 열리고 응답함을 확인했다. 공식 MCP Python SDK로 실제 앱에 stdio 연결해 도구 33개, 활성 버퍼, Agent 기록, 패널 이동 액션 조회를 검증했다.
 - Windows 화면 캡처는 창을 새로 선택해 재시도한 뒤에도 `window capture timed out`으로 실패했다. 따라서 실제 화면의 패널 조작 및 MCP 편집 승인·거절·취소 검증은 아직 완료하지 못했다. 테스트 앱·파일은 사용자 환경과 분리했다.
 - 현재 프로세스 환경에서 OpenAI/Anthropic API 키 환경 변수와 Claude Code 명령은 감지되지 않았다. 실제 계정 연결은 별도 검증 대상이다.
+- 사용자 지시에 따라 실제 OpenAI·Claude API 호출 검증은 이번 작업에서 생략한다. 공급자 프로토콜의 가짜 응답 계약 테스트 결과와 실제 계정 연결 여부를 구분한다.
 - Windows 자격 증명 저장소는 별도 고유 테스트 항목과 가짜 값으로 저장·읽기·삭제를 검증했다. 이 검사는 keyring 백엔드 수준이며, 실제 API 키나 Agent 화면을 통한 조작은 검증하지 않았다.
 
 ## 2026-11-04 작업 체크포인트 — 사용자 요청으로 일시 중지
