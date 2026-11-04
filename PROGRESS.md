@@ -1,5 +1,13 @@
 # Don Editor 진행 상황
 
+## 2026-11-04 재개 후 일시 중지 체크포인트
+
+- **사용자 지시:** 진행 중인 Windows ZIP 오류 수정과 이미 시작한 정적 검사를 마친 뒤 문서·커밋을 정리하고 목표를 일시 정지한다. 새 작업은 시작하지 않는다.
+- 실제 디버그 앱 빌드와 MCP 조회는 성공했고, ZIP 해시 오류를 수정해 실제 디버그 ZIP을 검증했다. 릴리스 ZIP과 압축 해제 실행 검증은 아직 하지 않았다.
+- `cargo clippy -p don_tools -p agent_panel -p mcp_server --offline`은 종료 코드 0으로 끝났으나 경고가 남았다. 신규 코드에서는 `don_tools` 1건, `mcp_server` 5건, `agent_panel` 3건이다. 특히 `mcp_server`의 Windows ACL 처리에서 동기 `Command::output` 3건은 UI 스레드 차단 가능성을 재개 시 확인한다. 기존 `prettier` 경고 1건도 보고됐다.
+- 격리 앱은 파일 창 생성과 실제 MCP 조회 당시 응답했다. Windows 화면 캡처는 재시도해도 `window capture timed out`으로 실패했고, 이후 확인 시 테스트 프로세스가 이미 종료되어 있었다. 격리 디렉터리의 `hang_traces`에 기록이 있으며 종료 원인은 확인하지 못했다. 재개 시 이 현상과 GUI 승인·거절·취소 및 패널 표시/숨김을 확인한다. 테스트 설정·파일은 `target/gui-test-feaeda1dec5a4796a547cc4ebb27460e/`에 남겨 두었다.
+- 한국어 설정 경로·Git 출력·선택 단위 GUI crate 회귀 테스트, 기존 기능 인벤토리의 미확인 항목, 실제 Claude Desktop/Code 연결과 릴리스 패키지 실행 검증이 남았다. 사용자가 실제 OpenAI/Claude API 호출 검증은 생략하도록 요청했으며, Linux/macOS에서 직접 테스트해야 하는 항목도 이번 목표에서 건너뛴다.
+
 ## 2026-11-04 재개 후 Windows 검증
 
 - 사용자 요청으로 작업을 재개했다. Linux/macOS에서 직접 테스트해야 하는 항목은 이번 작업에서 건너뛴다.
