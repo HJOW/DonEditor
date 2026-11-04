@@ -1,13 +1,58 @@
 # Don Editor 진행 상황
 
-## 2026-11-04 전체 잔여 작업 진행
+## 2026-11-04 작업 체크포인트 — 사용자 요청으로 일시 중지
 
-- 사용자 요청에 따라 아래 단계의 잔여 구현과 검증을 진행 중이며, 검증 가능한 작업 단위마다 한 줄 요약 메시지로 커밋한다.
-- **배포 스크립트 완료:** 커밋 `f1ba957` — `Linux·macOS tar 배포와 MCP·대응 소스 동봉을 구현`. `package-tar.sh`의 Linux/macOS 감지·도구 검사·선택 설치·재검사·빌드·tar.gz/SHA256 생성, Windows zip의 `don-mcp.exe` 필수 동봉, 실제 작업 트리 소스 기본 동봉을 구현했다. 소스 공개 저장소가 미정인 문제는 배포물에 수정 소스를 포함하는 방식으로 해결한다.
-- **배포 검증:** Unix 패키징 테스트 14개, 기존 빌드 도구 설치 테스트 19개, Windows zip PowerShell 검증, Bash 구문 검사와 diff 공백 검사가 통과했다. Linux/macOS GUI 네이티브 빌드·ARM64·깨끗한 환경의 실제 패키지 설치는 아직 미검증이다. 사용법과 제한은 `docs/packaging.md` 참고.
-- **진행 중:** 한국어 설정 화면·후속 패널, 공용 도구 레지스트리, 루프백 HTTP MCP 서버·stdio 브릿지, OpenAI/Anthropic Agent 패널, 자체 도움말 및 통합 검증.
-- **MCP 경량 검증:** 실제 소스를 재사용하는 `tooling/don_protocol_tests`에서 JSON-RPC 초기화·알림·오류·리소스, 실제 TCP 토큰 인증·Origin 거절·GET 405·도구 호출·202 응답·연결 파일 정리, UTF-8 편집 범위와 도구 입력 검사를 포함한 5개 테스트가 통과했다. GPUI 통합 검증은 진행 중이다.
-- **빌드 환경:** 지정 1.99.1 툴체인의 자동 동기화 중 Windows 디렉터리 이름 변경 오류가 발생했다. 설치된 `stable`도 rustc/cargo 1.99.1임을 확인하여 `RUSTUP_TOOLCHAIN=stable`로 검사한다. 메모리 여유를 고려해 통합 컴파일은 `CARGO_BUILD_JOBS=2`로 제한한다.
+- **사용자 지시:** 진행 중인 작업을 정리하고 문서 반영·Git 커밋을 마친 뒤 목표를 일시 중지한다. 새 작업을 시작하지 않고 이 체크포인트에서 멈춘다.
+- **전체 목표는 미완료다.** 아래는 소스 구현과 실제로 통과한 검증을 구분한 최신 상태다. 과거 단계별 기록의 미구현·대기 표시는 당시 상황이며, 재개할 때는 이 절의 남은 작업을 먼저 확인한다.
+
+### 이번 작업과 커밋
+
+| 커밋 | 작업 단위 |
+|------|-----------|
+| `f1ba957` | Linux/macOS tar.gz 배포, Windows zip의 MCP 실행 파일 및 실제 수정 소스 동봉 |
+| `5fa69a6` | 한국어 자체 도움말 6개, 원본 도움말 출처·검색 통합, 신규 의존성 고지 |
+| `2d7df76` | 내부 워크스페이스 SPDX·원본 GPL·원저작 고지 검증기 |
+| `7a48048` | 설정 본문 704개 문구와 키맵·Git·디버거·REPL·확장·원격 등 후속 UI 한국어화 |
+| `e098e1f` | 기능 인벤토리의 구현·자동 검사·실제 환경 미검증 구분 |
+| `10efaee` | stdio 브릿지 병렬 응답·요청 취소·EOF 세션 취소 |
+| `2b5390a` | 우측 Agent 초기 구현, OpenAI/Claude SSE·도구·서명 블록 보존·기록·OS 키 저장 경로 |
+| `8de5f9e` | 공용 도구 32개, GPUI 승인 경로, 세션별 MCP 취소·인증·전송·앱 통합 및 회귀 하네스 |
+
+- MCP는 루프백·Bearer·Host/Origin 검사, 세션별 요청 ID와 취소, TCP 종료·DELETE·서버 중지 취소, 같은 포트 재시작, Windows 기존 명시적 ACL 초기화를 구현했다. 전송은 16 MiB, 중복 인코딩하는 도구 결과는 4 MiB로 제한한다.
+- 편집 승인은 대상 파일의 전체 변경안을 표시하며, 승인 대기 중 변경된 파일·활성 탭·읽기 전용 상태·발췌 편집기를 검사한다. MCP 취소 토큰은 승인 직후에도 재검사한다. 이 **GPUI 경로는 아직 전체 컴파일·실행 검증 전**이다.
+- Agent는 기본 우측·숨김·항상 남는 도크 아이콘, 키 마스킹/OS 자격 증명 저장/환경 변수 폴백, Markdown 스트리밍·중단·컨텍스트·최근 20개 대화와 MCP 공개 액션 8개를 구현했다. 자세한 체크포인트는 `crates/agent_panel/README.md`에 기록했다.
+- macOS 번들/창 식별자와 원본 인스턴스 탐색을 분리했다. 프로젝트 `.gram/` 호환 설정, D2Coding UI 글꼴, 임시 D 아이콘은 유지한다. 별도 기여 정책·행동 강령은 새로 제정하지 않았다. 소스 공개 위치 미정 문제는 배포 스크립트의 수정 소스 동봉으로 대응한다.
+
+### 완료한 검증
+
+- **i18n:** 영·한 **1,762키**, GUI 없는 카탈로그 테스트 **11개 통과**. 키·자리표시자·실제 소스 사용 여부·언어 격리 검사 포함. 마지막 MCP 미리보기 표제 2개를 추가한 뒤 재검사했다.
+- **MCP 실제 소스 계약:** `don_protocol_tests`의 기본/세션/입력/UTF-8/HTTP **14개**, stdio 병렬·취소·EOF **4개**, 실제 TCP 취소·종료·DELETE·재시작·크기 제한 **5개**가 모두 통과했다. 기본 실행에서 제외하는 Windows ACL **1개**도 명시적으로 실행해 Everyone 명시적 ACE 제거를 확인했다(총 24개). GUI 대신 고정 테스트 실행기를 사용한다.
+- **외부 클라이언트:** 공식 Python MCP SDK **2.3.0**으로 HTTP·stdio 각각 legacy 초기화와 자동 협상, 도구 **32개**·리소스 **3개** 조회/호출을 검증했다. `tests/test_mcp_sdk.py`가 재현 스크립트이며 실제 에디터 GUI 연결이나 Claude Desktop/Code 실행을 대신하지 않는다.
+- **Agent:** 실제 `provider.rs`를 GUI 없이 재사용한 공급자 계약 테스트 **9개 통과**. SSE·한글·분할 도구 인자·실패/잘린 응답·중단 재개·Claude thinking/signature 보존을 확인했다. 실제 키·유료 API 호출은 사용하지 않았다.
+- **배포:** Unix 패키징 **14개**, 기존 설치 스크립트 **19개**, Windows zip PowerShell 검사 통과. 모의 빌드/설치와 실제 tar·해시·소스 스테이징을 구분했다. 신규 앱의 최종 실행 파일을 만든 검증은 아니다.
+- **문서/라이선스:** 자체 도움말 링크 **76개**·JSON 예시·원본문서 불변 검사, 내부 **143개 crate**의 SPDX/GPL/원저작 고지 검사, 검사기 회귀 **10개** 통과. 신규 외부 의존성은 원본 crate와 Cargo.lock SHA256을 확인해 개별 고지했다.
+- 변경 Rust 파일의 rustfmt 및 Git diff 공백 검사가 통과했다. 로그와 Python SDK용 가상 환경은 Git에서 제외하는 `target/`에 보관한다.
+
+### 남은 작업과 재개 순서
+
+1. **전체 GUI 컴파일부터 재개한다.** `cargo check -p gram -p mcp_server`는 공용 의존성 컴파일 중 사용자 중지 요청에 맞춰 중단했다. 종료 코드 1은 강제 중단 결과이며 빌드 성공을 의미하지 않는다. 신규 GUI 바이너리·릴리스 zip/tar.gz는 아직 만들지 않았다. 이후 바뀐 기본 feature(i18n/Agent)와 매니페스트를 다시 읽도록 새 Cargo 명령으로 시작한다.
+2. `don_tools`·MCP의 GPUI 연결과 Agent UI의 타입/빌드 오류를 해결하고 변경 GUI crate 테스트·clippy를 실행한다. 추가한 설정 JSON 경로·한국어 Git 처리·커서 선택 단위 회귀 테스트도 실행 전이다.
+3. 실제 앱에서 편집 승인/거절·취소·오래된 변경안 거절, 설정·언어 전환, Agent 기본 위치·숨김·아이콘 복귀·기록 복원, 원본/자체 도움말을 확인한다. MCP의 모든 기능 제어 완전성은 검증 전이며 특정 대화 선택·기록 삭제·패널 이동의 JSON 액션도 보강 대상이다.
+4. OS 키 저장/삭제와 실제 OpenAI 또는 Claude 호출, Claude Desktop/Code 실제 앱 연결을 검증한다. 사용자 API 키는 이번 작업에서 읽거나 등록하지 않았다.
+5. 기능 인벤토리의 기존 실행 확인 **2개/미확인 48개**를 기준으로 회귀 확인한다. 신규 소스의 전체 기능·시각 검증이 완료됐다고 표시하지 않는다.
+6. 신규 코드로 Windows 최종 zip과 각 OS의 Linux/macOS tar.gz 생성·압축 해제·실행, 깨끗한 환경 설치 흐름·ARM64를 확인한다. WSL은 후반에 `CreateVm/ERROR_TIMEOUT`으로 시작에 실패해 추가 Linux 실행 검증을 하지 못했다. macOS 환경도 사용하지 않았다.
+
+빌드 환경 참고: 지정 1.99.1 툴체인의 자동 동기화 중 Windows 디렉터리 이름 변경/롤백 오류가 있었다. 설치된 `stable`의 rustc/cargo도 **1.99.1**임을 확인했다. 검사 시 `RUSTUP_TOOLCHAIN=stable`, `CARGO_BUILD_JOBS=1` 또는 `2`로 메모리를 제한했다. 컴파일 캐시는 보존한다.
+
+```powershell
+$env:RUSTUP_TOOLCHAIN = 'stable'
+$env:CARGO_BUILD_JOBS = '2'
+cargo check -p gram -p mcp_server
+# 아래는 GUI 없이 재현 가능한 검사다.
+cargo test -p i18n --no-default-features --lib --offline --target-dir target/i18n-check
+cargo test -p agent_panel --no-default-features --lib --offline --target-dir target/contracts
+cargo test -p don_protocol_tests --offline --target-dir target/i18n-check
+```
 
 ### 이전 단계별 기록 (아래의 대기·미구현 표시는 당시 기준이며, 위 진행 기록으로 순차 갱신)
 

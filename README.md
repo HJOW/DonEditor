@@ -4,7 +4,7 @@ Don Editor는 **AI Agent 패널과 로컬 MCP를 적극 도입하는 한국어 �
 
 기존 편집기 기능을 유지하면서 한국어 UI, 기본 D2Coding 글꼴과 26개 언어의 기본 문법 강조를 제공합니다. 라이선스는 원본과 같은 GPL-3.0 계열이며 [LICENSE](LICENSE)와 [원저작 고지](./assets/licenses.md)를 보존합니다.
 
-개발 버전입니다. 구현·검증 범위는 [PROGRESS.md](./PROGRESS.md), 사용법은 [Don Editor 사용 안내](./docs/index.md)를 확인하세요. 실제 Linux/macOS 네이티브 배포 검증과 제공자 계정을 사용하는 API 연결 확인 등 환경별 검증이 남아 있습니다.
+개발 버전입니다. 새 MCP·Agent 및 후속 한국어 UI는 초기 구현을 반영한 체크포인트이며, 전체 GUI 컴파일·실행 검증은 아직 완료하지 않았습니다. 구현·검증 범위는 [PROGRESS.md](./PROGRESS.md), 사용법은 [Don Editor 사용 안내](./docs/index.md)를 확인하세요. 실제 Linux/macOS 네이티브 배포 검증과 제공자 계정을 사용하는 API 연결 확인 등 환경별 검증이 남아 있습니다.
 
 ## 이름의 유래
 
@@ -15,8 +15,8 @@ GramEditor 은 가벼움을 모토로 개발된 텍스트 편집기 프로젝트
 
 | 기능 | 내용 | 상태 |
 |------|------|------|
-| **AI Agent 사이드 패널** | OpenAI 또는 Anthropic API 키, 기본 우측 배치, 숨김·도크 아이콘으로 다시 표시, 스트리밍 응답, 컨텍스트 첨부, 도구 실행 승인, 대화 기록 | 구현됨. [설정과 사용법](./docs/agent.md), 실제 제공자 계정 연결은 별도 확인 필요 |
-| **로컬 MCP 서버** | 루프백·토큰 인증 HTTP, `don-mcp` stdio 브릿지, 파일·편집·검색·설정·터미널 도구 및 범용 편집기 액션 | 구현됨. [클라이언트 연결 예시](./docs/mcp.md), [승인·데이터 보관](./docs/security.md) |
+| **AI Agent 사이드 패널** | OpenAI 또는 Anthropic API 키, 기본 우측 배치, 숨김·도크 아이콘으로 다시 표시, 스트리밍 응답, 컨텍스트 첨부, 도구 실행 승인, 대화 기록 | 초기 소스 구현. GUI 통합·실제 키 저장·제공자 연결은 미검증. [설정과 사용법](./docs/agent.md) |
+| **로컬 MCP 서버** | 루프백·토큰 인증 HTTP, `don-mcp` stdio 브릿지, 파일·편집·검색·설정·터미널 도구 및 범용 편집기 액션 | 프로토콜·전송과 도구 초기 구현. GUI 도구 실행과 모든 기능 제어의 완전성은 미검증. [연결 예시](./docs/mcp.md), [승인·데이터 보관](./docs/security.md) |
 | 한국어 UI | 메뉴·패널·탭·검색·대화상자·설정 본문·키맵·Git·디버거 등 주요 화면 한국어화. 설정 `"ui_language"`: `"auto"`(OS 언어) / `"ko"` / `"en"`. 명령 팔레트에서 한국어와 영어 이름을 함께 표시 | 적용됨. 원본 도움말 본문은 출처를 구분해 원문 보존 |
 | 기본 글꼴 | [D2Coding](./assets/fonts) 을 기본 글꼴로 사용 (편집기·UI 모두) | 적용됨 |
 | 문법 강조 | 파일 확장자로 언어를 감지하여 기본 문법 강조. 대상 **26개**: Java, C, C++, SQL, C#, Rust, JavaScript(mjs·cjs 포함), TypeScript, Python, Ruby, JSON, JSON5, YAML(yml), Properties(`java.util.Properties` 호환), XML, HTML, XHTML, Markdown(md), Swift, Scala, R, Bat(Windows Batch), PowerShell, Sh(Unix Shell), Go, Dart. 이 중 15개는 원본에 내장되어 있고, **Java, C#, Ruby, JSON5, Properties, Swift, Scala, R, Bat, PowerShell, Dart 11개는 새로 추가** 샘플 파일은 [tests/samples/](./tests/samples) 에 있습니다. | 구현됨 (26개 감지·강조를 자동 테스트로 확인, 실제 창의 색상은 눈으로 미확인). 한계: `.xhtml` 의 `<?xml ?>` 선언 줄은 강조되지 않음 |
