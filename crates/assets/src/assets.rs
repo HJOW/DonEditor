@@ -71,24 +71,39 @@ impl Assets {
 #[exclude = "*.DS_Store"]
 pub struct Docs;
 
+// [DonEditor] 자체 한국어 사용 안내를 원본 문서와 별도 폴더에서 내장한다.
+// 외부 경로에는 don/ 접두사를 붙여 기존 gram://docs/... 링크와 구분한다.
+#[derive(RustEmbed)]
+#[folder = "../../docs"]
+#[include = "*.md"]
+#[exclude = "*.DS_Store"]
+pub struct DonDocs;
+
 impl AssetSource for Docs {
+    // [DonEditor] 원본과 자체 문서를 같은 도움말 조회 규약으로 읽는다.
     fn load(&self, path: &str) -> Result<Option<std::borrow::Cow<'static, [u8]>>> {
-        Self::get(path)
+        lookup_docs(path)
             .map(|f| Some(f.data))
             .with_context(|| format!("loading docs at path {path:?}"))
     }
 
+    // [DonEditor] 도움말 검색에 두 문서 모음을 모두 제공하되 경로 충돌을 피한다.
     fn list(&self, path: &str) -> Result<Vec<SharedString>> {
-        Ok(Self::iter()
-            .filter_map(|p| if p.starts_with(path) { Some(p.into()) } else { None })
+        let original = Self::iter().map(|entry| entry.to_string());
+        let don = DonDocs::iter().map(|entry| format!("don/{entry}"));
+        Ok(original
+            .chain(don)
+            .filter(|entry| entry.starts_with(path))
+            .map(SharedString::from)
             .collect())
     }
 }
 
+// [DonEditor] don/ 문서는 자체 문서에서, 나머지는 보존한 원본에서 찾는다.
 pub fn lookup_docs(path: &str) -> Option<rust_embed::EmbeddedFile> {
-    if let Some(docs) = Docs::get(path) {
-        Some(docs)
+    if let Some(path) = path.strip_prefix("don/") {
+        DonDocs::get(path).or_else(|| DonDocs::get(&format!("{path}.md")))
     } else {
-        Docs::get(&format!("{path}.md"))
+        Docs::get(path).or_else(|| Docs::get(&format!("{path}.md")))
     }
 }

@@ -124,19 +124,25 @@ pub fn open_doc_url(url: SharedString, window: &mut Window, cx: &mut App) {
 
 impl DocumentationView {
     fn render_toolbar(&self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        // [DonEditor] 현재 읽는 문서 모음의 목차로 돌아간다.
+        let contents_url = if self.current.starts_with("don/") {
+            "gram://docs/don/index.md"
+        } else {
+            "gram://docs/index.md"
+        };
         v_flex().gap_2().child(
             h_flex()
                 .gap_4()
                 .child(
                     IconButton::new("doc-view-toc", IconName::Library)
-                        .tooltip(Tooltip::text("Table of Contents"))
+                        .tooltip(Tooltip::text(i18n::t!("docs.contents")))
                         .on_click(move |_, window, cx| {
-                            open_doc_url("gram://docs/index.md".into(), window, cx);
+                            open_doc_url(contents_url.into(), window, cx);
                         }),
                 )
                 .child(
                     IconButton::new("doc-view-search", IconName::MagnifyingGlass)
-                        .tooltip(Tooltip::text("Search Documentation"))
+                        .tooltip(Tooltip::text(i18n::t!("docs.search")))
                         .on_click(move |_, window, cx| {
                             open_search(window, cx);
                         }),
@@ -144,7 +150,7 @@ impl DocumentationView {
                 .child(
                     IconButton::new("doc-view-back", IconName::ArrowLeft)
                         .disabled(self.back.is_empty())
-                        .tooltip(Tooltip::text("Back"))
+                        .tooltip(Tooltip::text(i18n::t!("menu.go.back")))
                         .on_click(cx.listener(move |this, _, window, cx| {
                             this.go_back(window, cx);
                         })),
@@ -152,7 +158,7 @@ impl DocumentationView {
                 .child(
                     IconButton::new("doc-view-forward", IconName::ArrowRight)
                         .disabled(self.forward.is_empty())
-                        .tooltip(Tooltip::text("Forward"))
+                        .tooltip(Tooltip::text(i18n::t!("menu.go.forward")))
                         .on_click(cx.listener(move |this, _, window, cx| {
                             this.go_forward(window, cx);
                         })),
@@ -401,7 +407,8 @@ impl DocumentationView {
     ) {
         let language_registry = workspace.project().read(cx).languages().clone();
         let workspace_handle = workspace.weak_handle();
-        let path = path.unwrap_or("index.md".into());
+        // [DonEditor] 기본 도움말은 자체 안내이며 원본 문서는 기존 링크로 계속 연다.
+        let path = path.unwrap_or("don/index.md".into());
         let path = path.strip_prefix("gram://docs/").unwrap_or(&path);
         if let Some(existing) = workspace.item_of_type::<DocumentationView>(cx) {
             let is_active = workspace
@@ -463,14 +470,22 @@ fn preprocess_text(text: &str, actions: Vec<Box<dyn Action>>) -> String {
     text.to_string()
 }
 
+// [DonEditor] 원본 Markdown 파일은 수정하지 않고 화면에만 출처 안내를 덧붙인다.
 fn get_docs<'b>(path: &str) -> Option<Cow<'b, str>> {
-    if let Some(text) = lookup_docs(path) {
-        Some(match text.data {
-            Cow::Borrowed(bytes) => Cow::Borrowed(std::str::from_utf8(bytes).unwrap()),
-            Cow::Owned(bytes) => Cow::Owned(String::from_utf8(bytes).unwrap()),
-        })
+    let text = lookup_docs(path)?;
+    let text = match text.data {
+        Cow::Borrowed(bytes) => Cow::Borrowed(std::str::from_utf8(bytes).ok()?),
+        Cow::Owned(bytes) => Cow::Owned(String::from_utf8(bytes).ok()?),
+    };
+    if path.starts_with("don/") {
+        Some(text)
     } else {
-        None
+        Some(Cow::Owned(format!(
+            "> {}\n>\n> [{}](gram://docs/don/index.md) · [GramEditor](https://codeberg.org/GramEditor/gram)\n\n{}",
+            i18n::t!("docs.original_notice"),
+            i18n::t!("menu.help.don_guide"),
+            text
+        )))
     }
 }
 

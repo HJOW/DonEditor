@@ -17,6 +17,7 @@ app_actions.workspace = true
 assets.workspace = true
 editor.workspace = true
 gpui.workspace = true
+i18n.workspace = true
 language.workspace = true
 markdown_preview.workspace = true
 regex.workspace = true

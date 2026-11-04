@@ -22,11 +22,18 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-For more information and complete license details, you can get the
-full source code for this program and all dependencies from
-<https://codeberg.org/GramEditor/gram> or by contacting the authors.
-(The link above is the original Gram project. The corresponding source code of
-Don Editor is available from the distributor of this program.)
+The corresponding Don Editor project source is included in release archives:
+`source/DonEditor-<version>-source.zip` on Windows, or
+`source/DonEditor-<version>-source.tar.gz` on Linux/macOS. These archives contain
+the working tree used for packaging, including uncommitted source changes,
+Cargo.lock, rust-toolchain.toml, build scripts and bundled assets. See SOURCE.txt
+and docs/packaging.md in the distribution. External Cargo dependency sources are
+identified by the registry/git locations and exact versions or revisions in Cargo.lock.
+
+The original GramEditor source is available at
+<https://codeberg.org/GramEditor/gram>. This upstream repository does not include
+the Don Editor modifications. Preserve the matching source and license notices
+when redistributing a Don Editor binary.
 
 ## Bundled fonts
 
@@ -56,6 +63,29 @@ language directory under `crates/languages/src/` contains the upstream copyright
 - Batch: tree-sitter-batch 0.11.1, Copyright (c) 2026 WharfLab.
 - PowerShell: tree-sitter-powershell 0.26.4, Copyright (c) 2023 Airbus CERT.
 - Dart: tree-sitter-dart 0.3.0, Copyright (c) 2026 Kasper Overgård Nielsen.
+
+## Credential storage dependencies added by Don Editor
+
+The Agent panel uses keyring for the operating system's credential manager.
+The following newly introduced crates offer the MIT or Apache License 2.0;
+Don Editor may use the MIT option alongside its GPL-3.0-or-later code. Their
+upstream license texts and copyright notices are preserved in `assets/licenses/`
+(the distribution's `licenses/` directory):
+
+| Crate | Version | License notice files |
+|---|---|---|
+| keyring | 3.6.3 | keyring-LICENSE-MIT, keyring-LICENSE-APACHE |
+| dbus-secret-service | 4.1.0 | dbus-secret-service-LICENSE-MIT, dbus-secret-service-LICENSE-APACHE |
+| dbus | 0.9.12 | dbus-LICENSE-MIT, dbus-LICENSE-APACHE |
+| libdbus-sys | 0.2.7 | libdbus-sys-LICENSE-MIT, libdbus-sys-LICENSE-APACHE |
+| security-framework | 2.11.1 | security-framework-LICENSE-MIT, security-framework-LICENSE-APACHE |
+| zeroize_derive | 1.5.0 | zeroize_derive-LICENSE-MIT, zeroize_derive-LICENSE-APACHE |
+
+Versions and archive SHA256 checksums are pinned in Cargo.lock. The notices were
+copied from those exact crates.io source archives after verifying their checksums.
+Windows/macOS use the platform credential APIs; Linux uses the system D-Bus and
+Secret Service. The system libraries are not copied into Don Editor's tar archives.
+Existing shared dependencies retain their original notices and licenses.
 
 ## GNU GENERAL PUBLIC LICENSE
 

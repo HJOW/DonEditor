@@ -1,4 +1,4 @@
-use assets::Docs;
+use assets::{Docs, lookup_docs};
 use clock::ReplicaId;
 use collections::{HashMap, HashSet};
 use fs;
@@ -335,7 +335,7 @@ impl Render for DocsSearch {
                         h_flex()
                             .gap_2()
                             .items_center()
-                            .child(Label::new("Search Documentation").size(LabelSize::Default))
+                            .child(Label::new(i18n::t!("docs.search")).size(LabelSize::Default))
                             .when(search_in_progress, |this| {
                                 this.child(
                                     Label::new(format!("Searching... {} matches in {} files", match_count, file_count))
@@ -774,7 +774,7 @@ impl PickerDelegate for DocsSearchDelegate {
                                 let editor_for_click = editor.clone();
                                 IconButton::new("insert-newline", IconName::Return)
                                     .size(ButtonSize::Compact)
-                                    .tooltip(Tooltip::text("Insert New Line"))
+                                    .tooltip(Tooltip::text(i18n::t!("search.insert_new_line")))
                                     .on_click(move |_, window, cx| {
                                         editor_for_click.update(cx, |editor, cx| {
                                             editor.insert("\n", window, cx);
@@ -891,7 +891,8 @@ impl PickerDelegate for DocsSearchDelegate {
                         break;
                     }
 
-                    let data = match Docs::get(&doc_path) {
+                    // [DonEditor] don/ 자체 안내와 원본 도움말을 함께 검색한다.
+                    let data = match lookup_docs(&doc_path) {
                         Some(data) => data,
                         None => {
                             log::error!("Failed to load {}", doc_path);
