@@ -18,6 +18,8 @@ collections.workspace = true
 editor.workspace = true
 fs.workspace = true
 gpui.workspace = true
+# [DonEditor] 미리보기/편집 전환 버튼의 한국어 문구
+i18n.workspace = true
 language.workspace = true
 linkify.workspace = true
 log.workspace = true

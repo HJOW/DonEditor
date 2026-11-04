@@ -990,6 +990,9 @@ fn initialize_pane(workspace: &Workspace, pane: &Entity<Pane>, window: &mut Wind
             toolbar.add_item(multibuffer_hint, window, cx);
             let breadcrumbs = cx.new(|_| Breadcrumbs::new());
             toolbar.add_item(breadcrumbs, window, cx);
+            // [DonEditor] Markdown 탭의 "미리보기 | 편집" 토글. 오른쪽 항목은 먼저 추가할수록 오른쪽 끝에 놓인다.
+            let markdown_mode_toggle = cx.new(|_| markdown_preview::markdown_mode::MarkdownModeToggle::new(workspace));
+            toolbar.add_item(markdown_mode_toggle, window, cx);
             let buffer_search_bar = cx.new(|cx| {
                 search::BufferSearchBar::new(Some(workspace.project().read(cx).languages().clone()), window, cx)
             });

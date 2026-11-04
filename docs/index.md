@@ -17,6 +17,8 @@ Don Editor는 GramEditor를 기반으로 한국어 UI, D2Coding 기본 글꼴, �
 
 파일 열기·편집·저장, 다중 탭·분할 창, 찾기·바꾸기, Git, 터미널, 디버거, 언어 서버, Vim/Helix 모드 등 기존 기능을 유지합니다. 기본 문법 강조 대상은 Java, C, C++, SQL, C#, Rust, JavaScript(mjs/cjs 포함), TypeScript, Python, Ruby, JSON, JSON5, YAML, Java Properties, XML, HTML, XHTML, Markdown, Swift, Scala, R, Windows Batch, PowerShell, Unix Shell, Go, Dart입니다.
 
+Markdown 파일(`.md` 등)은 열면 **미리보기 모드**로 먼저 표시됩니다. 탭 아래 현재 단락 제목 줄의 오른쪽에 있는 **미리보기 | 편집** 버튼으로 같은 탭 안에서 편집 모드와 오갈 수 있으며, 명령 팔레트의 `markdown: toggle preview mode`로도 전환합니다. 미리보기에서 블록을 두 번 누르면 그 위치에서 편집 모드로 바뀝니다. 내용이 없는 파일은 편집 모드로 열립니다. 저장·변경 표시·닫기 확인은 두 모드에서 똑같이 동작하며, 별도 탭이나 옆 분할 창에 미리보기를 여는 기존 기능도 그대로 쓸 수 있습니다.
+
 공통 편집기 사용법은 [원본 GramEditor 도움말](gram://docs/index.md)도 참고할 수 있습니다. 원본 문서는 그대로 보존하며, 앱에서 열 때 출처 안내를 표시합니다. 원본에 적힌 프로젝트 정책·제품명·경로는 Don Editor와 다를 수 있습니다.
 
 ## 기존 프로젝트와의 호환

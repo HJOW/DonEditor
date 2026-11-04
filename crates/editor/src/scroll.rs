@@ -382,6 +382,12 @@ impl ScrollManager {
         self.autoscroll_request.take()
     }
 
+    /// [DonEditor] 다음 화면 배치 때 적용될 자동 스크롤 요청(예: 특정 줄로 열기)이 남아 있는지 돌려준다.
+    /// 편집기를 그리지 않는 미리보기 모드에서 실제로 보여야 할 위치를 판단할 때 쓴다.
+    pub fn has_pending_autoscroll(&self) -> bool {
+        self.autoscroll_request.is_some()
+    }
+
     pub fn active_scrollbar_state(&self) -> Option<&ActiveScrollbarState> {
         self.active_scrollbar.as_ref()
     }

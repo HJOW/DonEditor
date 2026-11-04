@@ -868,7 +868,8 @@ impl Item for Editor {
                 f(ItemEvent::UpdateBreadcrumbs);
             }
 
-            EditorEvent::BreadcrumbsChanged => {
+            // [DonEditor] 대체 화면(미리보기/편집 모드) 전환도 툴바 표시 갱신 대상이다.
+            EditorEvent::BreadcrumbsChanged | EditorEvent::AlternateViewChanged => {
                 f(ItemEvent::UpdateBreadcrumbs);
             }
 

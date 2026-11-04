@@ -5457,6 +5457,7 @@ dependencies = [
  "editor",
  "fs",
  "gpui",
+ "i18n",
  "language",
  "linkify",
  "log",

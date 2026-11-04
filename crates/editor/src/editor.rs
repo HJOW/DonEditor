@@ -91,7 +91,7 @@ use futures::{
 use fuzzy::{StringMatch, StringMatchCandidate};
 use git::blame::{GitBlame, GlobalBlameRenderer};
 use gpui::{
-    Action, AnyElement, App, AppContext, AsyncWindowContext, Background, Bounds, ClickEvent, ClipboardEntry,
+    Action, AnyElement, AnyView, App, AppContext, AsyncWindowContext, Background, Bounds, ClickEvent, ClipboardEntry,
     ClipboardItem, Context, DispatchPhase, Entity, EntityInputHandler, EventEmitter, FocusHandle, FocusOutEvent,
     Focusable, FontId, FontWeight, FutureExt as _, Global, HighlightStyle, Hsla, KeyContext, Modifiers, MouseButton,
     MouseDownEvent, MouseMoveEvent, PaintQuad, ParentElement, Pixels, PressureStage, Render, ScrollHandle,
@@ -1083,6 +1083,13 @@ pub struct Editor {
     serialize_selections: Task<()>,
     serialize_folds: Task<()>,
     minimap: Option<Entity<Self>>,
+
+    // [DonEditor] 대체 화면 (예: Markdown 미리보기 모드)
+    /// 설정되어 있으면 편집기 본문 대신 이 화면을 그린다. 탭·저장·변경 표시는 편집기 항목이 그대로 담당한다.
+    alternate_view: Option<AnyView>,
+    /// 작업 공간 탭으로 처음 추가될 때의 화면 모드 자동 결정을 이미 마쳤는지 여부.
+    /// 탭을 다른 창 분할로 옮기거나 복제할 때 사용자가 고른 모드를 덮어쓰지 않기 위해 쓴다.
+    alternate_view_initialized: bool,
 }
 
 fn debounce_value(debounce_ms: u64) -> Option<Duration> {
@@ -1655,6 +1662,8 @@ impl Editor {
         clone.scroll_manager.clone_state(&self.scroll_manager);
         clone.searchable = self.searchable;
         clone.read_only = self.read_only;
+        // [DonEditor] 분할로 복제한 편집기는 편집 화면으로 연다(미리보기 원본 옆에서 바로 고칠 수 있게).
+        clone.alternate_view_initialized = true;
         clone
     }
 
@@ -2176,6 +2185,9 @@ impl Editor {
             applicable_language_settings: HashMap::default(),
             fetched_tree_sitter_chunks: HashMap::default(),
             number_deleted_lines: false,
+            // [DonEditor] 새 편집기는 항상 편집 화면으로 시작한다.
+            alternate_view: None,
+            alternate_view_initialized: false,
         };
 
         if is_minimap {
@@ -20723,6 +20735,8 @@ pub enum EditorEvent {
     },
     CursorShapeChanged,
     BreadcrumbsChanged,
+    /// [DonEditor] 편집기 본문 대신 그리는 대체 화면(Markdown 미리보기 등)이 바뀌었다.
+    AlternateViewChanged,
     PushedToNavHistory {
         anchor: Anchor,
         is_deactivate: bool,
@@ -20739,7 +20753,34 @@ impl Focusable for Editor {
 
 impl Render for Editor {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        EditorElement::new(&cx.entity(), self.create_style(cx))
+        // [DonEditor] 대체 화면(Markdown 미리보기 등)이 있으면 편집기 본문 대신 그 화면을 그린다.
+        if let Some(alternate_view) = &self.alternate_view {
+            return alternate_view.clone().into_any_element();
+        }
+        EditorElement::new(&cx.entity(), self.create_style(cx)).into_any_element()
+    }
+}
+
+// [DonEditor] 대체 화면 API. editor crate 는 화면의 종류를 모르며, 미리보기 crate 가 이 슬롯을 관리한다.
+impl Editor {
+    /// 현재 편집기 본문 대신 그리고 있는 대체 화면을 돌려준다.
+    pub fn alternate_view(&self) -> Option<&AnyView> {
+        self.alternate_view.as_ref()
+    }
+
+    /// 대체 화면을 설정하거나(`Some`) 해제해 편집 화면으로 되돌린다(`None`).
+    /// 대체 화면이 편집기를 다시 강하게 참조하면 순환 참조가 되므로, 대체 화면은 편집기를 약한 참조로 가져야 한다.
+    pub fn set_alternate_view(&mut self, view: Option<AnyView>, cx: &mut Context<Self>) {
+        self.alternate_view = view;
+        // 화면 모드를 사용자가 직접 바꿨다면 이후 자동 결정은 하지 않는다.
+        self.alternate_view_initialized = true;
+        cx.emit(EditorEvent::AlternateViewChanged);
+        cx.notify();
+    }
+
+    /// 작업 공간 탭으로 처음 추가될 때의 화면 모드 자동 결정을 아직 하지 않았다면 `true` 를 돌려주고 완료로 표시한다.
+    pub fn take_alternate_view_initialization(&mut self) -> bool {
+        !std::mem::replace(&mut self.alternate_view_initialized, true)
     }
 }
 

@@ -2,6 +2,8 @@ use gpui::{App, actions};
 use workspace::Workspace;
 
 pub mod markdown_elements;
+// [DonEditor] Markdown 파일 탭의 미리보기/편집 모드 전환
+pub mod markdown_mode;
 pub mod markdown_parser;
 pub mod markdown_preview_view;
 pub mod markdown_renderer;
@@ -30,7 +32,9 @@ actions!(
         /// Scrolls to the bottom of the markdown preview.
         ScrollToBottom,
         /// Opens a following markdown preview that syncs with the editor.
-        OpenFollowingPreview
+        OpenFollowingPreview,
+        /// [DonEditor] Toggles the current Markdown file tab between preview mode and edit mode.
+        TogglePreviewMode
     ]
 );
 
@@ -40,6 +44,8 @@ pub fn init(cx: &mut App) {
             return;
         };
         markdown_preview_view::MarkdownPreviewView::register(workspace, window, cx);
+        // [DonEditor] 미리보기/편집 모드 전환 액션과 "Markdown 파일은 미리보기로 열기" 처리
+        markdown_mode::register(workspace, window, cx);
     })
     .detach();
 }

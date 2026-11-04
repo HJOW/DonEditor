@@ -44,6 +44,8 @@ pub struct MarkdownPreviewView {
     mermaid_state: MermaidState,
     parsing_markdown_task: Option<Task<Result<()>>>,
     mode: MarkdownPreviewMode,
+    /// [DonEditor] 다음 구문 분석이 끝나면 이 원본 위치(바이트 오프셋)를 담은 블록이 맨 위에 오도록 스크롤한다.
+    pending_scroll_to_source_offset: Option<usize>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -52,10 +54,15 @@ pub enum MarkdownPreviewMode {
     Default,
     /// The preview will "follow" the currently active editor.
     Follow,
+    /// [DonEditor] 편집기 탭 안에 내장되어 편집기 본문 대신 그려지는 미리보기 (미리보기/편집 모드 전환용).
+    Embedded,
 }
 
 struct EditorState {
-    editor: Entity<Editor>,
+    // [DonEditor] 내장 미리보기는 편집기가 이 화면을 소유하므로, 편집기를 약한 참조로 가져야 순환 참조가 생기지 않는다.
+    editor: WeakEntity<Editor>,
+    /// 별도 탭 미리보기는 원본 편집기 탭을 닫아도 계속 보이도록 강한 참조를 함께 보관한다. 내장 미리보기는 `None`.
+    _keep_alive: Option<Entity<Editor>>,
     _subscription: Subscription,
 }
 
@@ -137,7 +144,7 @@ impl MarkdownPreviewView {
                     && view_read
                         .active_editor
                         .as_ref()
-                        .is_some_and(|active_editor| active_editor.editor == *editor)
+                        .is_some_and(|active_editor| active_editor.editor.entity_id() == editor.entity_id())
             })
             .and_then(|view| pane.index_for_item(&view))
     }
@@ -196,15 +203,19 @@ impl MarkdownPreviewView {
         workspace: WeakEntity<Workspace>,
         language_registry: Arc<LanguageRegistry>,
         window: &mut Window,
-        cx: &mut Context<Workspace>,
+        cx: &mut App,
     ) -> Entity<Self> {
+        // [DonEditor] 내장 미리보기는 편집기의 포커스 핸들을 같이 쓴다. 작업 공간이 편집기 탭에 초점을 주면
+        // 이 화면이 초점을 받아 미리보기 키 바인딩(스크롤 등)이 동작하고, 편집 모드로 돌아가도 초점이 유지된다.
+        let shared_focus_handle =
+            (mode == MarkdownPreviewMode::Embedded).then(|| active_editor.read(cx).focus_handle(cx));
         cx.new(|cx| {
             let list_state = ListState::new(0, gpui::ListAlignment::Top, px(1000.));
 
             let mut this = Self {
                 selected_block: 0,
                 active_editor: None,
-                focus_handle: cx.focus_handle(),
+                focus_handle: shared_focus_handle.unwrap_or_else(|| cx.focus_handle()),
                 workspace: workspace.clone(),
                 contents: None,
                 list_state,
@@ -213,6 +224,7 @@ impl MarkdownPreviewView {
                 parsing_markdown_task: None,
                 image_cache: RetainAllImageCache::new(cx),
                 mode,
+                pending_scroll_to_source_offset: None,
             };
 
             this.set_editor(active_editor, window, cx);
@@ -260,7 +272,7 @@ impl MarkdownPreviewView {
 
     fn set_editor(&mut self, editor: Entity<Editor>, window: &mut Window, cx: &mut Context<Self>) {
         if let Some(active) = &self.active_editor
-            && active.editor == editor
+            && active.editor.entity_id() == editor.entity_id()
         {
             return;
         }
@@ -288,8 +300,11 @@ impl MarkdownPreviewView {
             };
         });
 
+        // [DonEditor] 내장 미리보기만 약한 참조로 둔다 (편집기 → 미리보기 → 편집기 순환 방지)
+        let keep_alive = (self.mode != MarkdownPreviewMode::Embedded).then(|| editor.clone());
         self.active_editor = Some(EditorState {
-            editor,
+            editor: editor.downgrade(),
+            _keep_alive: keep_alive,
             _subscription: subscription,
         });
 
@@ -315,7 +330,7 @@ impl MarkdownPreviewView {
     fn parse_markdown_in_background(
         &mut self,
         wait_for_debounce: bool,
-        editor: Entity<Editor>,
+        editor: WeakEntity<Editor>,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> Task<Result<()>> {
@@ -327,12 +342,17 @@ impl MarkdownPreviewView {
                 cx.background_executor().timer(REPARSE_DEBOUNCE).await;
             }
 
-            let (contents, file_location) = view.update(cx, |_, cx| {
+            // [DonEditor] 편집기를 약한 참조로 받으므로, 대기 중 편집기가 닫혔으면 분석을 그만둔다.
+            let source = view.update(cx, |_, cx| {
+                let editor = editor.upgrade()?;
                 let editor = editor.read(cx);
                 let contents = editor.buffer().read(cx).snapshot(cx).text();
                 let file_location = MarkdownPreviewView::get_folder_for_active_editor(editor, cx);
-                (contents, file_location)
+                Some((contents, file_location))
             })?;
+            let Some((contents, file_location)) = source else {
+                return view.update(cx, |view, _| view.parsing_markdown_task = None);
+            };
 
             let parsing_task =
                 cx.background_spawn(
@@ -346,6 +366,14 @@ impl MarkdownPreviewView {
                 view.contents = Some(contents);
                 let scroll_top = view.list_state.logical_scroll_top();
                 view.list_state.reset(markdown_blocks_count);
+                // [DonEditor] 미리보기 모드로 막 바뀐 경우에는 편집기에서 보던 위치의 블록을 맨 위로 보여 준다.
+                let scroll_top = match view.pending_scroll_to_source_offset.take() {
+                    Some(offset) => ListOffset {
+                        item_ix: view.block_index_for_source_offset(offset),
+                        offset_in_item: px(0.),
+                    },
+                    None => scroll_top,
+                };
                 view.list_state.scroll_to(scroll_top);
                 view.parsing_markdown_task = None;
                 cx.notify();
@@ -354,17 +382,46 @@ impl MarkdownPreviewView {
     }
 
     fn move_cursor_to_block(&self, window: &mut Window, cx: &mut Context<Self>, selection: Range<MultiBufferOffset>) {
-        if let Some(state) = &self.active_editor {
-            state.editor.update(cx, |editor, cx| {
+        if let Some(editor) = self.active_editor.as_ref().and_then(|state| state.editor.upgrade()) {
+            editor.update(cx, |editor, cx| {
                 editor.change_selections(
                     SelectionEffects::scroll(Autoscroll::center()),
                     window,
                     cx,
                     |selections| selections.select_ranges(vec![selection]),
                 );
+                // [DonEditor] 내장 미리보기에서 블록을 두 번 누르면 편집 모드로 바꿔 그 위치에서 바로 고칠 수 있게 한다.
+                // 커서를 옮기며 요청한 자동 스크롤이 편집 화면을 다시 그릴 때 적용된다.
+                if self.mode == MarkdownPreviewMode::Embedded {
+                    editor.set_alternate_view(None, cx);
+                }
                 window.focus(&editor.focus_handle(cx), cx);
             });
         }
+    }
+
+    /// [DonEditor] 이 미리보기가 편집기 탭 안에 내장된 것인지 돌려준다.
+    pub fn is_embedded(&self) -> bool {
+        self.mode == MarkdownPreviewMode::Embedded
+    }
+
+    /// [DonEditor] 다음 구문 분석이 끝나면 원본 위치 `offset` 을 담은 블록이 맨 위에 오도록 예약한다.
+    pub fn scroll_to_source_offset_after_parse(&mut self, offset: usize) {
+        self.pending_scroll_to_source_offset = Some(offset);
+    }
+
+    /// [DonEditor] 현재 미리보기 맨 위에 보이는 블록의 원본 시작 위치(바이트 오프셋)를 돌려준다.
+    /// 원본 범위가 없는 블록이면 그 앞쪽에서 범위가 있는 가장 가까운 블록을 쓴다.
+    pub fn top_visible_source_offset(&self) -> Option<usize> {
+        let contents = self.contents.as_ref()?;
+        source_offset_at_or_before_block(&contents.children, self.list_state.logical_scroll_top().item_ix)
+    }
+
+    /// [DonEditor] 원본 위치 `offset` 을 담고 있거나, 그 앞에서 가장 가까운 블록 번호를 돌려준다.
+    fn block_index_for_source_offset(&self, offset: usize) -> usize {
+        self.contents
+            .as_ref()
+            .map_or(0, |contents| block_index_at_source_offset(&contents.children, offset))
     }
 
     /// The absolute path of the file that is currently being previewed.
@@ -519,6 +576,30 @@ impl MarkdownPreviewView {
     }
 }
 
+/// [DonEditor] 원본 위치 `offset` 을 담고 있거나, 그 앞에서 가장 가까운 블록 번호 (없으면 0).
+fn block_index_at_source_offset(blocks: &[ParsedMarkdownElement], offset: usize) -> usize {
+    let mut index = 0;
+    // 블록은 원본 순서대로 놓여 있으므로, 시작 위치가 offset 이하인 마지막 블록을 고른다
+    for (ix, block) in blocks.iter().enumerate() {
+        match block.source_range() {
+            Some(range) if range.start <= offset => index = ix,
+            Some(_) => break,
+            None => {}
+        }
+    }
+    index
+}
+
+/// [DonEditor] `index` 번 블록의 원본 시작 위치. 그 블록에 원본 범위가 없으면 앞쪽에서 가장 가까운 블록의 값을 쓴다.
+fn source_offset_at_or_before_block(blocks: &[ParsedMarkdownElement], index: usize) -> Option<usize> {
+    // 지정한 블록부터 앞쪽으로 거슬러 올라가며 원본 범위가 있는 블록을 찾는다
+    blocks[..blocks.len().min(index + 1)]
+        .iter()
+        .rev()
+        .find_map(|block| block.source_range())
+        .map(|range| range.start)
+}
+
 impl Focusable for MarkdownPreviewView {
     fn focus_handle(&self, _: &App) -> gpui::FocusHandle {
         self.focus_handle.clone()
@@ -538,7 +619,8 @@ impl Item for MarkdownPreviewView {
         self.active_editor
             .as_ref()
             .and_then(|editor_state| {
-                let buffer = editor_state.editor.read(cx).buffer().read(cx);
+                let editor = editor_state.editor.upgrade()?;
+                let buffer = editor.read(cx).buffer().read(cx);
                 let buffer = buffer.as_singleton()?;
                 let file = buffer.read(cx).file()?;
                 let local_file = file.as_local()?;
@@ -593,7 +675,8 @@ impl Render for MarkdownPreviewView {
                                     }))
                                     .with_checkbox_clicked_callback(cx.listener(
                                         move |this, e: &CheckboxClickedEvent, window, cx| {
-                                            if let Some(editor) = this.active_editor.as_ref().map(|s| s.editor.clone())
+                                            if let Some(editor) =
+                                                this.active_editor.as_ref().and_then(|s| s.editor.upgrade())
                                             {
                                                 editor.update(cx, |editor, cx| {
                                                     let task_marker = if e.checked() { "[x]" } else { "[ ]" };
@@ -669,5 +752,70 @@ impl Render for MarkdownPreviewView {
                 )
             }))
             .vertical_scrollbar_for(&self.list_state, window, cx)
+    }
+}
+
+// [DonEditor] 미리보기/편집 모드 전환 시 위치를 잇는 계산의 단위 테스트
+#[cfg(test)]
+mod tests {
+    use super::{block_index_at_source_offset, source_offset_at_or_before_block};
+    use crate::markdown_parser::parse_markdown;
+
+    /// 제목·문단·목록이 섞인 예시 문서
+    const SAMPLE: &str = "# 제목\n\n첫 문단입니다.\n\n## 둘째\n\n- 항목 하나\n- 항목 둘\n\n끝 문단\n";
+
+    /// 원본 위치가 그 위치를 담은 블록(블록 사이면 앞 블록) 번호로 바뀌는지 확인한다.
+    #[gpui::test]
+    async fn source_offset_maps_to_the_block_that_contains_it() {
+        let parsed = parse_markdown(SAMPLE, None, None).await;
+        let blocks = &parsed.children;
+        let second_heading = SAMPLE.find("## 둘째").unwrap();
+        let last_paragraph = SAMPLE.find("끝 문단").unwrap();
+
+        // 문서 맨 앞은 첫 블록
+        assert_eq!(block_index_at_source_offset(blocks, 0), 0);
+        // 블록 시작 위치와 블록 안쪽 위치는 그 블록
+        let heading_index = block_index_at_source_offset(blocks, second_heading);
+        assert_eq!(blocks[heading_index].source_range().unwrap().start, second_heading);
+        assert_eq!(block_index_at_source_offset(blocks, second_heading + 3), heading_index);
+        // 블록 사이 빈 줄은 앞 블록, 문서 끝을 넘으면 마지막 블록
+        assert_eq!(
+            block_index_at_source_offset(blocks, second_heading - 1),
+            heading_index - 1
+        );
+        assert_eq!(
+            block_index_at_source_offset(blocks, SAMPLE.len() + 10),
+            blocks.len() - 1
+        );
+        assert_eq!(
+            blocks[block_index_at_source_offset(blocks, last_paragraph)]
+                .source_range()
+                .unwrap()
+                .start,
+            last_paragraph
+        );
+    }
+
+    /// 블록 번호 → 원본 위치 → 블록 번호 변환이 제자리로 돌아오고, 범위 밖·빈 문서도 안전한지 확인한다.
+    #[gpui::test]
+    async fn block_index_round_trips_to_its_source_offset() {
+        let parsed = parse_markdown(SAMPLE, None, None).await;
+        let blocks = &parsed.children;
+        // 모든 블록에 대해 "블록 → 원본 위치 → 블록" 이 같은 블록으로 돌아와야 한다
+        for (index, block) in blocks.iter().enumerate() {
+            let offset = source_offset_at_or_before_block(blocks, index).unwrap();
+            assert_eq!(offset, block.source_range().unwrap().start);
+            assert_eq!(block_index_at_source_offset(blocks, offset), index);
+        }
+        // 범위를 벗어난 번호는 마지막 블록의 위치, 빈 문서는 None
+        assert_eq!(
+            source_offset_at_or_before_block(blocks, blocks.len() + 5),
+            blocks
+                .last()
+                .and_then(|block| block.source_range())
+                .map(|range| range.start)
+        );
+        assert_eq!(source_offset_at_or_before_block(&[], 0), None);
+        assert_eq!(block_index_at_source_offset(&[], 3), 0);
     }
 }
