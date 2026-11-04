@@ -1,12 +1,13 @@
 # Don Editor 진행 상황
 
 - 최종 갱신: 2026-11-04
-- 현재 단계: **Phase 5(한국어 UI) 1차 구현 완료 — 기반(`crates/i18n`·`ui_language` 설정)과 주요 UI(메뉴·패널·탭·컨텍스트 메뉴·검색·상태바·대화상자·명령 팔레트·설정 화면의 언어 선택)를 한글화, 자동 테스트 통과. 설정 화면 본문·키맵 편집기·Git 패널·디버거 등은 아직 영어(Phase 5 "남은 것" 참고). 디버그 빌드를 실제로 실행해 창을 캡처해 한국어 메뉴·우클릭 메뉴가 정상 표시됨을 확인했다(확인 범위는 Phase 5 "실제 화면 확인" 참고)** (Phase 5 변경분은 미커밋). Phase 4·3·2 의 사용자 확인·결정 요청도 그대로 남아 있음 → 다음은 Phase 5 2차(남은 화면) 또는 Phase 6 (MCP)
+- 현재 단계: **Phase 5(한국어 UI) 1차 구현 완료 — 기반(`crates/i18n`·`ui_language` 설정)과 주요 UI(메뉴·패널·탭·컨텍스트 메뉴·검색·상태바·대화상자·명령 팔레트·설정 화면의 언어 선택)를 한글화, 자동 테스트 통과. 설정 화면 본문·키맵 편집기·Git 패널·디버거 등은 아직 영어(Phase 5 "남은 것" 참고). 디버그 빌드를 실제로 실행해 창을 캡처해 한국어 메뉴·우클릭 메뉴가 정상 표시됨을 확인했다(확인 범위는 Phase 5 "실제 화면 확인" 참고)**. Phase 4·3·2 의 사용자 확인·결정 요청도 그대로 남아 있음 → 다음 후보는 Phase 5 2차(남은 화면), Phase 6 (MCP), Phase 3 후속(Linux/macOS tar.gz 배포)
 - Phase 1 완료 ✅ (디버그·릴리스 빌드와 실행, GUI 확인, 기능 인벤토리, 기준선 태그 `gram-baseline-3.4.0`)
 - Phase 2 구현·검증 완료 ✅, 사용자 시각 확인 대기 (식별자·경로·실행 파일명·표시 이름·글꼴·라이선스 고지 적용, 원본 빌드와 동시 실행 검증)
-- Phase 3·4 구현·검증 완료 ✅ (2026-10-27), Phase 5 1차 구현 완료 (2026-10-28). Phase 3·4 의 변경분은 사용자가 커밋 `78320a1` 에 포함했다. **Phase 5 의 변경분(신규 `crates/i18n/`·`assets/locales/`, 한글화로 수정한 crate 다수 — 변경 파일 약 86개, `Cargo.toml`/`Cargo.lock`, `assets/settings/default.jsonc`, README·PROGRESS)은 아직 커밋하지 않았다**
+- Phase 3·4 구현·검증 완료 ✅ (2026-10-27), Phase 5 1차 구현 완료 (2026-10-28). **현재 저장소에는 Phase 5 소스(`crates/i18n/`·`assets/locales/` 등)가 커밋 `f061f14` 에 포함되어 있다. 이전의 "Phase 5 미커밋" 안내를 정정한다.** 아래 과거 작업 기록의 커밋 번호·검증 결과는 당시 환경 기준으로 보존한다.
 - 2026-11-03 소스·빌드 환경 점검: Cargo workspace 에 선언된 139개 구성 요소의 디렉터리와 매니페스트가 모두 존재하고 핵심 소스·자산도 확인했다. 단, `AGENTS.md` 의 원본 경로 `D:\Workspace\git\GramEditor` 는 이 PC 에 없어 원본과의 전체 대조는 하지 못했다. 배포 스크립트 `-CheckOnly` 결과 Git·CMake·Windows SDK 10.0.26100 은 준비됨, `rustup`/Rust 1.99.1 및 MSVC Spectre 완화 라이브러리는 없음으로 빌드 환경 미완비.
 - 2026-11-04 **빌드 도구 번호 선택 설치 구현 완료:** Windows `install-build-tools.bat` + `script/install-build-tools.ps1`, Linux/macOS `install-build-tools.sh` 추가. 처음에는 전부 미선택이고, 번호로 항목을 고른 후 `I`를 입력해야 설치한다. 조회·모의 실행·취소 지원. 셸 테스트 19개와 Windows 메뉴 15개 시나리오·Rust 구성 요소 검사 통과. 실제 패키지 설치는 수행하지 않았다. 자세한 내용은 아래 절 참고.
+- 2026-11-04 **AGENTS.md 변경 문서 반영 완료:** R4에 패널 숨김·별도 아이콘 클릭으로 다시 표시를 명시하고, R5는 Windows zip으로 구분했다. Linux/macOS tar.gz 배포는 **R9**로 추가해 설계·Phase 3 후속·Phase 8·[기능 인벤토리](FEATURE-INVENTORY.md)에 반영했다. R4와 R9는 미구현이며, `install-build-tools.sh`만으로 R9를 충족하지 않는다. 현재 PC(HJOW-Athlon)의 원본 소스 경로는 `H:\Workspace\git\GramEditor`이며 디렉터리 존재만 확인했다(전체 대조 미수행). 이번 작업은 두 문서만 수정했으며 앱 빌드·실행 테스트는 하지 않았다.
 
 ### 빌드 도구 선택 설치 (2026-11-04)
 
@@ -42,11 +43,12 @@ GramEditor(Zed 하드포크, Rust/GPUI 기반)를 복제·커스텀하여 아래
 | R1 | 한국어 UI | 메뉴·패널·대화상자·설정 화면 등 UI 문자열 한국어화, 언어 전환 지원 |
 | R2 | 문법 강조 | **26개 언어** — java, c, cpp, sql, c#, rust, javascript(mjs, cjs 포함), typescript, python, ruby, json, json5, yaml(yml), properties(java.util.Properties 호환), xml, html, xhtml, markdown(md), swift, scala, r, bat(Windows Batch), powershell, sh(Unix Shell), go, dart — 파일 확장자로 언어 감지 (2026-10-27 AGENTS.md 에서 10개 → 26개로 확대) |
 | R3 | 로컬 MCP | 프로그램의 모든 기능을 외부 MCP 클라이언트에서 제어 |
-| R4 | Agent 사이드 패널 | OpenAI 또는 Claude API Key 연동, 기본 우측 배치 |
-| R5 | 배포 zip 스크립트 | 별도 bat/ps1 파일, 빌드 도구 존재 여부 검사 및 미설치 시 설치 여부 질의 |
+| R4 | Agent 사이드 패널 | OpenAI 또는 Claude API Key 연동, 기본 우측 배치. 패널을 숨길 수 있고, 숨긴 상태에서도 화면 내 별도 아이콘을 클릭해 다시 표시 가능 (2026-11-04 AGENTS.md 변경) |
+| R5 | Windows 배포 zip 스크립트 | 별도 bat/ps1 파일. 호출 시 빌드 도구 존재 여부 검사 및 미설치 시 설치 여부 질의 (2026-11-04 Windows 대상으로 명확화) |
 | R6 | 기본 글꼴 D2Coding | `assets/fonts/D2Coding-Ver1.4.0-20261003-all.ttc` 사용 (2026-10-27 AGENTS.md 추가) |
 | R7 | 라이선스 GPL-3.0 | 원본(GramEditor) 라이선스에 따라 GPL-3.0 유지, 원본 라이선스·저작권 명기 (2026-10-27 AGENTS.md 추가) |
 | R8 | 기존 기능 보존 | "그 외 기존에 존재하던 기능은 최대한 포함한다" — 원본 GramEditor 의 기능을 삭제·비활성화하지 않음 (2026-10-27 AGENTS.md 추가, 3.10 참고) |
+| R9 | Linux/macOS 배포 tar.gz 스크립트 | 별도 sh 파일. 호출 시 빌드 도구 존재 여부 검사 및 미설치 시 설치 여부 질의 (2026-11-04 AGENTS.md 추가, 미구현) |
 
 > **프로젝트 방향 (2026-10-27 사용자 확인):** 원본 GramEditor 는 AI 를 사용하지 않는 것을 핵심 방침으로 삼는 편집기이지만, Don Editor 는 **AI 기능을 적극 도입**한다.
 > 이것이 원본과 달라지는 **가장 큰 차이점**이며, R3(MCP)·R4(Agent 패널)가 그 중심이다. AI 관련 기능은 이후 추가 확장될 수 있다.
@@ -56,7 +58,7 @@ GramEditor(Zed 하드포크, Rust/GPUI 기반)를 복제·커스텀하여 아래
 
 ## 2. 기반 프로젝트(GramEditor) 분석 결과
 
-원본 경로: `D:\Workspace\git\GramEditor` (git 저장소가 아니므로 **파일 복사 방식**으로 이관)
+현재 PC(HJOW-Athlon)의 원본 소스 경로: `H:\Workspace\git\GramEditor` ([원본 저장소](https://codeberg.org/GramEditor/gram)). AGENTS.md의 링크 표기에는 이전 경로 `D:\Workspace\git\GramEditor`도 남아 있다. 아래 분석과 파일 복사 방식의 이관 기록은 이전 환경 기준이며, 현재 H: 경로의 소스 전체를 다시 대조한 결과는 아니다.
 
 | 항목 | 내용 |
 |------|------|
@@ -239,6 +241,8 @@ GramEditor(Zed 하드포크, Rust/GPUI 기반)를 복제·커스텀하여 아래
 - 신규 crate `crates/agent_panel`
   - `workspace::Panel` 구현, **기본 위치 `DockPosition::Right`**, 좌/우 이동 가능
   - 토글 액션 `agent_panel::ToggleFocus` + 기본 단축키(기존 키맵과 충돌 확인 후 지정), 메뉴 "보기 > Agent 패널"
+  - **패널 숨김 지원:** 닫기/숨기기 조작으로 패널을 감출 수 있게 한다.
+  - **다시 표시하는 별도 아이콘:** 패널을 숨겨도 화면 안에 아이콘을 유지하고, 클릭하면 Agent 패널을 다시 표시한다. 기존 도크 버튼과의 통합 위치를 구현 시 정하고, 한국어 툴팁·표시 상태를 함께 점검한다 (2026-11-04 AGENTS.md 추가, 미구현).
 - Provider 추상화 (`LlmProvider` 트레이트)
   - **Anthropic**: Messages API(`/v1/messages`), SSE 스트리밍, tool use
   - **OpenAI**: Responses API(또는 Chat Completions), SSE 스트리밍, function calling
@@ -254,9 +258,11 @@ GramEditor(Zed 하드포크, Rust/GPUI 기반)를 복제·커스텀하여 아래
   - 오류(키 누락, 401, 429, 네트워크) 한국어 메시지 표시
 - HTTP는 `http_client` + `reqwest_client` 재사용
 
-### 3.7 배포 zip 스크립트 (R5)
+### 3.7 플랫폼별 배포 스크립트 (R5, R9)
 
-> **구현 완료 (2026-10-27).** 아래는 처음 계획이며, 실제 구현·옵션·검증 결과와 계획에서 달라진 점은 **Phase 3 절**을 기준으로 한다 (예: 옵션 `-CheckOnly`·`-DryRun`·`-SkipBuild`·`-IncludeSource`·`-BuildProfile` 추가, VS Build Tools 패키지 ID 변경, zip 최상위 폴더 구성).
+#### Windows zip (R5)
+
+> **Windows zip 구현 완료 (2026-10-27).** 아래는 처음 계획이며, 실제 구현·옵션·검증 결과와 계획에서 달라진 점은 **Phase 3 절**을 기준으로 한다 (예: 옵션 `-CheckOnly`·`-DryRun`·`-SkipBuild`·`-IncludeSource`·`-BuildProfile` 추가, VS Build Tools 패키지 ID 변경, zip 최상위 폴더 구성). Linux/macOS tar.gz(R9)는 별도 후속 구현 대상이다.
 
 - 파일: `script/package-zip.ps1` (본체) + `package-zip.bat` (실행 정책 우회 래퍼, 저장소 루트)
 - 처리 순서
@@ -275,6 +281,13 @@ GramEditor(Zed 하드포크, Rust/GPUI 기반)를 복제·커스텀하여 아래
   6. `Compress-Archive` → `dist/DonEditor-<버전>-windows-<아키텍처>.zip` + SHA256 해시 파일
 - 옵션: `-Arch`, `-OutDir`, `-SkipCheck`, `-Yes`(질의 자동 승인)
 - 원본 `bundle-windows.ps1`(Inno Setup + 서명)은 참고만 하고 zip 전용으로 단순화
+
+#### Linux/macOS tar.gz (R9, 2026-11-04 추가 · 미구현)
+
+- 파일: 루트 `package-tar.sh` 예정 (별도 sh 배포 스크립트, Linux/macOS를 감지해 처리).
+- 호출 시 해당 OS의 빌드 도구·프로젝트 Rust 툴체인을 검사하고, 없는 도구는 **설치 여부를 물은 뒤 동의한 항목만 설치**한다. 기존 `install-build-tools.sh`의 도구 목록·번호 선택 설치 흐름 재사용을 검토하되, 배포 진입점에서도 검사·설치 질의·설치 후 재검사를 수행해야 한다. 도구가 부족한 상태에서 거절·빈 입력·EOF를 받으면 빌드 전에 중단한다.
+- OS별 빌드·실행에 필요한 파일을 스테이징하고, 실행 권한과 상대 경로를 보존해 `dist/DonEditor-<버전>-<linux|macos>-<아키텍처>.tar.gz` 및 SHA256 파일을 생성한다. Windows zip과 동일하게 GPL-3.0 `LICENSE`, GramEditor/Zed 원저작 고지, 제3자·D2Coding 라이선스, 소스 입수 방법을 포함한다.
+- Linux와 macOS 각각에서 도구 준비/누락·설치 동의/거절·설치 실패·tar.gz 생성·압축 해제 후 실행을 검증한다. 현재 도구 설치 스크립트 테스트는 이 배포 검증을 대신하지 않는다.
 
 ### 3.8 기본 글꼴 D2Coding (R6)
 
@@ -298,7 +311,7 @@ GramEditor(Zed 하드포크, Rust/GPUI 기반)를 복제·커스텀하여 아래
 - 원본 소스 파일 상단의 라이선스·저작권 헤더는 제거하지 않는다.
 - 앱 내 "정보(About)" / 라이선스 화면에도 동일 고지를 유지한다.
 - 신규 의존성(문법 crate, MCP/HTTP/keyring 등) 도입 시 `script/check-licenses` 로 GPL-3.0 호환성을 확인하고 `assets/licenses.md` 에 반영한다.
-- 배포 zip 에는 `LICENSE`, `licenses.md`, 소스 입수 방법(저장소 위치 또는 소스 동봉)을 포함한다.
+- Windows zip과 Linux/macOS tar.gz에는 `LICENSE`, `licenses.md`, 제3자·글꼴 라이선스, 소스 입수 방법(저장소 위치 또는 소스 동봉)을 포함한다.
 
 ### 3.10 기존 기능 보존 (R8)
 
@@ -326,8 +339,12 @@ DonEditor/
 │  ├─ README.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md, CHANGELOG.md
 │  ├─ docs/                       # 원본 사용자 문서 (앱 내 도움말로 내장 중)
 │  └─ assets/images/              # 원본 README 용 이미지
-├─ package-zip.bat                # 배포 래퍼 (R5)
-├─ script/package-zip.ps1         # 배포 본체 (R5)
+├─ package-zip.bat                # Windows zip 배포 래퍼 (R5, 구현됨)
+├─ script/package-zip.ps1         # Windows zip 배포 본체 (R5, 구현됨)
+├─ package-tar.sh                 # Linux/macOS tar.gz 배포 (R9, 예정·미구현)
+├─ install-build-tools.bat        # Windows 빌드 도구 선택 설치 래퍼 (구현됨)
+├─ script/install-build-tools.ps1 # Windows 빌드 도구 선택 설치 본체 (구현됨)
+├─ install-build-tools.sh         # Linux/macOS 빌드 도구 선택 설치 (구현됨, tar.gz 생성 기능 없음)
 ├─ script/make_placeholder_icon.py  # 임시 아이콘·로고 생성 (Phase 2)
 ├─ assets/
 │  └─ locales/ko.json, en.json    # UI 문자열 (R1)
@@ -399,7 +416,7 @@ DonEditor/
 - [ ] **'Gram' 문자열 잔여 백로그:** Phase 5 에서 화면에 보이는 것 중 설정 화면 설명문 8건·에디터 안내문·시작 화면·시스템 정보 등을 "Don Editor"로 바꿨다. 남은 것은 식별자·호환성 때문에 의도적으로 두었거나(테마 이름 `Gram (Default)`, `gram://` 스킴, 사용자 에이전트, 키맵 컨텍스트 `Gram Keybind Context`, DAP 클라이언트 이름) Linux 전용(`install_cli` 안내), 내부 오류 메시지·개발용 문구다. 재조사 명령: `grep -rIn '"[^"]*\bGram\b[^"]*"' crates --include=*.rs`
 - **완료 기준 점검:** ① 원본 Gram 과 동시 실행해도 설정이 섞이지 않음 — **충족(검증함)** ② 기본 글꼴이 D2Coding 으로 표시됨 — **사용자 시각 확인 필요**. 나머지 협의 항목(앱 내 도움말 처리, 자체 기여 안내 필요 여부)은 Phase 2 를 막지 않는 별도 결정 사항
 
-### Phase 3. 배포 zip 스크립트 (조기 작성 → 이후 Phase마다 패키징 검증) ✅
+### Phase 3. Windows 배포 zip 스크립트 (R5, 조기 작성 → 이후 Phase마다 패키징 검증) ✅
 - [x] **`script/package-zip.ps1` 사전 검사 + 설치 질의 + winget 설치** (2026-10-27) — 점검 6항목: Git, rustup, Rust 툴체인(`rust-toolchain.toml` 의 채널·targets), MSVC C++ 도구 + Spectre 라이브러리, Windows SDK ≥ 10.0.20348, CMake. 없는 항목마다 `[y/N]` 로 묻고(기본 "아니오", 입력이 닫혀 있어도 "아니오"), 동의하면 `winget`(VS 는 기존 VS 에 `setup.exe modify`, 없으면 `Microsoft.VisualStudio.BuildTools`)으로 설치. 거절하면 직접 설치 주소를 안내하고 종료 코드 1
 - [x] **빌드 → 스테이징 → zip + SHA256** — `cargo build --package gram --package cli [--release]` 후 `dist\DonEditor-<버전>-windows-<아키텍처>.zip` + `.sha256`(sha256sum 호환 형식). 끝나면 `dist\staging` 삭제
 - [x] **`package-zip.bat` 래퍼** — `-ExecutionPolicy Bypass` 로 ps1 호출, 인자 전달, 종료 코드 전파. **파일을 ASCII 로만 작성**(아래 "발견한 문제" 참고)
@@ -427,6 +444,14 @@ DonEditor/
 - `.bat`: `chcp 65001` 이후의 UTF-8 한글 줄을 cmd 가 잘못 읽어 엉뚱한 명령 오류가 났다 → `.bat` 은 ASCII 로만 쓰고 한글 메시지는 ps1 이 출력(실제 콘솔에서는 PowerShell 이 유니코드로 직접 쓰므로 `chcp` 불필요). PATH 에 Git 의 유닉스 `find` 가 앞서는 환경을 위해 `System32\find.exe` 를 명시. `.gitattributes` 에 `*.bat crlf` 추가(`*` 규칙이 LF 로 정규화하면 cmd 가 오동작할 수 있음)
 - `.ps1` 은 **UTF-8 BOM + CRLF** 로 저장해야 Windows PowerShell 5.1 이 한글을 올바르게 읽는다(BOM 없으면 깨짐). 이 파일을 편집한 뒤에는 BOM 이 유지되는지 확인할 것
 - PROGRESS 3.7 계획과 달라진 점: VS Build Tools 패키지 ID 를 `Microsoft.VisualStudio.BuildTools`(VS 2026, winget 조회로 확인)로 했다(계획은 `2022.BuildTools`). 이 PC 의 호스트 아키텍처와 같으면 `--target` 을 주지 않아 기존 `target\release` 캐시를 재사용한다(원본 스크립트는 항상 `--target` → 전체 재빌드)
+
+### Phase 3 후속. Linux/macOS 배포 tar.gz 스크립트 (R9, 미구현)
+
+- [ ] 별도 sh 배포 스크립트(`package-tar.sh` 예정) 작성, Linux/macOS 감지·OS별 빌드 도구 검사
+- [ ] 미설치 도구의 설치 여부 질의, 선택한 도구 설치 후 재검사, 거절·EOF·설치 실패 시 빌드 전 중단
+- [ ] OS별 릴리스 빌드·스테이징·tar.gz/SHA256 생성, GPL-3.0·원저작·제3자·글꼴 고지 및 소스 입수 방법 포함
+- [ ] Linux와 macOS 각각에서 도구 준비/누락 및 설치 동의/거절 흐름 검증, 압축 해제 후 실행 확인
+- 완료 기준: 각 OS에서 스크립트 호출 시 도구 검사·설치 질의를 거쳐 tar.gz를 만들고, 압축을 푼 배포본이 실행됨. **`install-build-tools.sh` 구현 완료와 별개로 전체 미완료다.**
 
 ### Phase 4. 문법 강조 (26개 언어: 원본 내장 15개 확인 + 신규 11개 추가) ✅ (2026-10-27)
 - [x] **원본 내장 15개 언어 동작 확인 및 확장자 보강** — 샘플 18개(`mjs`·`cjs`·`yaml`·`xhtml` 포함)를 실제 쿼리·테마 키 규칙으로 강조해 대표 토큰을 검증. 요구 확장자 중 빠진 것은 Python `pyw` 뿐이라 추가, XML 은 `xsd xsl xslt wsdl` 을 보강. mjs·cjs(JavaScript)·yml/yaml·xhtml(HTML) 은 원래 포함되어 있었다
@@ -526,19 +551,21 @@ DonEditor/
 
 ### Phase 7. Agent 사이드 패널
 - [ ] `crates/agent_panel` 패널 골격 (우측 기본 배치, 토글 액션, 메뉴)
+- [ ] 패널 숨김 및 숨긴 상태에서도 접근 가능한 별도 아이콘 구현, 아이콘 클릭으로 다시 표시
 - [ ] `LlmProvider` 트레이트 + Anthropic / OpenAI 구현 (스트리밍)
 - [ ] API Key 입력·저장(자격 증명 관리자)·환경 변수 폴백
 - [ ] 채팅 UI, 컨텍스트 첨부, 중단, 오류 처리
 - [ ] `don_tools` 연동 도구 호출 + 편집 diff 미리보기/승인
 - [ ] 대화 기록 저장/불러오기
-- 완료 기준: Claude/OpenAI 키 중 하나만 등록해도 우측 패널에서 대화하고, 현재 파일을 수정하도록 지시하면 승인 후 반영됨
+- 완료 기준: Claude/OpenAI 키 중 하나만 등록해도 기본 우측 패널에서 대화하고, 현재 파일을 수정하도록 지시하면 승인 후 반영됨. 패널을 숨긴 뒤에도 화면 내 별도 아이콘을 클릭해 다시 표시할 수 있음
 
 ### Phase 8. 통합 테스트 · 문서화 · 릴리스
-- [ ] 전체 기능 회귀 테스트 (R8 기능 인벤토리 기준 기존 기능 + 신규 요구사항 R1~R7)
+- [ ] 전체 기능 회귀 테스트 ([기능 인벤토리](FEATURE-INVENTORY.md) 기준 기존 기능 R8 + 신규 요구사항 R1~R7·R9, Agent 패널 숨김·아이콘으로 다시 표시 포함)
 - [ ] `cargo test` (변경 crate 위주), `cargo clippy` 경고 정리
 - [ ] 사용자 문서(한국어): 설치, Agent 설정, MCP 연결 방법
-- [ ] 배포 스크립트로 최종 zip 생성 및 압축 해제 실행 확인
-- 완료 기준: 배포 zip 하나로 설치 없이 실행 가능, 모든 요구사항 동작 확인
+- [ ] Windows 배포 스크립트로 최종 zip 생성 및 압축 해제 실행 확인
+- [ ] Linux/macOS 배포 스크립트로 각 OS의 최종 tar.gz 생성 및 압축 해제 실행 확인, 빌드 도구 검사·설치 질의 흐름 점검
+- 완료 기준: Windows zip과 Linux/macOS tar.gz를 각 대상 OS에서 압축 해제 후 실행 가능, R1~R9의 모든 요구사항 동작 확인
 
 ---
 
@@ -603,6 +630,7 @@ DonEditor/
 | 2026-10-28 | **Phase 5 착수·1차 구현:** `crates/i18n`(리소스·`t!`·폴백·치환·`with_language`·설정 `ui_language`·팔레트 이중 이름)과 `assets/locales` 를 만들고, 메뉴 112항목을 시작으로 탭·패널·컨텍스트 메뉴·검색·상태바·대화상자·선택기·온보딩 일부를 키 단위로 치환(키 383개). 설정 화면에 언어 드롭다운 추가. 도구 스크립트로 일치 횟수를 검증하며 일괄 치환 |
 | 2026-10-28 | Phase 5 검증: i18n 11개·gram 메뉴 테스트 통과, 변경 crate 기존 테스트 회귀 없음, fmt·clippy 통과. 발견·수정: `t_with` 재치환 결함, 소스 스캔 오탐, 설정 필드 누락(`vscode_import`), 병렬 테스트의 전역 언어 경쟁(→ `with_language` 스레드 격리). 한계 기록: 설정 화면 본문·키맵 편집기·Git 패널 등 미적용 |
 | 2026-10-28 | Phase 5 실제 화면 확인: 디버그 빌드(5분 53초)를 격리 폴더로 실행해 ko/en/auto 를 창 캡처로 확인 — 한국어 메뉴 막대·앱 메뉴·파일 메뉴·에디터/탭 우클릭 메뉴 정상, 영어는 원본과 동일, D2Coding 한글 렌더링 정상. (실수: 첫 시도에서 설정 JSON 의 따옴표가 자식 PowerShell 인자 전달 중 사라져 ko/en 이 모두 auto 로 동작 — 알림 문구로 알아채고 스크립트가 설정 파일을 직접 만들게 고쳐 재확인. 또 `LP` 라는 함수 이름이 PowerShell 별칭 `Out-Printer` 와 충돌해 클릭이 실패했으나 인쇄는 일어나지 않았고 이름을 바꿔 재실행) |
+| 2026-11-04 | **AGENTS.md 변경 문서 반영:** 변경 커밋 `ab97a9a`를 확인해 R4(Agent 패널 숨김·별도 아이콘으로 다시 표시), R5(Windows zip), 신규 R9(Linux/macOS sh 기반 tar.gz·빌드 도구 검사·미설치 시 설치 질의)를 요구사항·설계·목표 구조·Phase 3 후속/7/8·다음 작업에 반영. FEATURE-INVENTORY.md에 R1~R9 상태표 및 신규 요구사항 확인 목록 추가. HJOW-Athlon의 원본 H: 경로와 현재 Phase 5 커밋 상태도 정정. 두 Markdown 문서의 diff·요구사항 정합성을 검토했으며, 앱 소스 변경·빌드·설치는 수행하지 않음 |
 
 ---
 
@@ -612,7 +640,9 @@ DonEditor/
 2. ~~`cargo build` 재실행~~ ~~격리 폴더로 실행 확인~~ — 완료(창 생성·응답·파일 열기, 그리고 사용자가 GUI 편집·저장·한글 입력(IME)·화면 렌더링까지 직접 확인). 실행 방법: `target\debug\gram.exe --user-data-dir <임의 폴더> <파일>` (원본 Gram 과 식별자가 같으므로 원본 Gram 을 먼저 종료할 것)
 3. ~~릴리스 빌드 확인~~ — 완료. 기능 인벤토리·기준선 태그도 완료 (**Phase 1 완료**). 이후 인벤토리의 ⬜ 항목은 앱을 쓰면서 확인되는 대로 갱신
 4. ~~Phase 2 (리브랜딩 + D2Coding 기본 글꼴)~~ — 구현·검증 완료 (2026-10-27). **남은 것: 상단 "사용자 결정·확인 요청" 5건**
-5. ~~Phase 3 (배포 zip 스크립트)~~ — 구현·검증 완료 (2026-10-27). **남은 것:** 깨끗한 환경에서의 실제 설치 흐름 확인(Phase 3 "검증하지 못한 것" 참고), (변경분은 커밋 `78320a1` 에 포함됨)
+5. ~~Phase 3 (Windows 배포 zip 스크립트, R5)~~ — 구현·검증 완료 (2026-10-27). **남은 것:** 깨끗한 환경에서의 실제 설치 흐름 확인(Phase 3 "검증하지 못한 것" 참고). **Linux/macOS tar.gz(R9)는 Phase 3 후속으로 별도 구현·검증해야 한다.**
 6. ~~README.md 에 AGENTS.md 변경(26개 언어, R8) 반영~~ — 완료 (2026-10-27)
 7. ~~Phase 4 (문법 강조 26개)~~ — 구현·검증 완료 (2026-10-27). **남은 것:** 실제 창에서 색상 눈으로 확인(`tests/samples/` 의 파일을 열어 보면 됨), XHTML 처리 결정(Phase 4 "알려진 한계"). (변경분은 커밋 `78320a1` 에 포함됨) 빌드 크기 기준값(이후 비교용): 릴리스 `doneditor.exe` 170,434,048 바이트, zip 55.1MB
-8. ~~Phase 5 1차 (한국어 UI)~~ — 완료 (2026-10-28). **남은 것:** 대화상자·툴팁·검색 바·명령 팔레트 이중 이름·언어 전환의 실제 화면 확인(메뉴·우클릭 메뉴는 확인함), Phase 5 2차·3차(설정 화면 본문 구조 변경, 키맵 편집기, Git 패널, 디버거 등 — Phase 5 "남은 것"), 변경분 커밋. **다음은 Phase 5 2차 또는 Phase 6 (공용 도구 + 로컬 MCP 서버)** — 어느 쪽을 먼저 할지는 사용자 결정. 병행 가능한 사용자 결정: 상단 "사용자 결정·확인 요청 (Phase 2)" 5건. 특히 5번(소스 공개 위치)은 `SOURCE.txt` 의 "소스 저장소" 항목과 `assets/licenses.md` 에 들어갈 내용이므로 배포 전에 필요
+8. ~~Phase 5 1차 (한국어 UI)~~ — 완료 (2026-10-28, 현재 저장소의 `f061f14`에 소스 포함). **남은 것:** 대화상자·툴팁·검색 바·명령 팔레트 이중 이름·언어 전환의 실제 화면 확인(메뉴·우클릭 메뉴는 확인함), Phase 5 2차·3차(설정 화면 본문 구조 변경, 키맵 편집기, Git 패널, 디버거 등 — Phase 5 "남은 것"). **다음 후보는 Phase 5 2차, Phase 6 (공용 도구 + 로컬 MCP 서버), Phase 3 후속(R9)**이다. 병행 가능한 사용자 결정: 상단 "사용자 결정·확인 요청 (Phase 2)" 5건. 특히 5번(소스 공개 위치)은 `SOURCE.txt` 의 "소스 저장소" 항목과 `assets/licenses.md` 에 들어갈 내용이므로 배포 전에 필요
+9. **Phase 7 (Agent 패널, R4)** — 기본 우측 배치·OpenAI/Claude API Key 연동과 함께, 패널 숨김 및 화면 내 별도 아이콘 클릭으로 다시 표시하는 흐름을 구현·검증한다.
+10. ~~AGENTS.md 최신 요구사항을 PROGRESS.md·FEATURE-INVENTORY.md에 반영~~ — 완료 (2026-11-04). 새 요구사항의 구현 완료를 뜻하지 않으며, R4·R9는 후속 작업으로 남아 있다.
