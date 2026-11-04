@@ -10,6 +10,18 @@
 - 위 두 단락의 내용이 실제 기능과 맞지 않게 되면 직접 고치지 말고 사용자에게 알리고 수정 여부를 묻는다.
 
 
+
+## 현재 상태 요약 (2026-11-05 갱신 — 다음 작업 때 가장 먼저 읽는다)
+
+**사용자 요청 작업은 모두 구현·검증·커밋했다.** 커밋: Markdown 미리보기/편집 전환 `475437a`, 인코딩 표시·다시 불러오기·저장 보호 `c29fe81`, Typst 미리보기·Markdown→Typst 변환·PDF·인쇄 `4421531`, MCP 확인 `2e9ff1c`, 릴리스 ZIP 기록 `1808ab8`, clippy·회귀·README 정리 `d257aff`~`2e622db`. 자동 검사는 markdown_preview 40·don_charset 9·don_typst 17·language 99·text 24·worktree 26·gram 35·MCP 전송 25개(Windows ACL 선택 테스트 포함)·i18n 11개가 통과하고, 새 crate와 `don_tools`·`mcp_server`·`agent_panel`의 clippy 경고는 0건이다.
+
+**남은 항목과 이유(모두 사용자 결정 또는 이 환경에서 할 수 없는 것):**
+- 사용자 결정 대기: Don Editor 자체 기여 안내·행동 강령 필요 여부, 배포 시 Don Editor 소스의 공개 위치(현재는 배포본에 수정 소스를 동봉), `README.md` 보호 단락 내용 갱신이 필요하면 사용자 요청 후에만.
+- 사용자 지시로 제외: Linux/macOS 직접 실행·tar.gz 실물 검증, 실제 OpenAI/Claude API 호출 검증(유료·키 필요), Claude Desktop/Code 실제 연결(외부 클라이언트의 API 호출이 따름).
+- 이 환경에서 불가: 깨끗한 Windows/ARM64 설치 검증, 실제 프린터 출력과 PDF 뷰어 `print` 동작 확인(기본 프린터가 가상 프린터), 탐색기 UI에서 `.md`를 연결 프로그램으로 직접 지정하는 수동 확인.
+- 계속 진행형: 기능 인벤토리의 미확인 영역(실행 확인 12개/미확인 38개), 'Gram' 문자열 잔여 백로그.
+- 알려진 경미한 문제: ① 이번 세션의 릴리스 ZIP은 커밋 `2e9ff1c` 기준(이후 변경은 동작 불변 정리), ② 상태 표시줄 `Failed to load environment variables`(콘솔 로그상 `H:` 드라이브에서 PowerShell 환경 로드 실패 — 이 PC의 환경 문제로 보이며 이전부터 있던 메시지), ③ MCP 승인 창의 일부 요소가 화면 가운데 위쪽에 뭉쳐 보이는 레이아웃(기능은 동작), ④ `don_protocol_tests`의 브릿지 취소 테스트가 부하에서 가끔 실패하는 타이밍 경쟁(8회 연속 통과로 확인).
+
 ## 2026-11-05 회귀 테스트·clippy 정리 (사용자 목표 진행)
 
 - **변경 crate 전체 테스트:** `cargo test -p text -p language -p worktree --lib`가 **text 24개·language 99개·worktree 26개 모두 통과**했다(이번 세션에서 `text::Buffer::clear_history`, `language::Buffer::reload_with_encoding`, `worktree::write_file`의 인코딩 변환을 바꿨으므로 회귀 확인). 이 테스트들은 `markdown_preview` 40개, `don_charset` 9개, `don_typst` 17개, i18n 11개와 함께 통과한 상태다.
