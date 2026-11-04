@@ -12168,7 +12168,9 @@ dependencies = [
  "markdown_preview",
  "schemars",
  "serde",
+ "smol",
  "ui",
+ "util",
  "workspace",
 ]
 
