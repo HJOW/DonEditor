@@ -102,19 +102,19 @@ configure_platform() {
     if has_command apt-get; then
         manager=apt
         native_packages=(build-essential clang libclang-dev pkg-config perl)
-        library_packages=(libfontconfig-dev libwayland-dev libx11-xcb-dev libxcb1-dev libxkbcommon-x11-dev libssl-dev libzstd-dev libvulkan1 libsqlite3-dev zlib1g-dev)
+        library_packages=(libfontconfig-dev libwayland-dev libx11-xcb-dev libxcb1-dev libxkbcommon-x11-dev libssl-dev libzstd-dev libvulkan1 libsqlite3-dev zlib1g-dev libdbus-1-dev)
     elif has_command dnf; then
         manager=dnf
         native_packages=(gcc gcc-c++ make clang clang-devel llvm-devel pkgconf-pkg-config perl-FindBin perl-IPC-Cmd perl-File-Compare perl-File-Copy)
-        library_packages=(fontconfig-devel wayland-devel libxcb-devel libxkbcommon-x11-devel openssl-devel libzstd-devel vulkan-loader sqlite-devel zlib-devel)
+        library_packages=(fontconfig-devel wayland-devel libxcb-devel libxkbcommon-x11-devel openssl-devel libzstd-devel vulkan-loader sqlite-devel zlib-devel dbus-devel)
     elif has_command pacman; then
         manager=pacman
         native_packages=(base-devel clang pkgconf perl)
-        library_packages=(fontconfig wayland libxcb libxkbcommon-x11 openssl zstd vulkan-icd-loader sqlite zlib)
+        library_packages=(fontconfig wayland libxcb libxkbcommon-x11 openssl zstd vulkan-icd-loader sqlite zlib dbus)
     elif has_command zypper; then
         manager=zypper
         native_packages=(gcc gcc-c++ make clang clang-devel llvm-devel pkg-config perl)
-        library_packages=(fontconfig-devel wayland-devel libX11-devel libxcb-devel libxkbcommon-devel libxkbcommon-x11-devel libopenssl-devel libzstd-devel libvulkan1 sqlite3-devel zlib-devel)
+        library_packages=(fontconfig-devel wayland-devel libX11-devel libxcb-devel libxkbcommon-devel libxkbcommon-x11-devel libopenssl-devel libzstd-devel libvulkan1 sqlite3-devel zlib-devel dbus-devel)
     else
         printf '지원하는 Linux 패키지 관리자: apt-get, dnf, pacman, zypper. 이 시스템은 수동 설치가 필요합니다.\n' >&2
         return 1

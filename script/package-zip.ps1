@@ -6,7 +6,7 @@
 .DESCRIPTION
     1. 빌드에 필요한 프로그램(Git, rustup, Rust 툴체인, MSVC + Spectre 라이브러리,
        Windows SDK, CMake)이 있는지 검사하고, 없으면 설치할지 묻는다 (winget 사용).
-    2. cargo 로 doneditor.exe(GUI) 와 cli.exe 를 빌드한다.
+    2. cargo 로 doneditor.exe(GUI), cli.exe, don-mcp.exe 를 빌드한다.
     3. 배포 폴더를 구성하고 zip 과 SHA256 파일을 만든다.
 
     결과물: <OutDir>\DonEditor-<버전>-windows-<아키텍처>.zip (+ .sha256)
@@ -15,6 +15,8 @@
       DonEditor-<버전>-windows-<아키텍처>\
         doneditor.exe        GUI 실행 파일
         bin\doneditor.exe    명령줄(CLI) 실행 파일
+        bin\don-mcp.exe      MCP stdio 브릿지
+        source\DonEditor-<버전>-source.zip  현재 작업 트리 소스
         LICENSE, licenses.md, licenses\, README.md, SOURCE.txt
 
 .PARAMETER Arch
@@ -43,8 +45,8 @@
     빌드를 건너뛰고 target 폴더에 이미 있는 결과물로 zip 만 만든다.
 
 .PARAMETER IncludeSource
-    git archive 로 만든 소스 zip(DonEditor-<버전>-source.zip)을 함께 만든다.
-    커밋되지 않은 변경은 포함되지 않는다. (GPL 소스 제공 의무 이행용)
+    배포본에 기본 동봉하는 현재 작업 트리 소스 zip을 결과물 폴더에도 복사한다.
+    gitignore 대상은 제외하고 미커밋 수정/추가 소스도 포함한다.
 
 .EXAMPLE
     .\script\package-zip.ps1
@@ -135,7 +137,7 @@ function Show-Usage {
   -CheckOnly               점검 결과만 보여 주고 끝낸다
   -DryRun                  설치 명령을 실행하지 않고 출력만 한다 (빌드도 안 함)
   -SkipBuild               빌드 없이 기존 결과물로 zip 만 만든다
-  -IncludeSource           소스 zip 도 함께 만든다 (git archive, 커밋된 내용만)
+  -IncludeSource           기본 동봉 소스 zip을 결과물 폴더에도 복사한다
   -Help                    이 도움말
 
 자세한 설명: Get-Help .\script\package-zip.ps1 -Full
@@ -369,8 +371,9 @@ function Get-Prerequisites {
             Why = 'Rust 툴체인 관리자 (cargo 포함)'
             Manual = 'https://rustup.rs'
             Check = {
-                $out = Get-NativeOutput 'rustup' @('--version')
-                if ($out) { [pscustomobject]@{ Ok = $true; Detail = [string]$out[0] } }
+                # 버전 조회는 활성 툴체인을 검사할 수 있으므로 설치 전에는 도움말만 조회한다.
+                $out = Get-NativeOutput 'rustup' @('--help')
+                if ($out) { [pscustomobject]@{ Ok = $true; Detail = 'rustup 사용 가능' } }
                 else { [pscustomobject]@{ Ok = $false; Detail = 'rustup 을 찾을 수 없음' } }
             }
             Install = { Invoke-Winget $WingetRustup }
@@ -380,7 +383,7 @@ function Get-Prerequisites {
             Why = 'rust-toolchain.toml 에 지정된 컴파일러와 대상(target)'
             Manual = 'rustup toolchain install   (저장소 폴더에서 실행)'
             Check = {
-                if (-not (Get-NativeOutput 'rustup' @('--version'))) {
+                if (-not (Get-NativeOutput 'rustup' @('--help'))) {
                     return [pscustomobject]@{ Ok = $false; Detail = 'rustup 이 먼저 필요함' }
                 }
                 $installed = Get-NativeOutput 'rustup' @('toolchain', 'list')
@@ -546,14 +549,14 @@ function Get-CargoOutDir {
     return Join-Path $RepoRoot "target\$profileDir"
 }
 
-# doneditor.exe(GUI) 와 cli.exe 를 빌드한다
+# GUI, CLI 및 MCP stdio 브릿지를 빌드한다.
 function Invoke-Build {
     Param([string]$Channel)
     Write-Step "빌드 ($BuildProfile, $TargetTriple, 채널 $Channel)"
     # 릴리스 채널은 exe 아이콘(stable=파란색)과 앱 식별자를 정한다. 지정하지 않으면 dev 아이콘이 들어간다.
     $env:RELEASE_CHANNEL = $Channel
     $env:GRAM_RELEASE_CHANNEL = $Channel
-    $cargoArgs = @('build', '--package', 'gram', '--package', 'cli')
+    $cargoArgs = @('build', '--locked', '--package', 'gram', '--package', 'cli', '--package', 'mcp_server')
     if ($BuildProfile -eq 'Release') { $cargoArgs += '--release' }
     if ($IsCrossBuild) { $cargoArgs += @('--target', $TargetTriple) }
     Push-Location $RepoRoot
@@ -569,8 +572,9 @@ function New-PackageDirectory {
     Param([string]$PackageDir, [string]$Version, [string]$Channel, [string]$CargoOutDir)
     $guiExe = Join-Path $CargoOutDir 'doneditor.exe'
     $cliExe = Join-Path $CargoOutDir 'cli.exe'
+    $mcpExe = Join-Path $CargoOutDir 'don-mcp.exe'
     # 필수 산출물이 없으면 바로 알린다
-    foreach ($exe in @($guiExe, $cliExe)) {
+    foreach ($exe in @($guiExe, $cliExe, $mcpExe)) {
         if (-not (Test-Path $exe)) { throw "빌드 산출물을 찾을 수 없습니다: $exe" }
     }
 
@@ -578,6 +582,7 @@ function New-PackageDirectory {
     # GUI 는 루트에, CLI 는 bin\ 에 둔다 (앱이 bin\doneditor.exe 를 CLI 위치로 찾는다 - crates/util)
     Copy-Item $guiExe (Join-Path $PackageDir 'doneditor.exe')
     Copy-Item $cliExe (Join-Path $PackageDir 'bin\doneditor.exe')
+    Copy-Item $mcpExe (Join-Path $PackageDir 'bin\don-mcp.exe')
 
     # 라이선스 고지: GPL-3.0 전문, 원저작(Gram/Zed) 고지가 담긴 licenses.md, 제3자 라이선스 본문, 글꼴 라이선스
     Copy-Item (Join-Path $RepoRoot 'LICENSE') $PackageDir
@@ -588,6 +593,10 @@ function New-PackageDirectory {
     Copy-Item (Join-Path $RepoRoot 'assets\fonts\D2Coding-LICENSE') $licensesDir
     Copy-Item (Join-Path $RepoRoot 'README.md') $PackageDir
 
+    # 바이너리와 함께 현재 소스를 동봉하므로 별도 공개 저장소가 없어도 입수할 수 있다.
+    $sourceDir = Join-Path $PackageDir 'source'
+    New-Item -ItemType Directory -Force -Path $sourceDir | Out-Null
+    New-SourceArchive (Join-Path $sourceDir "$ProductName-$Version-source.zip") $Version
     New-SourceInfoFile (Join-Path $PackageDir 'SOURCE.txt') $Version $Channel
     return @(Get-ChildItem $PackageDir -Recurse -File).Count
 }
@@ -627,11 +636,57 @@ function New-SourceInfoFile {
         '원저작자 고지와 제3자 라이선스는 licenses.md 와 licenses\ 폴더를 참고하세요.',
         '',
         'GPL-3.0 에 따라, 이 바이너리에 대응하는 소스 코드를 받을 권리가 있습니다.',
-        '위 "소스 저장소" 주소 또는 이 파일과 함께 배포된 소스 zip(DonEditor-<버전>-source.zip)을 확인하세요.',
+        "배포본 source\$ProductName-$Version-source.zip에서 패키징 시점의 작업 트리 소스를 확인하세요.",
+        '미커밋 수정/추가 파일도 포함하며 gitignore 대상(키/빌드 결과물)은 제외합니다.',
+        'Cargo.lock, rust-toolchain.toml 및 빌드 스크립트가 포함됩니다. README.md와 docs/packaging.md를 참고하세요.',
         ''
     )
     # 한글이 깨지지 않도록 BOM 이 있는 UTF-8 로 저장한다 (메모장 등에서 바로 열 수 있게)
     [System.IO.File]::WriteAllText($Path, ($lines -join "`r`n"), (New-Object System.Text.UTF8Encoding $true))
+}
+
+# 현재 작업 트리의 소스 파일 목록을 UTF-8/NUL로 읽어 실제 내용으로 소스 zip을 만든다.
+# HEAD만 묶으면 미커밋 상태에서 빌드한 바이너리와 소스가 달라질 수 있다.
+function New-SourceArchive {
+    Param([string]$ArchivePath, [string]$Version)
+    Add-Type -AssemblyName System.IO.Compression
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $start = New-Object System.Diagnostics.ProcessStartInfo
+    $start.FileName = (Get-Command git -ErrorAction Stop).Source
+    $start.Arguments = '-C "' + $RepoRoot + '" ls-files -z --cached --others --exclude-standard'
+    $start.UseShellExecute = $false
+    $start.CreateNoWindow = $true
+    $start.RedirectStandardOutput = $true
+    $start.RedirectStandardError = $true
+    $start.StandardOutputEncoding = New-Object System.Text.UTF8Encoding $false
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo = $start
+    try {
+        [void]$process.Start()
+        $listing = $process.StandardOutput.ReadToEnd()
+        $errorText = $process.StandardError.ReadToEnd()
+        $process.WaitForExit()
+        if ($process.ExitCode -ne 0) { throw "소스 파일 목록 조회 실패: $errorText" }
+    } finally { $process.Dispose() }
+
+    $archive = [System.IO.Compression.ZipFile]::Open($ArchivePath, [System.IO.Compression.ZipArchiveMode]::Create)
+    $count = 0
+    $repoPrefix = [System.IO.Path]::GetFullPath($RepoRoot).TrimEnd('\') + '\'
+    $outputPrefix = [System.IO.Path]::GetFullPath($OutDir).TrimEnd('\') + '\'
+    try {
+        # 경로를 정규화하여 저장소 외부와 사용자 지정 출력 폴더가 섞이는 것을 방지한다.
+        foreach ($relative in $listing.Split([char]0)) {
+            if (-not $relative -or $relative -match '^(\.git|target|dist)/') { continue }
+            $full = [System.IO.Path]::GetFullPath((Join-Path $RepoRoot $relative))
+            if (-not $full.StartsWith($repoPrefix, [System.StringComparison]::OrdinalIgnoreCase)) { continue }
+            if ($full.StartsWith($outputPrefix, [System.StringComparison]::OrdinalIgnoreCase)) { continue }
+            if (-not (Test-Path -LiteralPath $full -PathType Leaf)) { continue }
+            [void][System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $full,
+                "$ProductName-$Version-source/$relative", [System.IO.Compression.CompressionLevel]::Optimal)
+            $count++
+        }
+        if ($count -eq 0) { throw '소스 파일 목록이 비어 있습니다. git 저장소에서 실행하세요.' }
+    } finally { $archive.Dispose() }
 }
 
 # 폴더를 zip 으로 압축한다. zip 안에는 폴더 이름이 최상위로 들어간다.
@@ -719,8 +774,11 @@ try {
     $stageRoot = Join-Path $OutDir 'staging'
     $packageDir = Join-Path $stageRoot $packageName
     # 지우기 전에 대상이 결과물 폴더 안쪽인지 확인한다 (경로 오류로 엉뚱한 곳이 지워지는 것을 막는다)
-    if ((Test-Path $stageRoot) -and $stageRoot.StartsWith($OutDir, [System.StringComparison]::OrdinalIgnoreCase)) {
-        Remove-Item $stageRoot -Recurse -Force
+    $stageRoot = [System.IO.Path]::GetFullPath($stageRoot)
+    $outputPrefix = $OutDir.TrimEnd('\') + '\'
+    if (-not $stageRoot.StartsWith($outputPrefix, [System.StringComparison]::OrdinalIgnoreCase)) { throw '스테이징 경로가 결과물 폴더를 벗어났습니다.' }
+    if (Test-Path -LiteralPath $stageRoot) {
+        Remove-Item -LiteralPath $stageRoot -Recurse -Force
     }
     $fileCount = New-PackageDirectory $packageDir $version $channel (Get-CargoOutDir)
     Write-Info "파일 $fileCount 개 구성: $packageDir"
@@ -732,20 +790,17 @@ try {
     $hash = New-HashFile $zipPath
     $zipSizeMb = [Math]::Round((Get-Item $zipPath).Length / 1MB, 1)
 
-    # 5) 소스 zip (선택)
+    # 5) 기본 동봉 소스 zip을 결과물 폴더에도 복사한다 (선택).
     $sourceZip = $null
     if ($IncludeSource) {
-        Write-Step '소스 zip (git archive)'
-        if (Get-GitLine @('status', '--porcelain')) {
-            Write-Warn '커밋되지 않은 변경이 있습니다. 소스 zip 에는 마지막 커밋의 내용만 들어가므로 바이너리와 다를 수 있습니다.'
-        }
+        Write-Step '소스 zip 별도 복사 (현재 작업 트리)'
         $sourceZip = Join-Path $OutDir "$ProductName-$version-source.zip"
-        if (Test-Path $sourceZip) { Remove-Item $sourceZip -Force }
-        Invoke-Native 'git' @('-C', $RepoRoot, 'archive', '--format=zip', "--prefix=$ProductName-$version-source/", '-o', $sourceZip, 'HEAD')
+        Copy-Item -LiteralPath (Join-Path $packageDir "source\$ProductName-$version-source.zip") -Destination $sourceZip -Force
+        [void](New-HashFile $sourceZip)
     }
 
     # 스테이징 폴더는 zip 이 만들어졌으므로 정리한다
-    Remove-Item $stageRoot -Recurse -Force
+    Remove-Item -LiteralPath $stageRoot -Recurse -Force
 
     $elapsed = (Get-Date) - $startTime
     Write-Host ''
