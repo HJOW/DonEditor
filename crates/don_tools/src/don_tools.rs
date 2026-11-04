@@ -520,10 +520,10 @@ fn execute_sync(
             };
             let action = cx.build_action(action_name, args.get("args").cloned())?;
             // 범용 액션은 패널의 현재 포커스를 보존해야 삭제·탐색 등도 제어할 수 있다.
-            if !matches!(name, "dispatch_action" | "toggle_panel") {
-                if let Ok(editor) = active_editor(workspace, cx) {
-                    window.focus(&editor.focus_handle(cx), cx);
-                }
+            if !matches!(name, "dispatch_action" | "toggle_panel")
+                && let Ok(editor) = active_editor(workspace, cx)
+            {
+                window.focus(&editor.focus_handle(cx), cx);
             }
             window.dispatch_action(action, cx);
             Ok(json!({"dispatched":action_name}))

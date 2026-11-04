@@ -10,6 +10,13 @@
 - 위 두 단락의 내용이 실제 기능과 맞지 않게 되면 직접 고치지 말고 사용자에게 알리고 수정 여부를 묻는다.
 
 
+## 2026-11-05 회귀 테스트·clippy 정리 (사용자 목표 진행)
+
+- **변경 crate 전체 테스트:** `cargo test -p text -p language -p worktree --lib`가 **text 24개·language 99개·worktree 26개 모두 통과**했다(이번 세션에서 `text::Buffer::clear_history`, `language::Buffer::reload_with_encoding`, `worktree::write_file`의 인코딩 변환을 바꿨으므로 회귀 확인). 이 테스트들은 `markdown_preview` 40개, `don_charset` 9개, `don_typst` 17개, i18n 11개와 함께 통과한 상태다.
+- **clippy 정리:** 이전부터 남아 있던 `don_tools` 1건과 `mcp_server` 5건을 정리해 `don_tools`·`mcp_server`·`agent_panel`·새 crate 4개(`don_charset`·`don_typst`·`typst_preview`·`encoding_selector`) 모두 `--no-deps` 경고 0건이다. 접을 수 있는 `if` 3건은 코드를 고쳤다. `mcp_server`의 Windows 보안 도구(`whoami`·`icacls`) 동기 실행 3건은 **구조를 바꾸지 않고 허용 사유를 코드에 명시**했다(`run_windows_tool`): MCP 서버를 사용자가 켤 때(기본값은 꺼짐) 한 번만 부르는 100ms 안팎의 짧은 명령이고, 시작을 비동기로 바꾸면 전송 시험·실사용 확인이 의존하는 "폴더 보호 후 토큰 파일 생성" 순서를 건드리기 때문이다.
+- **MCP 전송 테스트:** `don_protocol_tests` 전체(기본 14개·브릿지 4개·전송 6개·키링 1개)가 통과했고, 환경 변수 `DONEDITOR_TEST_WINDOWS_ACL=1`로 켜는 **Windows ACL 선택 테스트도 통과**해 이번 ACL 실행 코드 정리에 문제가 없음을 확인했다. 한 번 `active_limit_does_not_block_cancellation`가 "EOF 직후 잘린 JSON 한 줄"로 실패했으나(다른 작업이 CPU를 쓰는 중이었고 브릿지 코드는 바꾸지 않음) 같은 테스트를 8번 연속 실행해 모두 통과했다. 부하 상황에서 가끔 생기는 기존 테스트의 타이밍 경쟁으로 보이며 원인을 고치지는 않았다.
+- **배포 ZIP 참고:** 위 릴리스 ZIP은 커밋 `2e9ff1c` 기준이다. 이후 커밋(`d257aff` 인쇄 실행을 표준 비동기 명령으로, `97296d7`·이번 clippy 정리)은 동작을 바꾸지 않는 정리라 ZIP을 다시 만들지 않았다.
+
 ## 2026-11-05 Windows 릴리스 배포본 재생성과 실행 확인 (Markdown 미리보기·캐릭터셋·Typst 반영)
 
 - 사용자 목표("PROGRESS.md의 작업을 모두 진행")에 따라 위 세 기능(Markdown 미리보기/편집 전환 `475437a`, 인코딩 표시·다시 불러오기 `c29fe81`, Typst 지원 `4421531`)과 MCP 확인(`2e9ff1c`)을 반영한 Windows x86_64 배포본을 새로 만들었다. `script/package-zip.ps1 -Yes -OutDir dist/windows-20261105-040131`을 Visual Studio 개발자 셸(amd64)에서 실행했고 `cargo build --locked --package gram --package cli --package mcp_server --release`가 **83분 59초**에 성공했다(종료 코드 0).

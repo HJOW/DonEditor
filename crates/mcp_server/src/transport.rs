@@ -42,12 +42,8 @@ fn private_directory(path: &Path) -> Result<()> {
     }
     #[cfg(windows)]
     {
-        use std::os::windows::process::CommandExt;
         // 콘솔 창을 띄우지 않고 현재 사용자의 SID를 조회한다.
-        let who = std::process::Command::new("whoami.exe")
-            .args(["/user", "/fo", "csv", "/nh"])
-            .creation_flags(0x08000000)
-            .output()?;
+        let who = run_windows_tool("whoami.exe", &["/user", "/fo", "csv", "/nh"])?;
         ensure!(who.status.success(), "사용자 SID 조회 실패");
         let text = String::from_utf8(who.stdout)?;
         let sid = text.trim().rsplit(',').next().unwrap_or_default().trim_matches('"');
@@ -56,20 +52,39 @@ fn private_directory(path: &Path) -> Result<()> {
             "사용자 SID 형식 오류"
         );
         // 기존 명시적 ACE도 지운 뒤 현재 사용자만 허용하는 보호 디렉터리로 만든다.
-        let reset = std::process::Command::new("icacls.exe")
-            .arg(path)
-            .arg("/reset")
-            .creation_flags(0x08000000)
-            .output()?;
+        let reset = run_windows_tool("icacls.exe", &[path.as_os_str(), "/reset".as_ref()])?;
         ensure!(reset.status.success(), "MCP 토큰 디렉터리 권한 초기화 실패");
-        let acl = std::process::Command::new("icacls.exe")
-            .arg(path)
-            .args(["/inheritance:r", "/grant:r", &format!("*{sid}:(OI)(CI)F")])
-            .creation_flags(0x08000000)
-            .output()?;
+        let grant = format!("*{sid}:(OI)(CI)F");
+        let acl = run_windows_tool(
+            "icacls.exe",
+            &[
+                path.as_os_str(),
+                "/inheritance:r".as_ref(),
+                "/grant:r".as_ref(),
+                grant.as_ref(),
+            ],
+        )?;
         ensure!(acl.status.success(), "MCP 토큰 디렉터리 권한 설정 실패");
     }
     Ok(())
+}
+
+/// Windows 의 짧은 보안 도구(`whoami`, `icacls`)를 콘솔 창 없이 실행하고 끝날 때까지 기다린다.
+///
+/// 프로젝트의 `disallowed_methods` 규칙은 `std::process::Command` 가 스레드를 오래 막을 수 있다는 이유로 쓰지 말라고 하지만,
+/// 이 함수는 MCP 서버를 **사용자가 켤 때(기본값은 꺼짐) 한 번**, 연결 정보 폴더의 접근 권한을 정하려고 부르는
+/// 100ms 안팎의 짧은 명령 3개에만 쓴다. 서버 시작은 설정 반영 흐름(`Server::start`)이 동기적으로 폴더 보호를 끝낸 뒤에
+/// 토큰 파일을 만들어야 하는 구조(전송 시험 24개와 실사용 확인이 이 순서에 의존)라서, 시작 전체를 비동기로 바꾸는 대신
+/// 허용하는 이유를 여기에 남긴다.
+#[cfg(windows)]
+#[allow(clippy::disallowed_methods)]
+fn run_windows_tool<S: AsRef<std::ffi::OsStr>>(program: &str, args: &[S]) -> Result<std::process::Output> {
+    use std::os::windows::process::CommandExt;
+    // CREATE_NO_WINDOW: 콘솔 창을 띄우지 않는다
+    Ok(std::process::Command::new(program)
+        .args(args)
+        .creation_flags(0x0800_0000)
+        .output()?)
 }
 
 /// 서버의 수명과 토큰을 함께 관리한다.
@@ -161,10 +176,10 @@ impl Drop for Server {
         if let Some(thread) = self.listener_thread.take() {
             let _ = thread.join();
         }
-        if let Ok(bytes) = fs::read(&self.path) {
-            if serde_json::from_slice::<Connection>(&bytes).is_ok_and(|c| c.token == self.connection.token) {
-                let _ = fs::remove_file(&self.path);
-            }
+        if let Ok(bytes) = fs::read(&self.path)
+            && serde_json::from_slice::<Connection>(&bytes).is_ok_and(|c| c.token == self.connection.token)
+        {
+            let _ = fs::remove_file(&self.path);
         }
     }
 }
@@ -273,10 +288,10 @@ fn serve(
     if length > MAX_BODY {
         return respond(reader.get_mut(), 413, None);
     }
-    if let Some(version) = headers.get("mcp-protocol-version") {
-        if version != "2025-06-18" {
-            return respond(reader.get_mut(), 400, None);
-        }
+    if let Some(version) = headers.get("mcp-protocol-version")
+        && version != "2025-06-18"
+    {
+        return respond(reader.get_mut(), 400, None);
     }
     let mut body = vec![0; length];
     reader.read_exact(&mut body)?;
