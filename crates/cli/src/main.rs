@@ -73,31 +73,32 @@ struct Args {
     reuse: bool,
     /// Sets a custom directory for all user data (e.g., database, extensions, logs).
     /// This overrides the default platform-specific data directory location:
-    #[cfg_attr(target_os = "macos", doc = "`~/Library/Application Support/Gram`.")]
-    #[cfg_attr(target_os = "windows", doc = "`%LOCALAPPDATA%\\Gram`.")]
-    #[cfg_attr(not(any(target_os = "windows", target_os = "macos")), doc = "`$XDG_DATA_HOME/gram`.")]
+    // [DonEditor] 실제 기본 데이터 폴더(crates/paths)와 같은 이름으로 안내한다
+    #[cfg_attr(target_os = "macos", doc = "`~/Library/Application Support/DonEditor`.")]
+    #[cfg_attr(target_os = "windows", doc = "`%LOCALAPPDATA%\\DonEditor`.")]
+    #[cfg_attr(not(any(target_os = "windows", target_os = "macos")), doc = "`$XDG_DATA_HOME/doneditor`.")]
     #[arg(long, value_name = "DIR")]
     user_data_dir: Option<String>,
-    /// The paths to open in Gram (space-separated).
+    /// The paths to open in Don Editor (space-separated).
     ///
     /// Use `path:line:column` syntax to open a file at the given line and column.
     paths_with_position: Vec<String>,
-    /// Print Gram's version and the app path.
+    /// Print Don Editor's version and the app path.
     #[arg(short, long)]
     version: bool,
     /// Generate a shell completion script for the given shell and print it to stdout.
     ///
-    /// Example: `gram --completions fish > ~/.config/fish/conf.d/gram.fish`
+    /// Example: `doneditor --completions fish > ~/.config/fish/conf.d/doneditor.fish`
     #[arg(long, value_enum, value_name = "SHELL")]
     completions: Option<clap_complete::Shell>,
-    /// Run gram in the foreground (useful for debugging)
+    /// Run Don Editor in the foreground (useful for debugging)
     #[arg(long)]
     foreground: bool,
-    /// Custom path to Gram.app or the editor binary
+    /// Custom path to the Don Editor app bundle or the editor binary
     #[arg(long)]
     gram: Option<PathBuf>,
     /// The username and WSL distribution to use when opening paths. If not specified,
-    /// Gram will attempt to open the paths directly.
+    /// Don Editor will attempt to open the paths directly.
     ///
     /// The username is optional, and if not specified, the default user for the distribution
     /// will be used.
@@ -108,20 +109,20 @@ struct Args {
     #[cfg(target_os = "windows")]
     #[arg(long, value_name = "USER@DISTRO")]
     wsl: Option<String>,
-    /// Not supported in Gram CLI, only supported on Gram binary
+    /// Not supported in the CLI, only supported on the Don Editor binary
     /// Will attempt to give the correct command to run
     #[arg(long)]
     system_specs: bool,
     /// Pairs of file paths to diff. Can be specified multiple times.
     #[arg(long, action = clap::ArgAction::Append, num_args = 2, value_names = ["OLD_PATH", "NEW_PATH"])]
     diff: Vec<String>,
-    /// Uninstall Gram from user system
+    /// Uninstall Don Editor from user system
     #[cfg(all(any(target_os = "linux", target_os = "macos"), not(feature = "no-bundled-uninstall")))]
     #[arg(long)]
     uninstall: bool,
 
     /// Used for SSH/Git password authentication, to remove the need for netcat as a dependency,
-    /// by having Gram act like netcat communicating over a Unix socket.
+    /// by having Don Editor act like netcat communicating over a Unix socket.
     #[arg(long, hide = true)]
     askpass: Option<String>,
 }
