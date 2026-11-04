@@ -1,0 +1,8 @@
+{
+  "name": "Don Editor",
+  "version": "3.4.0",
+  "enabled": true,
+  "ratio": 3.14,
+  "tags": ["editor", "한글", null],
+  "nested": { "count": 10 }
+}

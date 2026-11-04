@@ -1,0 +1,8 @@
+# .yaml 확장자 샘플
+services:
+  web:
+    image: "nginx:latest"
+    ports:
+      - "8080:80"
+    environment:
+      - KEY=value

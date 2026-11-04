@@ -1,0 +1,17 @@
+# 한 줄 주석
+name: Don Editor
+version: 3.4.0
+enabled: true
+ratio: 3.14
+empty: null
+tags:
+  - editor
+  - "한글"
+nested:
+  count: 10
+  text: |
+    여러 줄
+    문자열
+anchor: &base
+  key: value
+ref: *base

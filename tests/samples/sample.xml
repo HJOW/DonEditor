@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 주석 -->
+<project xmlns="http://example.com/schema" version="1.0">
+  <name attr="값">Don Editor</name>
+  <items>
+    <item id="1" enabled="true">첫째 &amp; 둘째</item>
+    <item id="2"><![CDATA[<raw>]]></item>
+    <empty />
+  </items>
+</project>

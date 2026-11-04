@@ -1,0 +1,5 @@
+name = "Properties"
+grammar = "properties"
+# java.util.Properties 형식: '#' 와 '!' 로 시작하는 줄은 주석이다
+path_suffixes = ["properties"]
+line_comments = ["# ", "! "]

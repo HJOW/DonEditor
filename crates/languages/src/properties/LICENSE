@@ -1,0 +1,5 @@
+tree-sitter-properties 0.3.0 (https://github.com/tree-sitter-grammars/tree-sitter-properties)
+Copyright (c) ObserverOfTime
+
+The highlights.scm in this directory is derived from that project's queries/highlights.scm.
+Licensed under the MIT License. See assets/licenses/MIT.

@@ -1,0 +1,9 @@
+name = "XML"
+grammar = "xml"
+# [DonEditor] XML 스키마·변환·서비스 기술 파일 확장자(xsd, xsl, xslt, wsdl) 추가
+path_suffixes = ["xml", "xsd", "xsl", "xslt", "wsdl"]
+first_line_pattern = "^<.*xml"
+block_comment = ["<!-- ", " -->"]
+brackets = [{ start = "<", end = ">", close = true, newline = true }]
+prettier_parser_name = "xml"
+prettier_plugins = ["@prettier/plugin-xml"]

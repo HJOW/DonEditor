@@ -1,0 +1,14 @@
+// 한 줄 주석
+{
+  /* 블록 주석 */
+  name: 'Don Editor',
+  version: "3.4.0",
+  enabled: true,
+  ratio: +3.14,
+  hex: 0xFF,
+  infinite: Infinity,
+  tags: ['editor', '한글', null,],
+  nested: { count: 10, },
+  multiline: 'line one \
+line two',
+}

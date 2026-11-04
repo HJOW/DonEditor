@@ -1,0 +1,11 @@
+name = "Batch"
+grammar = "bat"
+# Windows 배치 파일
+path_suffixes = ["bat", "cmd"]
+modeline_aliases = ["bat", "batch", "cmd"]
+line_comments = ["rem ", ":: "]
+brackets = [
+  { start = "(", end = ")", close = true, newline = true },
+  { start = "\"", end = "\"", close = true, newline = false, not_in = ["comment", "string"] },
+]
+tab_size = 4
