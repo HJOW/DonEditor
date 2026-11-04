@@ -1,5 +1,12 @@
 # Don Editor 진행 상황
 
+## 2026-11-04 Windows 릴리스 배포본 생성
+
+- 사용자 요청으로 Windows x86_64 릴리스 배포본을 별도 폴더에 생성하고 그대로 보존했다. `script/package-zip.ps1 -Yes -OutDir dist/windows-20261104-172637` 실행 시 빌드 도구 점검 및 `cargo build --locked --package gram --package cli --package mcp_server --release`가 성공했다. 기존 Wasmtime 관련 `LNK4217` 링커 경고가 나왔다.
+- 배포 파일: `dist/windows-20261104-172637/DonEditor-3.4.0-windows-x86_64.zip` (77,238,393바이트). SHA-256: `d0238cf31cfd19ca4dc14fc7206cd678d6c9c3a02a85728ce2fa55a534fa6079`. 동봉 `.sha256`과 별도 계산값이 일치한다.
+- `dist/windows-20261104-172637/extracted/`에 압축을 풀어 GUI·CLI·MCP 실행 파일, GPL 라이선스, 소스 ZIP 존재를 확인했다. 격리된 `smoke-data`로 압축 해제된 GUI를 실행해 테스트 Rust 파일 창 생성과 응답 상태를 확인하고 창을 닫았다. 동봉된 MCP 브리지의 `--help` 실행도 확인했다. ZIP·해시·압축 해제본·테스트 데이터는 모두 보존한다.
+- 이 확인은 실행 기동 스모크 테스트이며 전체 기능 회귀, 깨끗한 Windows 설치 환경이나 ARM64 검증을 의미하지 않는다. Linux/macOS 직접 테스트와 실제 외부 API 호출은 이전 사용자 지시에 따라 생략한다.
+
 ## 2026-11-04 Agent 사이드 패널 수정 (사용자 요청)
 
 - **사용자 요청:** ① 프로그램 실행 시 Agent 패널은 기본적으로 숨김, ② 제공자 이름 클릭 토글을 콤보박스로 변경(이후 Google·OpenCode·LM Studio 추가 예정), ③ API 키는 패널이 아닌 Don Editor 기본 설정에서 제공자별로 사전 입력하고 선택 사항인 API 서버 URL(공란이면 기본값)도 입력, ④ 패널의 키 입력란은 숨기되 해당 제공자 키가 없으면 프롬프트 입력란 자리에 키 입력란을 보여 입력 즉시 기본 설정에 반영, ⑤ AI 요청에 현재 파일·폴더 경로가 컨텍스트로 들어가는지 확인.
@@ -683,7 +690,7 @@ DonEditor/
 - [ ] 전체 기능 회귀 테스트 ([기능 인벤토리](FEATURE-INVENTORY.md) 기준 기존 기능 R8 + 신규 요구사항 R1~R7·R9, Agent 패널 숨김·아이콘으로 다시 표시 포함)
 - [ ] `cargo test` (변경 crate 위주), `cargo clippy` 경고 정리 — **일부 완료:** i18n 11개·공급자 계약 13개·MCP 계약 테스트 통과, `agent_panel`·`settings_ui` clippy 경고 0건. 남은 경고: `don_tools` 1건(`dispatch_action` 포커스 `if` 병합), `mcp_server` 5건(Windows ACL 동기 `Command::output` 3건 포함), 기존 `prettier` 1건. GUI crate 테스트(`settings_ui`·`workspace` 등) 전체 실행은 미수행
 - [x] 사용자 문서(한국어): 설치, Agent 설정, MCP 연결 방법 — `docs/installation.md`·`agent.md`·`mcp.md`·`security.md`·`packaging.md`(`5fa69a6`), 2026-11-04 Agent 설정 변경 반영
-- [ ] Windows 배포 스크립트로 최종 zip 생성 및 압축 해제 실행 확인 — **디버그 ZIP 생성·해시·구성 검증 완료(`a970b6f`), 신규 코드의 릴리스 ZIP 생성과 압축 해제 후 실행은 미수행**
+- [x] Windows 배포 스크립트로 릴리스 zip 생성 및 압축 해제 실행 확인 — **2026-11-04 x86_64 릴리스 ZIP·SHA-256·구성 확인 및 격리 데이터로 GUI 기동 확인. 전체 기능 회귀와 깨끗한 설치 환경·ARM64는 별도 미검증**
 - [ ] Linux/macOS 배포 스크립트로 각 OS의 최종 tar.gz 생성 및 압축 해제 실행 확인, 빌드 도구 검사·설치 질의 흐름 점검 — **모의 검증만 완료, 실제 OS 검증은 이번 목표에서 건너뜀(사용자 지시)**
 - 완료 기준: Windows zip과 Linux/macOS tar.gz를 각 대상 OS에서 압축 해제 후 실행 가능, R1~R9의 모든 요구사항 동작 확인
 
