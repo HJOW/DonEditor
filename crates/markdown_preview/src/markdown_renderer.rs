@@ -3,7 +3,7 @@ use crate::{
         HeadingLevel, Image, Link, MarkdownParagraph, MarkdownParagraphChunk, ParsedMarkdown, ParsedMarkdownBlockQuote,
         ParsedMarkdownCodeBlock, ParsedMarkdownElement, ParsedMarkdownHeading, ParsedMarkdownListItem,
         ParsedMarkdownListItemType, ParsedMarkdownMermaidDiagram, ParsedMarkdownMermaidDiagramContents,
-        ParsedMarkdownTable, ParsedMarkdownTableAlignment, ParsedMarkdownTableRow,
+        ParsedMarkdownTable, ParsedMarkdownTableAlignment, ParsedMarkdownTableRow, SourceMapping,
     },
     markdown_preview_view::MarkdownPreviewView,
 };
@@ -185,6 +185,8 @@ pub struct RenderContext<'a> {
     fragment_jump_callback: Option<FragmentJumpCallback>,
     is_last_child: bool,
     mermaid_state: &'a MermaidState,
+    /// [DonEditor] 원본 문서 기준 검색 일치 범위와 강조 색 (문서 순서). 검색 중이 아니면 비어 있다.
+    search_highlights: Arc<[(Range<usize>, Hsla)]>,
 }
 
 impl<'a> RenderContext<'a> {
@@ -226,7 +228,14 @@ impl<'a> RenderContext<'a> {
             fragment_jump_callback: None,
             is_last_child: false,
             mermaid_state,
+            search_highlights: Arc::from(Vec::new()),
         }
+    }
+
+    /// [DonEditor] 원본 문서 기준 검색 일치(범위·색, 문서 순서)를 미리보기 글자에 강조하도록 설정한다.
+    pub fn with_search_highlights(mut self, highlights: Arc<[(Range<usize>, Hsla)]>) -> Self {
+        self.search_highlights = highlights;
+        self
     }
 
     pub fn with_checkbox_clicked_callback(
@@ -704,15 +713,20 @@ fn render_markdown_block_quote(parsed: &ParsedMarkdownBlockQuote, cx: &mut Rende
 }
 
 fn render_markdown_code_block(parsed: &ParsedMarkdownCodeBlock, cx: &mut RenderContext) -> AnyElement {
+    // [DonEditor] 검색 중이면 코드 안의 일치 부분에도 배경 강조를 덮는다
+    let search_highlights = search_highlights_for_text(&parsed.contents, &parsed.source_map, &cx.search_highlights);
     let body = if let Some(highlights) = parsed.highlights.as_ref() {
+        let syntax_highlights = highlights.iter().filter_map(|(range, highlight_id)| {
+            highlight_id
+                .style(cx.syntax_theme.as_ref())
+                .map(|style| (range.clone(), style))
+        });
         StyledText::new(parsed.contents.clone()).with_default_highlights(
             &cx.buffer_text_style,
-            highlights.iter().filter_map(|(range, highlight_id)| {
-                highlight_id
-                    .style(cx.syntax_theme.as_ref())
-                    .map(|style| (range.clone(), style))
-            }),
+            overlay_highlights(syntax_highlights.collect(), search_highlights),
         )
+    } else if !search_highlights.is_empty() {
+        StyledText::new(parsed.contents.clone()).with_highlights(search_highlights)
     } else {
         StyledText::new(parsed.contents.clone())
     };
@@ -835,6 +849,8 @@ fn render_markdown_text(parsed_new: &MarkdownParagraph, cx: &mut RenderContext) 
 
     let text_style = cx.text_style.clone();
     let link_color = cx.link_color;
+    // [DonEditor] 원본 기준 검색 일치 (검색 중이 아니면 비어 있다)
+    let search_matches = cx.search_highlights.clone();
 
     for parsed_region in parsed_new {
         match parsed_region {
@@ -869,6 +885,10 @@ fn render_markdown_text(parsed_new: &MarkdownParagraph, cx: &mut RenderContext) 
                         }
                     }),
                 );
+                // [DonEditor] 검색 중이면 일치 부분에 편집 화면과 같은 배경 강조를 덮는다
+                let search_highlights =
+                    search_highlights_for_text(&parsed.contents, &parsed.source_map, &search_matches);
+                let highlights = overlay_highlights(highlights.collect(), search_highlights);
                 let mut links = Vec::new();
                 let mut link_ranges = Vec::new();
                 for (range, region) in parsed.regions.iter() {
@@ -1093,6 +1113,105 @@ fn list_item_prefix(order: usize, ordered: bool, depth: usize) -> String {
     }
 }
 
+/// [DonEditor] 원본 기준 검색 일치(`matches`, 문서 순서·서로 겹치지 않음)를 대응표로 옮겨
+/// 렌더링 글자 `contents` 의 배경 강조 목록(정렬·비겹침)으로 만든다.
+/// 글자 길이를 벗어나거나 글자 경계에 맞지 않는 범위(분석 직후의 편집으로 위치가 어긋난 경우)는 버린다.
+fn search_highlights_for_text(
+    contents: &str,
+    source_map: &[SourceMapping],
+    matches: &[(Range<usize>, Hsla)],
+) -> Vec<(Range<usize>, HighlightStyle)> {
+    let mut highlights: Vec<(Range<usize>, HighlightStyle)> = Vec::new();
+    if matches.is_empty() {
+        return highlights;
+    }
+    // 대응마다 겹치는 일치를 이진 탐색으로 찾아 렌더링 범위로 옮긴다
+    for mapping in source_map {
+        let first = matches.partition_point(|(range, _)| range.end <= mapping.source.start);
+        // 이 대응의 원본 범위가 끝나기 전에 시작하는 일치만 본다
+        for (matched, color) in &matches[first..] {
+            if matched.start >= mapping.source.end {
+                break;
+            }
+            let Some(range) = mapping.rendered_range_for(matched) else {
+                continue;
+            };
+            let range = range.start.min(contents.len())..range.end.min(contents.len());
+            if range.is_empty() || !contents.is_char_boundary(range.start) || !contents.is_char_boundary(range.end) {
+                continue;
+            }
+            highlights.push((
+                range,
+                HighlightStyle {
+                    background_color: Some(*color),
+                    ..Default::default()
+                },
+            ));
+        }
+    }
+
+    // 범위 전체끼리 대응한 조각은 서로 겹칠 수 있으므로, 정렬한 뒤 앞 강조와 겹친 부분을 잘라 낸다
+    highlights.sort_by_key(|(range, _)| range.start);
+    let mut non_overlapping: Vec<(Range<usize>, HighlightStyle)> = Vec::with_capacity(highlights.len());
+    for (range, style) in highlights {
+        let start = non_overlapping
+            .last()
+            .map_or(range.start, |(last, _)| range.start.max(last.end));
+        if start < range.end {
+            non_overlapping.push((start..range.end, style));
+        }
+    }
+    non_overlapping
+}
+
+/// [DonEditor] 정렬·비겹침인 기본 강조(`base`) 위에 같은 조건의 검색 강조(`overlay`)를 덮어씌운다.
+/// 겹치는 구간은 두 스타일을 합치며, 배경색은 검색 강조를 쓴다(인라인 코드 배경 위에서도 일치가 보이도록).
+/// 결과도 정렬·비겹침이라 `StyledText` 의 글자 구간으로 바로 쓸 수 있다.
+fn overlay_highlights(
+    base: Vec<(Range<usize>, HighlightStyle)>,
+    overlay: Vec<(Range<usize>, HighlightStyle)>,
+) -> Vec<(Range<usize>, HighlightStyle)> {
+    if overlay.is_empty() {
+        return base;
+    }
+    // 두 목록의 모든 경계를 모아, 이웃한 경계 사이 구간마다 스타일을 정한다
+    let mut boundaries: Vec<usize> = base
+        .iter()
+        .chain(overlay.iter())
+        .flat_map(|(range, _)| [range.start, range.end])
+        .collect();
+    boundaries.sort_unstable();
+    boundaries.dedup();
+
+    let mut result = Vec::with_capacity(boundaries.len());
+    let (mut base_ix, mut overlay_ix) = (0, 0);
+    // 구간마다 그 구간을 덮는 기본·검색 강조를 찾아 합친다 (두 목록 모두 정렬되어 있어 앞으로만 나아간다)
+    for bounds in boundaries.windows(2) {
+        let (start, end) = (bounds[0], bounds[1]);
+        while base.get(base_ix).is_some_and(|(range, _)| range.end <= start) {
+            base_ix += 1;
+        }
+        while overlay.get(overlay_ix).is_some_and(|(range, _)| range.end <= start) {
+            overlay_ix += 1;
+        }
+        let base_style = base
+            .get(base_ix)
+            .filter(|(range, _)| range.start <= start)
+            .map(|(_, style)| *style);
+        let overlay_style = overlay
+            .get(overlay_ix)
+            .filter(|(range, _)| range.start <= start)
+            .map(|(_, style)| *style);
+        let style = match (base_style, overlay_style) {
+            (None, None) => continue,
+            (Some(style), None) | (None, Some(style)) => style,
+            (Some(base_style), Some(overlay_style)) => base_style.highlight(overlay_style),
+        };
+        result.push((start..end, style));
+    }
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1300,5 +1419,122 @@ mod tests {
             Arc::ptr_eq(&fallback.unwrap(), &svg_a),
             "Fallback should be the old duplicate diagram's image"
         );
+    }
+
+    /// [DonEditor] 테스트용 강조 색 (일반 일치·현재 일치)
+    fn match_color() -> Hsla {
+        gpui::red()
+    }
+    fn active_match_color() -> Hsla {
+        gpui::blue()
+    }
+
+    /// [DonEditor] 테스트용 배경 강조 스타일
+    fn background(color: Hsla) -> HighlightStyle {
+        HighlightStyle {
+            background_color: Some(color),
+            ..Default::default()
+        }
+    }
+
+    /// [DonEditor] 원본 기준 일치가 렌더링 글자 범위로 옮겨지고, 대응하지 않는 일치와 어긋난 범위는 버려지는지 확인한다.
+    #[test]
+    fn test_search_highlights_for_text_maps_matches() {
+        // 원본 "a **bc** 한글" → 렌더링 "a bc 한글"
+        let source = "a **bc** 한글";
+        let contents = "a bc 한글";
+        let source_map = vec![
+            SourceMapping::new(source, 0..2, "a ", 0..2),
+            SourceMapping::new(source, 2..4, "bc", 4..6),
+            SourceMapping::new(source, 4..11, " 한글", 8..15),
+        ];
+        let matches = vec![
+            // "bc" (서식 기호 포함 "**bc**" 로 찾은 경우)
+            (2..8, match_color()),
+            // "한" 한 글자 (현재 일치)
+            (9..12, active_match_color()),
+        ];
+        let highlights = search_highlights_for_text(contents, &source_map, &matches);
+        assert_eq!(
+            highlights,
+            vec![
+                (2..4, background(match_color())),
+                (5..8, background(active_match_color()))
+            ]
+        );
+        assert_eq!(&contents[5..8], "한");
+
+        // 검색 중이 아니면 강조가 없다
+        assert!(search_highlights_for_text(contents, &source_map, &[]).is_empty());
+
+        // 분석 뒤 편집으로 위치가 어긋난 범위는 버린다: 렌더링 글자 "한" 의 중간 바이트에 걸친 경우
+        let inside_char = SourceMapping {
+            rendered: 6..7,
+            source: 8..9,
+            exact: true,
+        };
+        assert!(search_highlights_for_text(contents, &[inside_char], &[(8..9, match_color())]).is_empty());
+        // 렌더링 글자 끝을 벗어난 경우
+        let past_end = SourceMapping {
+            rendered: 20..21,
+            source: 8..9,
+            exact: true,
+        };
+        assert!(search_highlights_for_text(contents, &[past_end], &[(8..9, match_color())]).is_empty());
+    }
+
+    /// [DonEditor] 범위 전체끼리 대응한 조각들이 겹쳐도 결과 강조는 겹치지 않는지 확인한다.
+    #[test]
+    fn test_search_highlights_for_text_removes_overlaps() {
+        let contents = "abcdef";
+        let source_map = vec![
+            SourceMapping {
+                rendered: 0..4,
+                source: 0..2,
+                exact: false,
+            },
+            SourceMapping {
+                rendered: 2..6,
+                source: 2..4,
+                exact: false,
+            },
+        ];
+        let highlights = search_highlights_for_text(contents, &source_map, &[(1..3, match_color())]);
+        assert_eq!(
+            highlights,
+            vec![(0..4, background(match_color())), (4..6, background(match_color()))]
+        );
+    }
+
+    /// [DonEditor] 기본 강조 위에 검색 강조를 덮으면 구간이 나뉘고, 겹친 곳은 검색 배경색이 이기는지 확인한다.
+    #[test]
+    fn test_overlay_highlights_prefers_search_background() {
+        let bold = HighlightStyle {
+            font_weight: Some(gpui::FontWeight::BOLD),
+            ..Default::default()
+        };
+        let code_background = background(gpui::green());
+        let base = vec![(0..4, bold), (6..10, code_background)];
+        let overlay = vec![(2..8, background(match_color()))];
+        let combined = overlay_highlights(base.clone(), overlay);
+        assert_eq!(
+            combined,
+            vec![
+                (0..2, bold),
+                (
+                    2..4,
+                    HighlightStyle {
+                        font_weight: Some(gpui::FontWeight::BOLD),
+                        background_color: Some(match_color()),
+                        ..Default::default()
+                    }
+                ),
+                (4..6, background(match_color())),
+                (6..8, background(match_color())),
+                (8..10, code_background),
+            ]
+        );
+        // 검색 강조가 없으면 기본 강조를 그대로 돌려준다
+        assert_eq!(overlay_highlights(base.clone(), Vec::new()), base);
     }
 }

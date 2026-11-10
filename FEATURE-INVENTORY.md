@@ -80,7 +80,7 @@ AGENTS.md 의 "기존에 존재하던 기능은 최대한 포함한다"(R8)를 �
 | 설정/외형 | 시각 사용자화 | `ui` | ✅ | [visual-customization](GramEditor-docs/docs/visual-customization.md) | ⬜ |  |
 | 확장/연동 | 확장 기능(Wasm) 설치·관리 | `extension`, `extension_host`, `extension_api`, `extensions_ui` | ⚠ 일부 별도: extension_api | [extensions](GramEditor-docs/docs/extensions.md) | ⬜ | 원본 README: 제한적 지원. 확장이 임의 실행 파일을 내려받을 수 있다는 경고 있음 |
 | 확장/연동 | Zed 설정 가져오기(마이그레이션) | `migrator` | ✅ | [zed](GramEditor-docs/docs/migrate/zed.md), [vs-code](GramEditor-docs/docs/migrate/vs-code.md) | ⬜ |  |
-| 뷰어 | Markdown 미리보기 | `markdown_preview`, `markdown` | ✅ | - | ✅ | 2026-11-04 Windows 디버그 빌드 확인. Don Editor는 md 파일을 같은 탭의 미리보기 모드로 먼저 열고 툴바 `미리보기 \| 편집` 토글로 전환한다. 기존 별도 탭/옆 분할 미리보기도 유지 |
+| 뷰어 | Markdown 미리보기 | `markdown_preview`, `markdown` | ✅ | - | ✅ | 2026-11-04 Windows 디버그 빌드 확인. Don Editor는 md 파일을 같은 탭의 미리보기 모드로 먼저 열고 툴바 `미리보기 \| 편집` 토글로 전환한다. 기존 별도 탭/옆 분할 미리보기도 유지. 2026-11-10: 미리보기 모드에서도 Ctrl+F(macOS Cmd+F)로 검색 바를 열고, 원본에서 찾은 일치를 미리보기 글자에 강조(자동 통합 테스트로 확인) |
 | 뷰어 | SVG 미리보기 | `svg_preview` | ✅ | - | ✅ | 2026-11-05 확인: `.svg` 파일을 열면 편집기와 함께 "Preview pic.svg" 미리보기 탭이 열림 |
 | 뷰어 | 이미지 뷰어 | `image_viewer` | ✅ | - | ✅ | 2026-11-05 확인: 160x100 PNG 를 열면 이미지와 크기·확대 정보가 표시됨 |
 | 앱 | 명령줄(CLI) | `cli`, `install_cli` | ✅ | [command-line-interface](GramEditor-docs/docs/command-line-interface.md) | ⬜ | `cli` 실행 파일은 기본 빌드(`cargo build`) 대상이 아니라 `target\debug` 에 만들어지지 않음(확인함). 배포 zip 에 넣으려면 `-p cli` 별도 빌드 필요(Phase 3) |

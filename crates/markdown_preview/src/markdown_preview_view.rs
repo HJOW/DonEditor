@@ -7,15 +7,16 @@ use anyhow::Result;
 use editor::scroll::Autoscroll;
 use editor::{Editor, EditorEvent, MultiBufferOffset, SelectionEffects};
 use gpui::{
-    App, ClickEvent, Context, Entity, EventEmitter, FocusHandle, Focusable, InteractiveElement, IntoElement, IsZero,
-    ListOffset, ListState, ParentElement, Render, RetainAllImageCache, Styled, Subscription, Task, WeakEntity, Window,
-    list,
+    App, ClickEvent, Context, Entity, EventEmitter, FocusHandle, Focusable, Hsla, InteractiveElement, IntoElement,
+    IsZero, ListOffset, ListState, ParentElement, Render, RetainAllImageCache, Styled, Subscription, Task, WeakEntity,
+    Window, list,
 };
 use language::LanguageRegistry;
 use settings::Settings;
 use theme::ThemeSettings;
 use ui::{WithScrollbar, prelude::*};
 use workspace::item::{Item, ItemHandle};
+use workspace::searchable::SearchEvent;
 use workspace::{Pane, Workspace};
 
 use crate::markdown_elements::{
@@ -46,6 +47,8 @@ pub struct MarkdownPreviewView {
     mode: MarkdownPreviewMode,
     /// [DonEditor] 다음 구문 분석이 끝나면 이 원본 위치(바이트 오프셋)를 담은 블록이 맨 위에 오도록 스크롤한다.
     pending_scroll_to_source_offset: Option<usize>,
+    /// [DonEditor] 원본 편집기의 버퍼 검색(Ctrl+F) 일치 범위와 강조 색. 그릴 때마다 편집기에서 다시 읽는다.
+    search_highlights: Arc<[(Range<usize>, Hsla)]>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -64,6 +67,8 @@ struct EditorState {
     /// 별도 탭 미리보기는 원본 편집기 탭을 닫아도 계속 보이도록 강한 참조를 함께 보관한다. 내장 미리보기는 `None`.
     _keep_alive: Option<Entity<Editor>>,
     _subscription: Subscription,
+    /// [DonEditor] 편집기의 검색 일치가 바뀌면 미리보기의 일치 강조를 다시 그리기 위한 구독
+    _search_subscription: Subscription,
 }
 
 impl MarkdownPreviewView {
@@ -225,6 +230,7 @@ impl MarkdownPreviewView {
                 image_cache: RetainAllImageCache::new(cx),
                 mode,
                 pending_scroll_to_source_offset: None,
+                search_highlights: Arc::from(Vec::new()),
             };
 
             this.set_editor(active_editor, window, cx);
@@ -300,12 +306,17 @@ impl MarkdownPreviewView {
             };
         });
 
+        // [DonEditor] 검색 바가 일치를 새로 찾거나 지우면(편집기 검색 이벤트) 미리보기의 일치 강조를 다시 그린다.
+        // 현재 일치가 바뀌는 경우는 편집기 선택이 바뀌므로 위의 SelectionsChanged 처리에서 다시 그려진다.
+        let search_subscription = cx.subscribe(&editor, |_, _, _: &SearchEvent, cx| cx.notify());
+
         // [DonEditor] 내장 미리보기만 약한 참조로 둔다 (편집기 → 미리보기 → 편집기 순환 방지)
         let keep_alive = (self.mode != MarkdownPreviewMode::Embedded).then(|| editor.clone());
         self.active_editor = Some(EditorState {
             editor: editor.downgrade(),
             _keep_alive: keep_alive,
             _subscription: subscription,
+            _search_subscription: search_subscription,
         });
 
         self.parse_markdown_from_active_editor(false, window, cx);
@@ -639,6 +650,13 @@ impl Render for MarkdownPreviewView {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let buffer_size = ThemeSettings::get_global(cx).buffer_font_size(cx);
         let buffer_line_height = ThemeSettings::get_global(cx).buffer_line_height;
+        // [DonEditor] 원본 편집기의 검색 일치를 읽어, 보이는 블록을 그릴 때 같은 색으로 강조한다
+        self.search_highlights = self
+            .active_editor
+            .as_ref()
+            .and_then(|state| state.editor.upgrade())
+            .map(|editor| Arc::from(editor.read(cx).buffer_search_highlights(cx)))
+            .unwrap_or_else(|| Arc::from(Vec::new()));
 
         v_flex()
             .image_cache(self.image_cache.clone())
@@ -669,6 +687,7 @@ impl Render for MarkdownPreviewView {
 
                             let mut render_cx =
                                 RenderContext::new(Some(this.workspace.clone()), &this.mermaid_state, window, cx)
+                                    .with_search_highlights(this.search_highlights.clone())
                                     .with_fragment_jump_callback(cx.listener(move |this, id: &str, window, cx| {
                                         this.scroll_to_heading(id, window, cx);
                                         cx.notify();

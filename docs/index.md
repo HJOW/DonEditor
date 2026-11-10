@@ -2,7 +2,7 @@
 
 Don Editor는 GramEditor를 기반으로 한국어 UI, D2Coding 기본 글꼴, 로컬 MCP와 AI Agent 패널을 제공하는 텍스트 편집기입니다. **AI 기능을 적극적으로 도입**하며, 원본 GramEditor의 AI 사용 금지 정책은 이 프로젝트에 적용되지 않습니다.
 
-현재 Don Editor 버전은 **0.1.0**이며, 기반이 된 GramEditor 3.4.0과 별도로 관리합니다.
+현재 Don Editor 버전은 **0.1.1**이며, 기반이 된 GramEditor 3.4.0과 별도로 관리합니다.
 
 ## 시작하기
 
@@ -18,6 +18,8 @@ Don Editor는 GramEditor를 기반으로 한국어 UI, D2Coding 기본 글꼴, �
 파일 열기·편집·저장, 다중 탭·분할 창, 찾기·바꾸기, Git, 터미널, 디버거, 언어 서버, Vim/Helix 모드 등 기존 기능을 유지합니다. 기본 문법 강조 대상은 Java, C, C++, SQL, C#, Rust, JavaScript(mjs/cjs 포함), TypeScript, Python, Ruby, JSON, JSON5, YAML, Java Properties, XML, HTML, XHTML, Markdown, Swift, Scala, R, Windows Batch, PowerShell, Unix Shell, Go, Dart입니다. 이 밖에 원본이 제공하는 Typst(`.typ`)도 기본으로 지원합니다.
 
 Markdown 파일(`.md` 등)은 열면 **미리보기 모드**로 먼저 표시됩니다. 탭 아래 현재 단락 제목 줄의 오른쪽에 있는 **미리보기 | 편집** 버튼으로 같은 탭 안에서 편집 모드와 오갈 수 있으며, 명령 팔레트의 `markdown: toggle preview mode`로도 전환합니다. 미리보기에서 블록을 두 번 누르면 그 위치에서 편집 모드로 바뀝니다. 내용이 없는 파일은 편집 모드로 열립니다. 저장·변경 표시·닫기 확인은 두 모드에서 똑같이 동작하며, 별도 탭이나 옆 분할 창에 미리보기를 여는 기존 기능도 그대로 쓸 수 있습니다.
+
+미리보기 모드에서도 **Ctrl+F**(macOS는 Cmd+F)로 검색 바를 열 수 있습니다. 검색은 원본 Markdown 글자에서 하며, 일치하는 부분은 미리보기 화면에 편집 모드와 같은 색으로 강조되고 현재 일치가 있는 블록으로 화면이 이동합니다. Enter·Shift+Enter 또는 F3·Shift+F3으로 다음·이전 일치로 옮겨 가고, Esc로 검색 바를 닫습니다. 링크 주소·이미지 경로처럼 미리보기에 보이지 않는 글자에서 찾은 일치는 해당 블록으로 이동만 하고 강조되지 않습니다.
 
 ### Typst 문서, Markdown→Typst 변환, PDF 내보내기, 인쇄
 

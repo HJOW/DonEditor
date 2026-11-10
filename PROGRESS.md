@@ -1,5 +1,32 @@
 # Don Editor 진행 상황
 
+## 2026-11-10 Markdown 미리보기 모드 텍스트 검색(Ctrl+F), 버전 0.1.1
+
+- **사용자 요청:** ① md 문서 미리보기 모드에서 Ctrl+F를 눌러도 검색어 창이 나타나지 않으니 미리보기 모드에서도 텍스트를 검색할 수 있게 한다. ② 프로그램 안의 버전 표기를 0.1.1로 한다.
+- **원인:** 미리보기 모드는 편집기 탭이 본문 대신 미리보기 화면(`Editor::set_alternate_view`)을 그리므로 키 컨텍스트에 `Editor`가 없고 `MarkdownPreview`만 있다. 기본 키맵의 `ctrl-f` → `buffer_search::Deploy`는 `Editor && mode == full` 컨텍스트에만 있어 미리보기에서는 아무 동작도 하지 않았다.
+- **구현:**
+  - **키맵**(`default-windows.jsonc`·`default-linux.jsonc`·`default-macos.jsonc`): `MarkdownPreview` 컨텍스트에 `ctrl-f`(macOS `cmd-f`) → `buffer_search::Deploy`, `escape` → `buffer_search::Dismiss`를 추가했다. 검색 바는 탭의 실제 항목인 편집기를 대상으로 열리므로 검색은 **원본 Markdown 글자**에서 하고, 다음/이전 일치(Enter·Shift+Enter, F3·Shift+F3)·대소문자/단어/정규식 옵션·바꾸기 토글도 편집 모드와 같다. Typst 미리보기는 쪽을 SVG 그림으로 그려 글자 강조를 할 수 없어 이번 범위에서 제외했다(키맵 컨텍스트를 `MarkdownPreview`만으로 둠).
+  - **미리보기 일치 강조:** 파서(`markdown_parser.rs`)가 글자 이벤트(본문·인라인 코드·HTML·코드 블록 줄)마다 "렌더링 글자 범위 ↔ 원본 범위" 대응표(`SourceMapping`, `ParsedMarkdownText`/`ParsedMarkdownCodeBlock`의 `source_map`)를 남긴다. 원본 조각 안에서 렌더링 글자를 그대로 찾으면 1:1 대응(강조 기호·백틱·이스케이프 역슬래시를 뺀 부분), 찾지 못하면(스마트 문장부호 등) 조각 전체끼리 대응한다. 편집기에 `Editor::buffer_search_highlights`(검색 일치 범위의 원본 오프셋과 편집 화면 강조 색)를 추가했고, 미리보기는 그릴 때마다 이를 읽어 렌더러(`RenderContext::with_search_highlights`)가 보이는 블록의 글자에 배경 강조를 덮는다. 현재 일치는 편집 화면처럼 "현재 일치" 색으로 구분되며, 인라인 코드 배경 위에서도 검색 배경이 보이도록 겹침을 정리한다(`overlay_highlights`). 일치로 편집기 선택이 옮겨지면 기존 동작대로 미리보기가 그 블록을 화면에 보여 준다. 검색 이벤트(`SearchEvent`)를 구독해 별도 탭·옆 분할 미리보기도 일치가 바뀌면 다시 그린다.
+  - **검색어 자동 채우기:** 미리보기 중에는 커서가 보이지 않으므로, 선택 영역이 없을 때 커서 위치 단어로 검색어를 채우지 않도록 했다(`items.rs` `query_suggestion`, 이전 검색어 유지).
+  - **한계:** 링크 주소·이미지 경로처럼 미리보기에 보이지 않는 글자에서 찾은 일치는 해당 블록으로 이동만 하고 강조되지 않는다. 화면보다 긴 블록(긴 코드 블록 등) 안의 일치는 블록 맨 위로만 이동한다. 서식 기호를 사이에 둔 문구(예: `**굵게** 글자`의 "굵게 글자")는 원본에서 찾으므로 일치하지 않는다.
+- **버전 0.1.1:** `Cargo.toml` 워크스페이스 버전을 `0.1.0` → `0.1.1`로 바꾸고 `cargo update --workspace --offline`로 `Cargo.lock`의 내부 패키지 142개 버전 줄만 갱신했다(외부 의존성 변경 없음). 정보 창·시작 로그·CLI `--version`·MCP 서버 정보·배포 파일 이름은 모두 워크스페이스 버전(`CARGO_PKG_VERSION`)을 쓰므로 함께 0.1.1이 된다. 자체 도움말 `docs/index.md`·`docs/packaging.md`의 현재 버전 표기도 갱신했다. 패키징 테스트(`tests/test_package_zip.ps1`·`tests/test_package_tar.py`)의 `0.1.0`은 가짜 `Cargo.toml`을 만들어 쓰는 시험용 값이라 그대로 두었다. README.md 보호 단락은 건드리지 않았다.
+- **문서:** 자체 도움말 `docs/index.md`의 Markdown 미리보기 절에 미리보기 검색 사용법과 한계를, [기능 인벤토리](FEATURE-INVENTORY.md)의 Markdown 미리보기 항목에 이번 변경을 적었다.
+- **검증(Visual Studio 개발자 셸 amd64, `RUSTUP_TOOLCHAIN=stable`):**
+  - `cargo check -p markdown_preview -p editor -p search --tests --offline` 경고 0, 변경한 Rust 파일 `rustfmt --check` 통과.
+  - `cargo test -p markdown_preview --lib --offline` **46개 통과**(기존 40개 + 신규 6개: 문단·제목·코드 블록의 원본 위치 대응, 대응 실패 시 전체 대응, 일치→렌더링 범위 변환·어긋난 범위 버림·겹침 정리, 검색 배경 우선 덮어쓰기).
+  - `gram` 통합 테스트 `test_find_in_markdown_preview_mode`(신규): 실제 기본 키맵을 불러와 `.md`를 열면 미리보기로 시작 → 커서를 "제목" 안에 둔 채 **Ctrl+F 키 입력** → 검색 바가 열리고 검색어가 비어 있음 → "문단" 입력 시 문서는 그대로이고 일치 1개가 원본 위치로 보고되며 선택이 일치로 이동, 미리보기 모드 유지 → Esc로 검색 바가 닫히고 강조가 사라짐.
+  - `cargo test -p gram --lib --offline --no-fail-fast` **37개 통과**(기존 36개 + 위 신규 1개). 기본 키맵 파싱·액션 이름 검사(`test_base_keymap`·`test_generate_keymap_json_schema_for_registered_actions`·`test_keymap_application_menu_names_exist` 등)도 통과해 새 키맵 블록에 문제가 없다. 경고는 기존 Wasmtime 링커 `LNK4217`뿐이다.
+  - **GUI 실제 창 확인은 하지 않았다**(사용자가 PC를 사용 중이라 앱 창에 키 입력을 보내는 자동 조작을 하지 않음). 키 입력부터 검색 바 표시까지의 경로는 위 통합 테스트가 GPUI 테스트 창에서 확인한다.
+- **커밋:** 사용자 요청이 없어 커밋하지 않았다. 이전 세션의 미커밋 변경(`crates/util/src/shell_env.rs`의 PowerShell 경로 인용 수정과 아래 "중단 점검 재개" 기록)도 그대로 작업 트리에 있다.
+
+## 2026-11-05 중단 점검 재개
+
+- 중단 당시 미검증 변경: Visual Studio 개발자 환경과 stable 툴체인에서 `cargo check -p extension_host -p dap -p util --offline` 성공, Git 단위 테스트 32개와 i18n 단위 테스트 11개 통과.
+- 환경 변수 로드 오류 원인: PowerShell 명령에서 이미 인용된 경로를 다시 작은따옴표로 감싸 실제 경로에 큰따옴표가 포함되었다. PowerShell 리터럴 경로를 직접 구성하고 작은따옴표를 이스케이프하도록 수정했다. 공백·작은따옴표가 포함된 실제 디렉터리에서 PowerShell `--printenv` 호출 성공. 공백·작은따옴표 경로 회귀 단위 테스트 1개도 통과. 릴리스 바이너리의 `--printenv` 호출도 정상이며 앱 화면에서의 재확인은 남았다.
+- 격리 테스트 앱을 실행했으나 이 세션에서 대상 창이 나타나지 않아 F10·개요 패널 등 GUI 회귀는 아직 확인하지 못했다.
+- Windows 배포 도구 사전 점검은 모든 항목 통과. 현재 작업 트리를 포함한 x86-64 릴리스 ZIP `dist/windows-20261105-recheck/DonEditor-0.1.0-windows-x86_64.zip` 생성 완료(91.5 MB, SHA-256 `201472cb88216af3e1767e5b22e2f56298c867593af70c547158fd9bd469e228`). ZIP 201개 항목과 내장 소스 ZIP 무결성, 수정 소스 포함, 압축 해제 후 CLI 버전 및 MCP 도움말 확인. 릴리스 링크 시 tree-sitter/Wasmtime 관련 LNK4217 경고가 발생했으나 빌드는 성공. GUI 직접 실행은 창이 나타나지 않아 미확인. ZIP 내부 진행 문서는 패키징 당시 상태이며 이 최종 기록은 작업 트리에 있다.
+
+
 ## ⚠ 문서 보호 규칙 (사용자 지시, 2026-11-04)
 
 - **README.md의 앞 두 단락은 사용자가 직접 다시 작성했다. 사용자가 그 부분의 수정을 명시적으로 요청하지 않는 한 절대 수정하지 않는다.**
@@ -11,7 +38,7 @@
 
 
 
-## 현재 상태 요약 (2026-11-05 갱신 — 다음 작업 때 가장 먼저 읽는다)
+## 이전 상태 요약 (2026-11-05 — 위 재개 기록이 더 최신이다)
 
 **사용자 요청 작업은 모두 구현·검증·커밋했다.** 커밋: Markdown 미리보기/편집 전환 `475437a`, 인코딩 표시·다시 불러오기·저장 보호 `c29fe81`, Typst 미리보기·Markdown→Typst 변환·PDF·인쇄 `4421531`, MCP 확인 `2e9ff1c`, 릴리스 ZIP 기록 `1808ab8`, clippy·회귀·README 정리 `d257aff`~`2e622db`. 자동 검사는 markdown_preview 40·don_charset 9·don_typst 17·language 99·text 24·worktree 26·gram 35·MCP 전송 25개(Windows ACL 선택 테스트 포함)·i18n 11개가 통과하고, 새 crate와 `don_tools`·`mcp_server`·`agent_panel`의 clippy 경고는 0건이다.
 

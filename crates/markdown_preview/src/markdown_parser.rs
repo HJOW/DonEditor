@@ -14,6 +14,7 @@ pub async fn parse_markdown(
 ) -> ParsedMarkdown {
     let parser = Parser::new_ext(markdown_input, PARSE_OPTIONS);
     let parser = MarkdownParser::new(
+        markdown_input,
         parser.into_offset_iter().collect(),
         file_location_directory,
         language_registry,
@@ -25,6 +26,8 @@ pub async fn parse_markdown(
 }
 
 struct MarkdownParser<'a> {
+    /// [DonEditor] 원본 Markdown 문서 (렌더링 글자와 원본 위치의 대응을 만들 때 쓴다)
+    source: &'a str,
     tokens: Vec<(Event<'a>, Range<usize>)>,
     /// The current index in the tokens array
     cursor: usize,
@@ -50,11 +53,13 @@ impl Default for MarkdownListItem {
 
 impl<'a> MarkdownParser<'a> {
     fn new(
+        source: &'a str,
         tokens: Vec<(Event<'a>, Range<usize>)>,
         file_location_directory: Option<PathBuf>,
         language_registry: Option<Arc<LanguageRegistry>>,
     ) -> Self {
         Self {
+            source,
             tokens,
             file_location_directory,
             language_registry,
@@ -216,14 +221,25 @@ impl<'a> MarkdownParser<'a> {
         let mut highlights: Vec<(Range<usize>, MarkdownHighlight)> = vec![];
         let mut link_urls: Vec<String> = vec![];
         let mut link_ranges: Vec<Range<usize>> = vec![];
+        // [DonEditor] 렌더링 글자 범위와 원본 범위의 대응 (미리보기 검색 일치 강조용)
+        let mut source_map: Vec<SourceMapping> = vec![];
 
         loop {
             if self.eof() {
                 break;
             }
 
-            let (current, _) = self.current().unwrap();
+            let (current, current_range) = self.current().unwrap();
             let prev_len = text.len();
+            // [DonEditor] 원본 글자를 그대로 옮기는 이벤트는 렌더링 글자와 원본 범위의 대응을 남긴다
+            if let Event::Text(t) | Event::Code(t) | Event::InlineHtml(t) | Event::Html(t) = current {
+                source_map.push(SourceMapping::new(
+                    self.source,
+                    prev_len..prev_len + t.len(),
+                    t.as_ref(),
+                    current_range.clone(),
+                ));
+            }
             match current {
                 Event::SoftBreak => {
                     if should_complete_on_soft_break {
@@ -358,6 +374,7 @@ impl<'a> MarkdownParser<'a> {
                                 contents: mem::take(&mut text).into(),
                                 highlights: mem::take(&mut highlights),
                                 regions: mem::take(&mut regions),
+                                source_map: mem::take(&mut source_map),
                             });
                             markdown_text_like.push(parsed_regions);
                         }
@@ -385,6 +402,7 @@ impl<'a> MarkdownParser<'a> {
                                 image.set_alt_text(std::mem::take(&mut text).into());
                                 mem::take(&mut highlights);
                                 mem::take(&mut regions);
+                                mem::take(&mut source_map);
                             }
                             markdown_text_like.push(MarkdownParagraphChunk::Image(image));
                         }
@@ -410,6 +428,7 @@ impl<'a> MarkdownParser<'a> {
                 contents: text.into(),
                 highlights,
                 regions,
+                source_map,
             }));
         }
         markdown_text_like
@@ -703,15 +722,25 @@ impl<'a> MarkdownParser<'a> {
 
         let source_range = source_range.clone();
         let mut code = String::new();
+        // [DonEditor] 코드 글자 범위와 원본 범위의 대응 (미리보기 검색 일치 강조용)
+        let mut source_map: Vec<SourceMapping> = vec![];
 
+        // 코드 블록이 끝날 때까지 줄 단위 글자 이벤트를 이어 붙인다
         while !self.eof() {
-            let Some((current, _source_range)) = self.current() else {
+            let Some((current, text_range)) = self.current() else {
                 break;
             };
 
             match current {
                 Event::Text(text) => {
+                    let start = code.len();
                     code.push_str(text);
+                    source_map.push(SourceMapping::new(
+                        self.source,
+                        start..code.len(),
+                        text.as_ref(),
+                        text_range.clone(),
+                    ));
                     self.cursor += 1;
                 }
                 Event::End(TagEnd::CodeBlock) => {
@@ -746,6 +775,7 @@ impl<'a> MarkdownParser<'a> {
             contents: code.into(),
             language,
             highlights,
+            source_map,
         })
     }
 
@@ -867,6 +897,7 @@ mod tests {
                 contents: "Some bostrikethroughld text".into(),
                 highlights: Vec::new(),
                 regions: Vec::new(),
+                source_map: Vec::new(),
             })])
         );
 
@@ -1031,6 +1062,7 @@ mod tests {
                     contents: " Lorem Ipsum ".into(),
                     highlights: Vec::new(),
                     regions: Vec::new(),
+                    source_map: Vec::new(),
                 }),
                 MarkdownParagraphChunk::Image(Image {
                     source_range: 0..81,
@@ -1520,6 +1552,7 @@ fn main() {
         vec![MarkdownParagraphChunk::Text(ParsedMarkdownText {
             highlights: Vec::new(),
             regions: Vec::new(),
+            source_map: Vec::new(),
             source_range,
             contents: contents.to_string().into(),
         })]
@@ -1540,6 +1573,7 @@ fn main() {
             language,
             contents: code.to_string().into(),
             highlights,
+            source_map: Vec::new(),
         })
     }
 
@@ -1598,5 +1632,101 @@ fn main() {
         fn eq(&self, other: &Self) -> bool {
             self.source_range == other.source_range && self.contents == other.contents
         }
+    }
+
+    // [DonEditor] 원본 위치 대응표(`source_map`)는 별도 테스트에서 확인하므로 비교에서 뺀다.
+    impl PartialEq for ParsedMarkdownCodeBlock {
+        fn eq(&self, other: &Self) -> bool {
+            self.source_range == other.source_range
+                && self.language == other.language
+                && self.contents == other.contents
+                && self.highlights == other.highlights
+        }
+    }
+
+    /// [DonEditor] 원본에서 `needle` 을 찾아 그 범위를 대응표로 미리보기 글자 범위로 옮긴 결과(글자들)를 돌려준다.
+    fn rendered_text_for_source(contents: &str, source_map: &[SourceMapping], source: &str, needle: &str) -> String {
+        let start = source.find(needle).expect("원본에 찾는 글자가 있어야 한다");
+        let matched = start..start + needle.len();
+        // 일치 범위에 걸친 대응마다 렌더링 범위를 모아 이어 붙인다
+        source_map
+            .iter()
+            .filter_map(|mapping| mapping.rendered_range_for(&matched))
+            .map(|range| contents[range].to_string())
+            .collect()
+    }
+
+    /// [DonEditor] 문단 안 강조·코드 조각·링크·이스케이프 글자의 원본 위치가 미리보기 글자 위치로 정확히 옮겨지는지 확인한다.
+    #[gpui::test]
+    async fn test_source_map_for_inline_text() {
+        let source = r"Hello **world** and `code` [link](http://x.com) \*star\* 끝";
+        let parsed = parse(source).await;
+        let ParsedMarkdownElement::Paragraph(chunks) = &parsed.children[0] else {
+            panic!("문단이어야 한다");
+        };
+        let MarkdownParagraphChunk::Text(text) = &chunks[0] else {
+            panic!("글자 조각이어야 한다");
+        };
+        assert_eq!(text.contents.as_ref(), "Hello world and code link *star* 끝");
+        // 서식 기호를 뺀 글자는 원본과 같은 글자로 옮겨져야 한다
+        for needle in ["Hello", "world", "code", "link", "star", "끝", "and"] {
+            assert_eq!(
+                rendered_text_for_source(&text.contents, &text.source_map, source, needle),
+                needle,
+                "{needle} 의 대응이 어긋났다"
+            );
+        }
+        // 미리보기에 보이지 않는 링크 주소는 어떤 글자에도 대응하지 않는다
+        assert_eq!(
+            rendered_text_for_source(&text.contents, &text.source_map, source, "x.com"),
+            ""
+        );
+        // 서식 기호를 걸친 일치는 보이는 글자 부분만 대응한다
+        assert_eq!(
+            rendered_text_for_source(&text.contents, &text.source_map, source, "**world**"),
+            "world"
+        );
+    }
+
+    /// [DonEditor] 제목·코드 블록 안의 원본 위치가 미리보기 글자 위치로 옮겨지는지 확인한다.
+    #[gpui::test]
+    async fn test_source_map_for_heading_and_code_block() {
+        let source = "# 제목 Title\n\n```rust\nfn main() {\n    return 0;\n}\n```\n";
+        let parsed = parse(source).await;
+        let ParsedMarkdownElement::Heading(heading) = &parsed.children[0] else {
+            panic!("제목이어야 한다");
+        };
+        let MarkdownParagraphChunk::Text(title) = &heading.contents[0] else {
+            panic!("글자 조각이어야 한다");
+        };
+        assert_eq!(
+            rendered_text_for_source(&title.contents, &title.source_map, source, "Title"),
+            "Title"
+        );
+        let ParsedMarkdownElement::CodeBlock(code) = &parsed.children[1] else {
+            panic!("코드 블록이어야 한다");
+        };
+        // 코드 블록의 마지막 줄 바꿈은 잘려도 대응 범위는 원본 줄 단위로 남는다
+        for needle in ["fn main", "return 0;", "}"] {
+            let rendered = rendered_text_for_source(&code.contents, &code.source_map, source, needle);
+            assert_eq!(rendered, needle);
+        }
+    }
+
+    /// [DonEditor] 글자가 바뀌어 1:1 로 맞출 수 없는 조각은 범위 전체끼리 대응하는지 확인한다.
+    #[test]
+    fn test_source_mapping_falls_back_to_whole_range() {
+        // 원본 "--" 가 렌더링 글자 "–" 로 바뀐 경우처럼 원본에서 렌더링 글자를 찾을 수 없다
+        let mapping = SourceMapping::new("a -- b", 2..5, "–", 2..4);
+        assert!(!mapping.exact);
+        assert_eq!(mapping.rendered_range_for(&(3..4)), Some(2..5));
+        // 겹치지 않는 일치는 대응하지 않는다
+        assert_eq!(mapping.rendered_range_for(&(0..2)), None);
+        assert_eq!(mapping.rendered_range_for(&(4..6)), None);
+        // 원본과 같은 글자면 겹친 부분만 1:1 로 대응한다
+        let exact = SourceMapping::new("xx hello", 10..15, "hello", 3..8);
+        assert!(exact.exact);
+        assert_eq!(exact.rendered_range_for(&(0..5)), Some(10..12));
+        assert_eq!(exact.rendered_range_for(&(4..20)), Some(11..15));
     }
 }

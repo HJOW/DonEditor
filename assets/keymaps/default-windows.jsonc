@@ -946,6 +946,16 @@
     },
   },
   {
+    // [DonEditor] Markdown 미리보기 모드에서도 검색 바를 연다. 검색은 원본 Markdown 에서 하고,
+    // 일치 부분은 미리보기 화면에 강조한다(F3/Shift+F3·Enter 로 다음/이전 일치 이동).
+    "context": "MarkdownPreview",
+    "use_key_equivalents": true,
+    "bindings": {
+      "ctrl-f": "buffer_search::Deploy",
+      "escape": "buffer_search::Dismiss",
+    },
+  },
+  {
     "context": "KeymapEditor",
     "use_key_equivalents": true,
     "bindings": {

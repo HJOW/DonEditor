@@ -1435,6 +1435,9 @@ impl SearchableItem for Editor {
                 if text.contains('\n') { String::new() } else { text }
             }
             SeedQuerySetting::Selection => String::new(),
+            // [DonEditor] 대체 화면(Markdown 미리보기 등)을 그리는 중에는 커서가 보이지 않으므로,
+            // 보이지 않는 커서 위치의 단어로 검색어를 채우지 않고 이전 검색어를 그대로 둔다.
+            SeedQuerySetting::Always if self.alternate_view().is_some() => String::new(),
             SeedQuerySetting::Always => {
                 let (range, kind) =
                     buffer_snapshot.surrounding_word(selection.start, Some(CharScopeContext::Completion));

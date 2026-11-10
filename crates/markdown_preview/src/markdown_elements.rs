@@ -76,13 +76,66 @@ pub enum ParsedMarkdownListItemType {
     Unordered,
 }
 
+// [DonEditor] 테스트용 비교는 `source_map` 을 빼고 비교하도록 markdown_parser 테스트 모듈에서 직접 구현한다.
 #[derive(Debug)]
-#[cfg_attr(test, derive(PartialEq))]
 pub struct ParsedMarkdownCodeBlock {
     pub source_range: Range<usize>,
     pub language: Option<String>,
     pub contents: SharedString,
     pub highlights: Option<Vec<(Range<usize>, HighlightId)>>,
+    /// [DonEditor] `contents` 의 글자 범위와 원본 문서 범위의 대응 (미리보기 검색 일치 강조용)
+    pub source_map: Vec<SourceMapping>,
+}
+
+/// [DonEditor] 미리보기에 그려지는 글자 범위와, 그 글자를 만든 원본 Markdown 범위의 대응.
+/// 검색은 원본 문서에서 하므로, 원본 기준 일치 범위를 미리보기 글자 위치로 옮겨 강조할 때 쓴다.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SourceMapping {
+    /// 렌더링된 글자(`contents`) 안의 바이트 범위
+    pub rendered: Range<usize>,
+    /// 원본 Markdown 문서 안의 바이트 범위
+    pub source: Range<usize>,
+    /// 두 범위의 글자가 똑같아 바이트 단위로 1:1 대응하면 `true`.
+    /// HTML 엔티티·줄 바꿈이 들어간 코드 조각처럼 글자가 달라지면 `false` 이고, 이때는 범위 전체끼리만 대응한다.
+    pub exact: bool,
+}
+
+impl SourceMapping {
+    /// 원본 이벤트 범위 `source_range` 가 렌더링 글자 `rendered_text`(렌더링 범위 `rendered`)가 되었을 때의 대응을 만든다.
+    /// 원본 조각 안에서 렌더링 글자를 그대로 찾을 수 있으면(코드 조각의 백틱, 이스케이프의 역슬래시 등을 뺀 부분)
+    /// 그 부분과 1:1 로 대응시키고, 찾을 수 없으면 범위 전체끼리 대응시킨다.
+    pub fn new(source: &str, rendered: Range<usize>, rendered_text: &str, source_range: Range<usize>) -> Self {
+        let original = source.get(source_range.clone()).unwrap_or_default();
+        if !rendered_text.is_empty()
+            && let Some(position) = original.find(rendered_text)
+        {
+            let start = source_range.start + position;
+            return Self {
+                rendered,
+                source: start..start + rendered_text.len(),
+                exact: true,
+            };
+        }
+        Self {
+            rendered,
+            source: source_range,
+            exact: false,
+        }
+    }
+
+    /// 원본 범위 `matched` 중 이 대응에 걸친 부분을 렌더링 글자 범위로 바꾼다. 겹치지 않으면 `None`.
+    pub fn rendered_range_for(&self, matched: &Range<usize>) -> Option<Range<usize>> {
+        let start = matched.start.max(self.source.start);
+        let end = matched.end.min(self.source.end);
+        if start >= end {
+            return None;
+        }
+        if !self.exact {
+            return Some(self.rendered.clone());
+        }
+        let offset = self.rendered.start;
+        Some(offset + (start - self.source.start)..offset + (end - self.source.start))
+    }
 }
 
 #[derive(Debug)]
@@ -181,6 +234,8 @@ pub struct ParsedMarkdownText {
     pub highlights: Vec<(Range<usize>, MarkdownHighlight)>,
     /// The regions of the Markdown document.
     pub regions: Vec<(Range<usize>, ParsedRegion)>,
+    /// [DonEditor] `contents` 의 글자 범위와 원본 문서 범위의 대응 (미리보기 검색 일치 강조용)
+    pub source_map: Vec<SourceMapping>,
 }
 
 /// A run of highlighted Markdown text.

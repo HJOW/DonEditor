@@ -171,11 +171,7 @@ async fn capture_windows(
             "-NonInteractive",
             "-NoProfile",
             "-Command",
-            &format!(
-                "Set-Location '{}'; & '{}' --printenv",
-                directory.try_shell_safe(shell_kind)?,
-                binary_path,
-            ),
+            &powershell_capture_command(directory, &std::env::current_exe()?)?,
         ]),
         ShellKind::Elvish => cmd.args([
             "-c",
@@ -222,4 +218,39 @@ async fn capture_windows(
     // Parse the JSON output from gram --printenv
     serde_json::from_str(&env_output)
         .with_context(|| format!("Failed to deserialize environment variables from json: {env_output}"))
+}
+
+// PowerShell 리터럴 문자열에 경로를 안전하게 넣고 중복 인용을 피한다.
+#[cfg(windows)]
+fn powershell_capture_command(directory: &Path, binary: &Path) -> Result<String> {
+    // 작은따옴표는 PowerShell 리터럴 안에서 두 번 써서 이스케이프한다.
+    let quote = |path: &Path| -> Result<String> {
+        Ok(format!(
+            "'{}'",
+            path.to_str()
+                .context("Path contains invalid UTF-8")?
+                .replace('\'', "''")
+        ))
+    };
+    Ok(format!(
+        "Set-Location -LiteralPath {}; & {} --printenv",
+        quote(directory)?,
+        quote(binary)?
+    ))
+}
+
+#[cfg(all(test, windows))]
+mod windows_tests {
+    use super::*;
+
+    // 공백과 작은따옴표가 있는 경로도 PowerShell 리터럴로 보존한다.
+    #[test]
+    fn powershell_capture_quotes_paths_once() {
+        let command =
+            powershell_capture_command(Path::new("C:\\a b\\it's"), Path::new("C:\\app's\\doneditor.exe")).unwrap();
+        assert_eq!(
+            command,
+            "Set-Location -LiteralPath 'C:\\a b\\it''s'; & 'C:\\app''s\\doneditor.exe' --printenv"
+        );
+    }
 }

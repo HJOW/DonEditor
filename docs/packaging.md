@@ -12,7 +12,7 @@ Don Editor는 GramEditor/Zed의 기존 기능을 유지하면서 로컬 MCP와 A
 .\package-zip.bat -IncludeSource
 ```
 
-결과는 `dist/DonEditor-<버전>-windows-<아키텍처>.zip`과 `.sha256`이다. 현재 제품 버전은 `0.1.0`이며 `Cargo.toml`의 워크스페이스 버전을 사용한다. 압축을 풀고 `doneditor.exe`를 실행한다. CLI는 `bin/doneditor.exe`, MCP 브릿지는 `bin/don-mcp.exe`다. `-BuildProfile Debug`는 개발 확인용이며 이름에 `-debug`를 붙인다. `-IncludeSource`는 기본 동봉 소스 zip을 `dist`에도 별도로 복사한다.
+결과는 `dist/DonEditor-<버전>-windows-<아키텍처>.zip`과 `.sha256`이다. 현재 제품 버전은 `0.1.1`이며 `Cargo.toml`의 워크스페이스 버전을 사용한다. 압축을 풀고 `doneditor.exe`를 실행한다. CLI는 `bin/doneditor.exe`, MCP 브릿지는 `bin/don-mcp.exe`다. `-BuildProfile Debug`는 개발 확인용이며 이름에 `-debug`를 붙인다. `-IncludeSource`는 기본 동봉 소스 zip을 `dist`에도 별도로 복사한다.
 
 ## Linux와 macOS
 

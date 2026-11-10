@@ -20788,6 +20788,30 @@ impl Editor {
     pub fn mark_alternate_view_initialized(&mut self) {
         self.alternate_view_initialized = true;
     }
+
+    /// 버퍼 검색(Ctrl+F)이 찾은 일치 범위(멀티버퍼 바이트 오프셋)와 편집 화면에서 쓰는 강조 색을 문서 순서대로 돌려준다.
+    /// 대체 화면(Markdown 미리보기 등)이 편집 화면 대신 그려지는 동안에도 같은 일치를 같은 색
+    /// (현재 일치는 "현재 일치" 색)으로 강조할 수 있게 한다. 검색 중이 아니면 빈 목록이다.
+    pub fn buffer_search_highlights(&self, cx: &App) -> Vec<(Range<usize>, Hsla)> {
+        let Some((color_fetcher, ranges)) = self
+            .background_highlights
+            .get(&HighlightKey::Type(TypeId::of::<items::BufferSearchHighlights>()))
+        else {
+            return Vec::new();
+        };
+        let snapshot = self.buffer.read(cx).snapshot(cx);
+        let theme: &Theme = cx.theme();
+        // 일치마다 앵커를 오프셋으로 바꾸고, 편집 화면과 같은 규칙(일치 번호별)으로 색을 정한다
+        ranges
+            .iter()
+            .enumerate()
+            .map(|(index, range)| {
+                let start = range.start.to_offset(&snapshot).0;
+                let end = range.end.to_offset(&snapshot).0;
+                (start..end, color_fetcher(&index, theme))
+            })
+            .collect()
+    }
 }
 
 impl EntityInputHandler for Editor {

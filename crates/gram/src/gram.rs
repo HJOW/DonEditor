@@ -4594,6 +4594,104 @@ mod tests {
         assert!(checked >= 3, "OpenApplicationMenu 바인딩 {checked}개만 확인했다");
     }
 
+    // [DonEditor] Markdown 미리보기 모드에서도 기본 키맵의 찾기 단축키(Ctrl+F, macOS Cmd+F)로 검색 바가 열리고,
+    // 원본에서 찾은 일치를 미리보기가 강조할 수 있도록 편집기가 일치 범위를 알려 주는지 실제 키 입력으로 확인한다.
+    #[gpui::test]
+    async fn test_find_in_markdown_preview_mode(cx: &mut TestAppContext) {
+        use editor::ToOffset as _;
+        use markdown_preview::markdown_mode::is_preview_mode;
+        use search::{BufferSearchBar, buffer_search::BUFFER_SEARCH_DEBOUNCE_MS};
+
+        // 플랫폼별 기본 키맵의 찾기 단축키
+        let find_keystroke = if cfg!(target_os = "macos") { "cmd-f" } else { "ctrl-f" };
+        // 미리보기에 보이는 글자와, 미리보기에 보이지 않는 커서 위치의 단어
+        const DOCUMENT: &str = "# 제목\n\n검색할 단어가 있는 **문단**입니다.\n";
+
+        let app_state = init_test(cx);
+        cx.update(|cx| {
+            markdown_preview::init(cx);
+            load_default_keymap(cx);
+        });
+        app_state
+            .fs
+            .as_fake()
+            .insert_tree(path!("/root"), json!({ "doc.md": DOCUMENT }))
+            .await;
+        let project = Project::test(app_state.fs.clone(), [path!("/root").as_ref()], cx).await;
+        project.update(cx, |project, _cx| project.languages().add(markdown_language()));
+        let window = cx.add_window(|window, cx| Workspace::test_new(project, window, cx));
+        let workspace = window.root(cx).unwrap();
+        let file = cx.read(|cx| workspace.file_project_paths(cx))[0].clone();
+        window
+            .update(cx, |workspace, window, cx| {
+                workspace.open_path(file, None, true, window, cx)
+            })
+            .unwrap()
+            .await
+            .unwrap();
+        cx.run_until_parked();
+
+        // 내용이 있는 Markdown 파일은 미리보기 모드로 열린다
+        let (editor, search_bar) = cx.read(|cx| {
+            let pane = workspace.read(cx).active_pane().read(cx);
+            let editor = pane.active_item().unwrap().downcast::<Editor>().unwrap();
+            let search_bar = pane.toolbar().read(cx).item_of_type::<BufferSearchBar>().unwrap();
+            (editor, search_bar)
+        });
+        assert!(
+            cx.read(|cx| is_preview_mode(&editor, cx)),
+            "Markdown 파일은 미리보기로 열려야 한다"
+        );
+
+        // 보이지 않는 커서를 "제목" 안에 두고, 미리보기에 초점을 준 채 찾기 단축키를 누른다
+        window
+            .update(cx, |_, window, cx| {
+                editor.update(cx, |editor, cx| {
+                    editor.change_selections(SelectionEffects::no_scroll(), window, cx, |selections| {
+                        selections.select_ranges([MultiBufferOffset(5)..MultiBufferOffset(5)])
+                    });
+                });
+                window.focus(&editor.focus_handle(cx), cx);
+            })
+            .unwrap();
+        cx.run_until_parked();
+        cx.simulate_keystrokes(window.into(), find_keystroke);
+        cx.run_until_parked();
+        assert!(
+            cx.read(|cx| !search_bar.read(cx).is_dismissed()),
+            "미리보기 모드에서 찾기 단축키로 검색 바가 열려야 한다"
+        );
+        // 미리보기에서는 보이지 않는 커서 위치의 단어("제목")로 검색어를 채우지 않는다
+        assert_eq!(cx.read(|cx| search_bar.read(cx).query(cx)), "");
+
+        // 입력은 원본 문서가 아니라 검색어 칸으로 들어가고, 일치가 원본 위치로 알려진다
+        cx.simulate_input(window.into(), "문단");
+        cx.executor()
+            .advance_clock(Duration::from_millis(BUFFER_SEARCH_DEBOUNCE_MS + 50));
+        cx.run_until_parked();
+        assert_eq!(cx.read(|cx| search_bar.read(cx).query(cx)), "문단");
+        let (text, highlights, selection) = cx.read(|cx| {
+            let editor = editor.read(cx);
+            let text = editor.buffer().read(cx).snapshot(cx).text();
+            let selection = editor.selections.newest_anchor().head();
+            let selection = selection.to_offset(&editor.buffer().read(cx).snapshot(cx)).0;
+            (text, editor.buffer_search_highlights(cx), selection)
+        });
+        assert_eq!(text, DOCUMENT, "검색어 입력이 문서를 바꾸면 안 된다");
+        assert_eq!(highlights.len(), 1);
+        assert_eq!(&text[highlights[0].0.clone()], "문단");
+        // 현재 일치로 선택이 옮겨져(미리보기는 이 선택으로 해당 블록을 보여 준다) 미리보기 모드가 유지된다
+        assert!(highlights[0].0.contains(&selection) || highlights[0].0.end == selection);
+        assert!(cx.read(|cx| is_preview_mode(&editor, cx)));
+
+        // 검색 바를 닫으면 일치 강조도 사라진다
+        cx.simulate_keystrokes(window.into(), "escape");
+        cx.run_until_parked();
+        assert!(cx.read(|cx| search_bar.read(cx).is_dismissed()));
+        assert!(cx.read(|cx| editor.read(cx).buffer_search_highlights(cx).is_empty()));
+        assert!(cx.read(|cx| is_preview_mode(&editor, cx)));
+    }
+
     // [DonEditor] 요구사항 R1: 한국어 메뉴. 표시 언어를 이 스레드에서만 바꿔(i18n::with_language) 다른 테스트에 영향을 주지 않는다.
     #[gpui::test]
     fn test_app_menus_follow_the_display_language(cx: &mut TestAppContext) {
